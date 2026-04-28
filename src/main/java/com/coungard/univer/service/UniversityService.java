@@ -1,0 +1,92 @@
+package com.coungard.univer.service;
+
+import com.coungard.univer.dto.UniversityDto;
+import com.coungard.univer.dto.mapper.UniversityMapper;
+import com.coungard.univer.entity.Address;
+import com.coungard.univer.entity.University;
+import com.coungard.univer.exception.ResourceNotFoundException;
+import com.coungard.univer.repository.AddressRepository;
+import com.coungard.univer.repository.UniversityRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.UUID;
+
+@Service
+@RequiredArgsConstructor
+public class UniversityService {
+
+    private final UniversityRepository universityRepository;
+    private final AddressRepository addressRepository;
+    private final UniversityMapper universityMapper;
+
+    /**
+     * Получить все университеты
+     */
+    @Transactional(readOnly = true)
+    public List<UniversityDto> getAllUniversities() {
+        return universityMapper.toDtoList(universityRepository.findAll());
+    }
+
+    /**
+     * Получить университет по ID
+     */
+    @Transactional(readOnly = true)
+    public UniversityDto getUniversityById(UUID id) {
+        University university = universityRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("University not found with id: " + id));
+        return universityMapper.toDto(university);
+    }
+
+    /**
+     * Создать новый университет
+     */
+    @Transactional
+    public UniversityDto createUniversity(UniversityDto universityDto) {
+        University university = universityMapper.toEntity(universityDto);
+
+        University saved = universityRepository.save(university);
+        return universityMapper.toDto(saved);
+    }
+
+    /**
+     * Обновить университет
+     */
+    @Transactional
+    public UniversityDto updateUniversity(UUID id, UniversityDto universityDto) {
+        University existing = universityRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("University not found with id: " + id));
+
+        existing.setName(universityDto.name());
+        existing.setDescription(universityDto.description());
+
+        Address address = null;
+
+        if (universityDto.address() != null) {
+            if (universityDto.address().id() != null) {
+                address = addressRepository.findById(universityDto.address().id())
+                        .orElseThrow(() -> new ResourceNotFoundException(
+                                "Address not found with id: " + universityDto.address().id()));
+            } else {
+                address = universityMapper.toAddressEntity(universityDto.address());
+            }
+        }
+        existing.setAddress(address);
+
+        University saved = universityRepository.save(existing);
+        return universityMapper.toDto(saved);
+    }
+
+    /**
+     * Удалить университет по ID
+     */
+    @Transactional
+    public void deleteUniversityById(UUID id) {
+        if (!universityRepository.existsById(id)) {
+            throw new ResourceNotFoundException("University not found with id: " + id);
+        }
+        universityRepository.deleteById(id);
+    }
+}

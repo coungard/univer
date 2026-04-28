@@ -1,0 +1,270 @@
+package com.coungard.univer.service;
+
+import com.coungard.univer.UniverApplication;
+import com.coungard.univer.dto.RegisterStudentDto;
+import com.coungard.univer.dto.StudentDto;
+import com.coungard.univer.entity.Student;
+import com.coungard.univer.entity.University;
+import com.coungard.univer.exception.ResourceNotFoundException;
+import com.coungard.univer.repository.StudentRepository;
+import com.coungard.univer.repository.UniversityRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+
+import java.time.LocalDate;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@SpringBootTest(classes = UniverApplication.class)
+@Testcontainers
+class StudentServiceTest {
+
+    @Container
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15")
+            .withDatabaseName("univer_test")
+            .withUsername("postgres")
+            .withPassword("postgres");
+
+    @DynamicPropertySource
+    static void configureProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", postgres::getJdbcUrl);
+        registry.add("spring.datasource.username", postgres::getUsername);
+        registry.add("spring.datasource.password", postgres::getPassword);
+        registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
+    }
+
+    @Autowired
+    private StudentService studentService;
+
+    @Autowired
+    private StudentRepository studentRepository;
+
+    @Autowired
+    private UniversityRepository universityRepository;
+
+    @MockBean  // 🔥 Мокаем KeycloakAdminService
+    private KeycloakAdminService keycloakAdminService;
+
+    private UUID universityId;
+
+    @BeforeEach
+    void setUp() {
+        studentRepository.deleteAll();
+        universityRepository.deleteAll();
+
+        University university = new University();
+        university.setName("Test University");
+        universityId = universityRepository.save(university).getId();
+    }
+
+    @Test
+    void shouldRegisterNewStudent() {
+        // Given
+        String mockKeycloakId = UUID.randomUUID().toString();
+        RegisterStudentDto registerDto = new RegisterStudentDto(
+                "Иван",
+                "Иванов",
+                "ivan@example.com",
+                "password123",
+                LocalDate.now().minusYears(1),
+                universityId
+        );
+
+        // When: Мокаем ответ Keycloak
+        when(keycloakAdminService.createUser(
+                eq("Иван"), eq("Иванов"), eq("ivan@example.com"), eq("password123")))
+                .thenReturn(mockKeycloakId);
+
+        StudentDto registered = studentService.registerStudent(registerDto);
+
+        // Then
+        assertThat(registered.firstName()).isEqualTo("Иван");
+        assertThat(registered.email()).isEqualTo("ivan@example.com");
+        assertThat(registered.universityId()).isEqualTo(universityId);
+
+        // Проверяем, что студент сохранён в БД
+        assertThat(studentRepository.findById(UUID.fromString(mockKeycloakId))).isPresent();
+
+        // Проверяем, что вызвали Keycloak
+        verify(keycloakAdminService).createUser(any(), any(), any(), any());
+        verify(keycloakAdminService).assignStudentRole(eq(mockKeycloakId));
+    }
+
+    @Test
+    void shouldGetStudentsWithPaginationAndFiltering() {
+        // Given
+        createTestStudent("Анна", "Смирнова", LocalDate.of(2023, 9, 1));
+        createTestStudent("Иван", "Иванов", LocalDate.of(2023, 9, 1));
+        createTestStudent("Иван", "Петров", LocalDate.of(2024, 1, 15));
+
+        // When: Поиск по имени "Иван"
+        Page<StudentDto> result = studentService.getStudents(
+                "Иван", null, null, 0, 10, "lastName", "asc"
+        );
+
+        // Then
+        assertThat(result.getContent()).hasSize(2);
+        assertThat(result.getContent())
+                .extracting(StudentDto::firstName)
+                .containsOnly("Иван");
+    }
+
+    @Test
+    void shouldFilterStudentsByUniversity() {
+        // Given
+        UUID otherUniversityId = createOtherUniversity().getId();
+        createTestStudent("Иван", "Иванов", LocalDate.now(), universityId);
+        createTestStudent("Петр", "Петров", LocalDate.now(), otherUniversityId);
+
+        // When
+        Page<StudentDto> result = studentService.getStudents(
+                null, universityId, null, 0, 10, "id", "asc"
+        );
+
+        // Then
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).firstName()).isEqualTo("Иван");
+    }
+
+    @Test
+    void shouldFilterStudentsByEnrollmentDate() {
+        // Given
+        createTestStudent("Иван", "Иванов", LocalDate.of(2023, 9, 1));
+        createTestStudent("Петр", "Петров", LocalDate.of(2024, 1, 15));
+
+        // When
+        Page<StudentDto> result = studentService.getStudents(
+                null, null, LocalDate.of(2023, 9, 1), 0, 10, "id", "asc"
+        );
+
+        // Then
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).firstName()).isEqualTo("Иван");
+    }
+
+    @Test
+    void shouldThrowExceptionWhenUniversityNotFoundOnRegistration() {
+        // Given
+        RegisterStudentDto registerDto = new RegisterStudentDto(
+                "Иван",
+                "Иванов",
+                "ivan@example.com",
+                "password123",
+                LocalDate.now(),
+                UUID.randomUUID()
+        );
+
+        // When & Then
+        assertThatThrownBy(() -> studentService.registerStudent(registerDto))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("University not found");
+    }
+
+    @Test
+    void shouldUpdateStudent() {
+        // Given
+        StudentDto original = createTestStudent("Иван", "Иванов", LocalDate.now());
+
+        StudentDto updateDto = new StudentDto(
+                original.id(),
+                "Петр",
+                "Петров",
+                "petr@example.com",
+                LocalDate.now().minusDays(1),
+                universityId
+        );
+
+        // When
+        StudentDto updated = studentService.updateStudent(original.id(), updateDto);
+
+        // Then
+        assertThat(updated.firstName()).isEqualTo("Петр");
+        assertThat(updated.lastName()).isEqualTo("Петров");
+        assertThat(updated.email()).isEqualTo("petr@example.com");
+    }
+
+    @Test
+    void shouldThrowExceptionWhenUpdatingNonExistentStudent() {
+        // Given
+        StudentDto dto = new StudentDto(
+                UUID.randomUUID(),
+                "Петр",
+                "Петров",
+                "petr@example.com",
+                LocalDate.now(),
+                universityId
+        );
+
+        // When & Then
+        assertThatThrownBy(() -> studentService.updateStudent(dto.id(), dto))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("Student not found");
+    }
+
+    @Test
+    void shouldDeleteStudentById() {
+        // Given
+        StudentDto student = createTestStudent("Иван", "Иванов", LocalDate.now());
+
+        // When
+        studentService.deleteStudentById(student.id());
+
+        // Then
+        assertThat(studentRepository.findById(student.id())).isEmpty();
+    }
+
+    @Test
+    void shouldThrowExceptionWhenDeletingNonExistentStudent() {
+        // When & Then
+        assertThatThrownBy(() -> studentService.deleteStudentById(UUID.randomUUID()))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("Student not found");
+    }
+
+    // === Вспомогательные методы ===
+
+    private StudentDto createTestStudent(String firstName, String lastName, LocalDate enrollmentDate) {
+        return createTestStudent(firstName, lastName, enrollmentDate, universityId);
+    }
+
+    private StudentDto createTestStudent(String firstName, String lastName, LocalDate enrollmentDate, UUID universityId) {
+        Student student = new Student();
+        student.setFirstName(firstName);
+        student.setLastName(lastName);
+        student.setEmail((firstName + "." + lastName + "@test.com").toLowerCase());
+        student.setEnrollmentDate(enrollmentDate);
+        University uni = new University();
+        uni.setId(universityId);
+        student.setUniversity(uni);
+
+        Student saved = studentRepository.save(student);
+        return new StudentDto(
+                saved.getId(),
+                saved.getFirstName(),
+                saved.getLastName(),
+                saved.getEmail(),
+                saved.getEnrollmentDate(),
+                saved.getUniversity().getId()
+        );
+    }
+
+    private University createOtherUniversity() {
+        University university = new University();
+        university.setName("Other University");
+        return universityRepository.save(university);
+    }
+}
