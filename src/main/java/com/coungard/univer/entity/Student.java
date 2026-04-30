@@ -32,6 +32,9 @@ public class Student {
         }
     }
 
+    @Column(name = "username", nullable = false)
+    private String username;
+
     @Column(name = "first_name", nullable = false)
     private String firstName;
 

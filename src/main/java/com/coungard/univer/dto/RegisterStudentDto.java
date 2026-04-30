@@ -10,23 +10,29 @@ import java.util.UUID;
 
 public record RegisterStudentDto(
 
-    @NotBlank(message = "Имя обязательно")
-    String firstName,
+        @NotBlank(message = "Логин обязателен")
+        String username,
 
-    @NotBlank(message = "Фамилия обязательна")
-    String lastName,
+        @NotBlank(message = "Имя обязательно")
+        String firstName,
 
-    @Email(message = "Некорректный email")
-    @NotBlank(message = "Email обязателен")
-    String email,
+        @NotBlank(message = "Фамилия обязательна")
+        String lastName,
 
-    @NotNull(message = "Пароль обязателен")
-    String password,
+        String middleName,
 
-    @NotNull(message = "Дата зачисления обязательна")
-    @PastOrPresent(message = "Дата зачисления не может быть в будущем")
-    LocalDate enrollmentDate,
+        @Email(message = "Некорректный email")
+        @NotBlank(message = "Email обязателен")
+        String email,
 
-    @NotNull(message = "ID университета обязателен")
-    UUID universityId
-) {}
+        @NotNull(message = "Пароль обязателен")
+        String password,
+
+        @NotNull(message = "Дата зачисления обязательна")
+        @PastOrPresent(message = "Дата зачисления не может быть в будущем")
+        LocalDate enrollmentDate,
+
+        @NotNull(message = "ID университета обязателен")
+        UUID universityId
+) {
+}

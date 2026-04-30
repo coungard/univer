@@ -12,7 +12,7 @@ services:
       - "5435:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./init-db/init-keycloak-db.sql:/docker-entrypoint-initdb.d/init-keycloak-db.sql
+      - ./init-keycloak/init-keycloak-db.sql:/docker-entrypoint-initdb.d/init-keycloak-db.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
@@ -35,12 +35,17 @@ services:
       KC_LOG_LEVEL: INFO
       KC_HOSTNAME: localhost
       KC_HOSTNAME_PORT: 8082
-    command: ["start-dev"]
+      # Важно: указываем путь к realm-файлу
+      KC_IMPORT: /opt/keycloak/data/import/realm-config.json
+      KC_IMPORT_FORCE: true
+    command: [ "start-dev", "--import-realm" ]
     ports:
       - "8082:8080"
     depends_on:
       postgres:
         condition: service_healthy
+    volumes:
+      - ./init-keycloak/realm-config.json:/opt/keycloak/data/import/realm-config.json
     links:
       - postgres
 

@@ -76,8 +76,10 @@ class StudentServiceTest {
         // Given
         String mockKeycloakId = UUID.randomUUID().toString();
         RegisterStudentDto registerDto = new RegisterStudentDto(
+                "ivan",
                 "Иван",
                 "Иванов",
+                "Иванович",
                 "ivan@example.com",
                 "password123",
                 LocalDate.now().minusYears(1),
@@ -85,8 +87,7 @@ class StudentServiceTest {
         );
 
         // When: Мокаем ответ Keycloak
-        when(keycloakAdminService.createUser(
-                eq("Иван"), eq("Иванов"), eq("ivan@example.com"), eq("password123")))
+        when(keycloakAdminService.createUser(registerDto))
                 .thenReturn(mockKeycloakId);
 
         StudentDto registered = studentService.registerStudent(registerDto);
@@ -100,7 +101,7 @@ class StudentServiceTest {
         assertThat(studentRepository.findById(UUID.fromString(mockKeycloakId))).isPresent();
 
         // Проверяем, что вызвали Keycloak
-        verify(keycloakAdminService).createUser(any(), any(), any(), any());
+        verify(keycloakAdminService).createUser(any(RegisterStudentDto.class));
         verify(keycloakAdminService).assignStudentRole(eq(mockKeycloakId));
     }
 
@@ -160,8 +161,10 @@ class StudentServiceTest {
     void shouldThrowExceptionWhenUniversityNotFoundOnRegistration() {
         // Given
         RegisterStudentDto registerDto = new RegisterStudentDto(
+                "ivan",
                 "Иван",
                 "Иванов",
+                "Иванович",
                 "ivan@example.com",
                 "password123",
                 LocalDate.now(),
@@ -181,6 +184,7 @@ class StudentServiceTest {
 
         StudentDto updateDto = new StudentDto(
                 original.id(),
+                "petr",
                 "Петр",
                 "Петров",
                 "petr@example.com",
@@ -202,6 +206,7 @@ class StudentServiceTest {
         // Given
         StudentDto dto = new StudentDto(
                 UUID.randomUUID(),
+                "petr",
                 "Петр",
                 "Петров",
                 "petr@example.com",
@@ -254,6 +259,7 @@ class StudentServiceTest {
         Student saved = studentRepository.save(student);
         return new StudentDto(
                 saved.getId(),
+                saved.getUsername(),
                 saved.getFirstName(),
                 saved.getLastName(),
                 saved.getEmail(),
