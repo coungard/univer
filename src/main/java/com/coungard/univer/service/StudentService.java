@@ -9,6 +9,7 @@ import com.coungard.univer.exception.ResourceNotFoundException;
 import com.coungard.univer.repository.StudentRepository;
 import com.coungard.univer.repository.UniversityRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class StudentService {
@@ -67,8 +69,7 @@ public class StudentService {
         Sort sortable = Sort.by(Sort.Direction.fromString(direction), sort);
         Pageable pageable = PageRequest.of(page, size, sortable);
 
-        return studentRepository.findAll(spec, pageable)
-                .map(studentMapper::toDto);
+        return studentRepository.findAll(spec, pageable).map(studentMapper::toDto);
     }
 
     @Transactional(readOnly = true)
@@ -80,32 +81,43 @@ public class StudentService {
 
     @Transactional
     public StudentDto registerStudent(RegisterStudentDto registerDto) {
-        // 1. Проверяем, что университет существует
-        University university = universityRepository.findById(registerDto.universityId())
-                .orElseThrow(() -> new ResourceNotFoundException("University not found"));
 
-        // 2. Создаём пользователя в Keycloak
-        String keycloakUserId = keycloakAdminService.createUser(
-                registerDto.firstName(),
-                registerDto.lastName(),
-                registerDto.email(),
-                registerDto.password()
-        );
+        String keycloakUserId = null;
+        try {
+            University university = universityRepository.findById(registerDto.universityId())
+                    .orElseThrow(() -> new ResourceNotFoundException("University not found"));
 
-        // 3. Назначаем роль STUDENT
-        keycloakAdminService.assignStudentRole(keycloakUserId);
+            // 2. Создаём пользователя в Keycloak
+            keycloakUserId = keycloakAdminService.createUser(registerDto);
 
-        // 4. Создаём сущность Student
-        Student student = new Student();
-        student.setId(UUID.fromString(keycloakUserId)); // Используем Keycloak ID как ID студента
-        student.setFirstName(registerDto.firstName());
-        student.setLastName(registerDto.lastName());
-        student.setEmail(registerDto.email());
-        student.setEnrollmentDate(registerDto.enrollmentDate());
-        student.setUniversity(university);
+            // 3. Назначаем роль STUDENT
+            keycloakAdminService.assignStudentRole(keycloakUserId);
 
-        Student saved = studentRepository.save(student);
-        return studentMapper.toDto(saved);
+            Student student = new Student();
+            student.setUsername(registerDto.username().toLowerCase());
+            student.setId(UUID.fromString(keycloakUserId)); // Используем Keycloak ID как ID студента
+            student.setFirstName(registerDto.firstName());
+            student.setLastName(registerDto.lastName());
+            student.setEmail(registerDto.email());
+            student.setEnrollmentDate(registerDto.enrollmentDate());
+            student.setUniversity(university);
+
+            Student saved = studentRepository.save(student);
+            return studentMapper.toDto(saved);
+        } catch (Exception ex) {
+            log.error(ex.getMessage(), ex);
+            // Откат: если Keycloak-пользователь был создан, но БД упала
+            if (keycloakUserId != null) {
+                try {
+                    keycloakAdminService.deleteUser(keycloakUserId);
+                    log.info("Пользователь в Keycloak удалён после сбоя в БД: " + keycloakUserId);
+                } catch (Exception cleanupEx) {
+                    log.warn("Не удалось удалить пользователя в Keycloak: " + keycloakUserId);
+                    log.error(cleanupEx.getMessage(), cleanupEx);
+                }
+            }
+            throw new RuntimeException("Ошибка при регистрации студента", ex);
+        }
     }
 
     @Transactional

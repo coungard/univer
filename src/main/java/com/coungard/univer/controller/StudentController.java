@@ -42,6 +42,7 @@ public class StudentController {
             description = "Поддерживает поиск по имени, университету и дате зачисления"
     )
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<StudentDto>> getStudents(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) UUID universityId,
@@ -57,6 +58,7 @@ public class StudentController {
 
     @Operation(summary = "Получить студента по ID")
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<StudentDto> getStudentById(@PathVariable UUID id) {
         StudentDto dto = studentService.getStudentById(id);
         return ResponseEntity.ok(dto);

@@ -47,6 +47,7 @@ CREATE TABLE faculty (
 CREATE TABLE department (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(255) NOT NULL,
+    description TEXT,
     faculty_id UUID NOT NULL,
     FOREIGN KEY (faculty_id) REFERENCES faculty(id) ON DELETE CASCADE,
     UNIQUE (name, faculty_id)
@@ -57,6 +58,7 @@ CREATE TABLE department (
 -- ===================================
 CREATE TABLE instructor (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    username VARCHAR(100) NOT NULL,
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
@@ -69,6 +71,7 @@ CREATE TABLE instructor (
 -- ===================================
 CREATE TABLE student (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    username VARCHAR(100) NOT NULL,
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,

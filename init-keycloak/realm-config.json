@@ -1,0 +1,90 @@
+{
+  "id": "univer-realm",
+  "realm": "univer-realm",
+  "displayName": "University Realm",
+  "enabled": true,
+  "registrationAllowed": false,
+  "clients": [
+    {
+      "clientId": "univer-client",
+      "name": "University Client",
+      "description": "Основное клиентское приложение университета",
+      "protocol": "openid-connect",
+      "enabled": true,
+      "publicClient": false,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": true,
+      "authorizationServicesEnabled": false,
+      "baseUrl": "/",
+      "rootUrl": "http://localhost:8082",
+      "adminUrl": "http://localhost:8082/admin",
+      "webOrigins": [
+        "http://localhost:*",
+        "https://localhost:*",
+        "+"
+      ],
+      "redirectUris": [
+        "http://localhost:8023/*"
+      ],
+      "attributes": {
+        "post.logout.redirect.uris": "+",
+        "oauth2.device.authorization.grant.enabled": "true"
+      }
+    }
+  ],
+  "roles": {
+    "realm": [
+      {
+        "name": "ROLE_ADMIN",
+        "description": "Роль суперадмина",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "univer-realm"
+      },
+      {
+        "name": "ROLE_STUDENT",
+        "description": "Роль студента",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "univer-realm"
+      },
+      {
+        "name": "ROLE_TEACHER",
+        "description": "Роль преподавателя",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "univer-realm"
+      },
+      {
+        "name": "ROLE_APPLICANT",
+        "description": "Роль абитуриента",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "univer-realm"
+      },
+      {
+        "name": "ROLE_GUEST",
+        "description": "Гостевая роль",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "univer-realm"
+      }
+    ]
+  },
+  "users": [
+    {
+      "username": "super",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "1234",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["ROLE_ADMIN"]
+    }
+  ]
+}

@@ -33,7 +33,7 @@ public class OpenApiConfig {
                                 .description("OAuth2 with Keycloak")
                                 .flows(new OAuthFlows()
                                         .authorizationCode(new OAuthFlow()
-                                                .authorizationUrl(keycloakAuthServerUrl + "/realms/univer-realm/protocol/openid-connect/auth")
+                                                .authorizationUrl(keycloakAuthServerUrl + "/realms/univer-realm/protocol/openid-connect/auth?prompt=login")
                                                 .tokenUrl(keycloakAuthServerUrl + "/realms/univer-realm/protocol/openid-connect/token")
                                                 .scopes(new Scopes().addString("openid", "OpenID scope"))
                                         )

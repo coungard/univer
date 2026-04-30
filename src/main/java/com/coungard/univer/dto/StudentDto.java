@@ -11,6 +11,9 @@ import java.util.UUID;
 public record StudentDto(
         UUID id,
 
+        @NotBlank(message = "Логин обязателен")
+        String username,
+
         @NotBlank(message = "Имя обязательно")
         String firstName,
 
