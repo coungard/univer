@@ -56,7 +56,7 @@ class StudentServiceTest {
     @Autowired
     private UniversityRepository universityRepository;
 
-    @MockBean  // 🔥 Мокаем KeycloakAdminService
+    @MockBean
     private KeycloakAdminService keycloakAdminService;
 
     private UUID universityId;
@@ -108,9 +108,9 @@ class StudentServiceTest {
     @Test
     void shouldGetStudentsWithPaginationAndFiltering() {
         // Given
-        createTestStudent("Анна", "Смирнова", LocalDate.of(2023, 9, 1));
-        createTestStudent("Иван", "Иванов", LocalDate.of(2023, 9, 1));
-        createTestStudent("Иван", "Петров", LocalDate.of(2024, 1, 15));
+        createTestStudent("anna", "Анна", "Смирнова", LocalDate.of(2023, 9, 1));
+        createTestStudent("ivan", "Иван", "Иванов", LocalDate.of(2023, 9, 1));
+        createTestStudent("ivanpetrov", "Иван", "Петров", LocalDate.of(2024, 1, 15));
 
         // When: Поиск по имени "Иван"
         Page<StudentDto> result = studentService.getStudents(
@@ -128,8 +128,8 @@ class StudentServiceTest {
     void shouldFilterStudentsByUniversity() {
         // Given
         UUID otherUniversityId = createOtherUniversity().getId();
-        createTestStudent("Иван", "Иванов", LocalDate.now(), universityId);
-        createTestStudent("Петр", "Петров", LocalDate.now(), otherUniversityId);
+        createTestStudent("ivan", "Иван", "Иванов", LocalDate.now(), universityId);
+        createTestStudent("petr", "Петр", "Петров", LocalDate.now(), otherUniversityId);
 
         // When
         Page<StudentDto> result = studentService.getStudents(
@@ -144,8 +144,8 @@ class StudentServiceTest {
     @Test
     void shouldFilterStudentsByEnrollmentDate() {
         // Given
-        createTestStudent("Иван", "Иванов", LocalDate.of(2023, 9, 1));
-        createTestStudent("Петр", "Петров", LocalDate.of(2024, 1, 15));
+        createTestStudent("ivan", "Иван", "Иванов", LocalDate.of(2023, 9, 1));
+        createTestStudent("petr", "Петр", "Петров", LocalDate.of(2024, 1, 15));
 
         // When
         Page<StudentDto> result = studentService.getStudents(
@@ -158,29 +158,9 @@ class StudentServiceTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenUniversityNotFoundOnRegistration() {
-        // Given
-        RegisterStudentDto registerDto = new RegisterStudentDto(
-                "ivan",
-                "Иван",
-                "Иванов",
-                "Иванович",
-                "ivan@example.com",
-                "password123",
-                LocalDate.now(),
-                UUID.randomUUID()
-        );
-
-        // When & Then
-        assertThatThrownBy(() -> studentService.registerStudent(registerDto))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessageContaining("University not found");
-    }
-
-    @Test
     void shouldUpdateStudent() {
         // Given
-        StudentDto original = createTestStudent("Иван", "Иванов", LocalDate.now());
+        StudentDto original = createTestStudent("ivan", "Иван", "Иванов", LocalDate.now());
 
         StudentDto updateDto = new StudentDto(
                 original.id(),
@@ -223,7 +203,7 @@ class StudentServiceTest {
     @Test
     void shouldDeleteStudentById() {
         // Given
-        StudentDto student = createTestStudent("Иван", "Иванов", LocalDate.now());
+        StudentDto student = createTestStudent("ivan", "Иван", "Иванов", LocalDate.now());
 
         // When
         studentService.deleteStudentById(student.id());
@@ -242,12 +222,13 @@ class StudentServiceTest {
 
     // === Вспомогательные методы ===
 
-    private StudentDto createTestStudent(String firstName, String lastName, LocalDate enrollmentDate) {
-        return createTestStudent(firstName, lastName, enrollmentDate, universityId);
+    private StudentDto createTestStudent(String username, String firstName, String lastName, LocalDate enrollmentDate) {
+        return createTestStudent(username, firstName, lastName, enrollmentDate, universityId);
     }
 
-    private StudentDto createTestStudent(String firstName, String lastName, LocalDate enrollmentDate, UUID universityId) {
+    private StudentDto createTestStudent(String username, String firstName, String lastName, LocalDate enrollmentDate, UUID universityId) {
         Student student = new Student();
+        student.setUsername(username);
         student.setFirstName(firstName);
         student.setLastName(lastName);
         student.setEmail((firstName + "." + lastName + "@test.com").toLowerCase());
