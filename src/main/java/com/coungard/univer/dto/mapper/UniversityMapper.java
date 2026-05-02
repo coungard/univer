@@ -1,9 +1,11 @@
 package com.coungard.univer.dto.mapper;
 
 import com.coungard.univer.dto.AddressDto;
+import com.coungard.univer.dto.DepartmentDto;
 import com.coungard.univer.dto.FacultyDto;
 import com.coungard.univer.dto.UniversityDto;
 import com.coungard.univer.entity.Address;
+import com.coungard.univer.entity.Department;
 import com.coungard.univer.entity.Faculty;
 import com.coungard.univer.entity.University;
 import org.springframework.stereotype.Component;
@@ -39,6 +41,14 @@ public class UniversityMapper {
                 .collect(Collectors.toList());
     }
 
+    private List<DepartmentDto> toDepartmentDtos(List<Department> departments) {
+        if (departments == null) return null;
+        return departments.stream()
+                .filter(Objects::nonNull)
+                .map(this::toDepartmentDto)
+                .collect(Collectors.toList());
+    }
+
     private FacultyDto toFacultyDto(Faculty faculty) {
         if (faculty == null) return null;
 
@@ -46,13 +56,20 @@ public class UniversityMapper {
                 .id(faculty.getId())
                 .name(faculty.getName())
                 .description(faculty.getDescription())
-                .universityId(faculty.getId())
+                .departments(toDepartmentDtos(faculty.getDepartments()))
                 .build();
     }
 
-    /**
-     * Преобразует UniversityDto в University
-     */
+    private DepartmentDto toDepartmentDto(Department department) {
+        if (department == null) return null;
+
+        return DepartmentDto.builder()
+                .id(department.getId())
+                .name(department.getName())
+                .description(department.getDescription())
+                .build();
+    }
+
     public University toEntity(UniversityDto dto) {
         if (dto == null) return null;
 
@@ -64,6 +81,22 @@ public class UniversityMapper {
 
         if (dto.address() != null) {
             university.setAddress(toAddressEntity(dto.address()));
+        }
+
+        for (FacultyDto facultyDto : dto.faculties()) {
+            Faculty faculty = new Faculty();
+            faculty.setName(facultyDto.name());
+            faculty.setDescription(facultyDto.description());
+            faculty.setUniversity(university);
+
+            for (DepartmentDto departmentDto : facultyDto.departments()) {
+                Department department = new Department();
+                department.setName(departmentDto.name());
+                department.setDescription(departmentDto.description());
+                department.setFaculty(faculty);
+                faculty.getDepartments().add(department);
+            }
+            university.getFaculties().add(faculty);
         }
 
         return university;
