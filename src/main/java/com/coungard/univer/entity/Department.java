@@ -9,28 +9,27 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import lombok.Data;
-
 import java.util.UUID;
+import lombok.Data;
 
 @Entity
 @Table(name = "department", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"name", "faculty_id"})
+    @UniqueConstraint(columnNames = {"name", "faculty_id"})
 })
 @Data
 public class Department {
 
-    @Id
-    @GeneratedValue
-    private UUID id;
+  @Id
+  @GeneratedValue
+  private UUID id;
 
-    @Column(nullable = false)
-    private String name;
+  @Column(nullable = false)
+  private String name;
 
-    @Column(columnDefinition = "TEXT")
-    private String description;
+  @Column(columnDefinition = "TEXT")
+  private String description;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "faculty_id", nullable = false)
-    private Faculty faculty;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "faculty_id", nullable = false)
+  private Faculty faculty;
 }

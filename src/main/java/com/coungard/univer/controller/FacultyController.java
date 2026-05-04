@@ -27,51 +27,50 @@ import java.util.UUID;
 @RequestMapping("/api/v1/faculties")
 public class FacultyController {
 
-    @Autowired
-    private FacultyService facultyService;
+  @Autowired
+  private FacultyService facultyService;
 
-    @PostMapping
-    @Operation(summary = "Добавить факультет")
-    public ResponseEntity<FacultyDto> createFaculty(@RequestBody FacultyDto facultyDto) {
-        FacultyDto created = facultyService.createFaculty(facultyDto);
+  @PostMapping
+  @Operation(summary = "Добавить факультет")
+  public ResponseEntity<FacultyDto> createFaculty(@RequestBody FacultyDto facultyDto) {
+    FacultyDto created = facultyService.createFaculty(facultyDto);
 
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(created.id())
-                .toUri();
+    URI location = ServletUriComponentsBuilder
+        .fromCurrentRequest()
+        .path("/{id}")
+        .buildAndExpand(created.id())
+        .toUri();
 
-        return ResponseEntity.created(location).body(created);
-    }
+    return ResponseEntity.created(location).body(created);
+  }
 
-    @GetMapping("/university/{universityId}")
-    @Operation(summary = "Получить факультеты по ID университета")
-    public ResponseEntity<List<FacultyDto>> getFacultiesByUniversity(@PathVariable UUID universityId) {
-        List<FacultyDto> faculties = facultyService.getFacultiesByUniversity(universityId);
-        return ResponseEntity.ok(faculties);
-    }
+  @GetMapping("/university/{universityId}")
+  @Operation(summary = "Получить факультеты по ID университета")
+  public ResponseEntity<List<FacultyDto>> getFacultiesByUniversity(@PathVariable UUID universityId) {
+    List<FacultyDto> faculties = facultyService.getFacultiesByUniversity(universityId);
+    return ResponseEntity.ok(faculties);
+  }
 
-    @GetMapping("/{id}")
-    @Operation(summary = "Получить факультет по ID")
-    public ResponseEntity<FacultyDto> getFacultyById(@PathVariable UUID id) {
-        FacultyDto faculty = facultyService.getFacultyById(id);
-        return ResponseEntity.ok(faculty);
-    }
+  @GetMapping("/{id}")
+  @Operation(summary = "Получить факультет по ID")
+  public ResponseEntity<FacultyDto> getFacultyById(@PathVariable UUID id) {
+    FacultyDto faculty = facultyService.getFacultyById(id);
+    return ResponseEntity.ok(faculty);
+  }
 
-    @PutMapping("/{id}")
-    @Operation(summary = "Изменить факультет по ID ")
-    public ResponseEntity<FacultyDto> updateFaculty(
-            @PathVariable UUID id,
-            @RequestBody FacultyDto facultyDto) {
-        FacultyDto updated = facultyService.updateFaculty(id, facultyDto);
-        return ResponseEntity.ok(updated);
-    }
+  @PutMapping("/{id}")
+  @Operation(summary = "Изменить факультет по ID ")
+  public ResponseEntity<FacultyDto> updateFaculty(
+      @PathVariable UUID id,
+      @RequestBody FacultyDto facultyDto) {
+    FacultyDto updated = facultyService.updateFaculty(id, facultyDto);
+    return ResponseEntity.ok(updated);
+  }
 
-    @DeleteMapping("/{id}")
-    @Operation(summary = "Удалить факультет по ID")
-    public ResponseEntity<Void> deleteFaculty(@PathVariable UUID id) {
-        facultyService.deleteFaculty(id);
-        return ResponseEntity.noContent().build(); // 204 No Content
-    }
-
+  @DeleteMapping("/{id}")
+  @Operation(summary = "Удалить факультет по ID")
+  public ResponseEntity<Void> deleteFaculty(@PathVariable UUID id) {
+    facultyService.deleteFaculty(id);
+    return ResponseEntity.noContent().build(); // 204 No Content
+  }
 }

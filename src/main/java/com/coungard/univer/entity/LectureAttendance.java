@@ -8,10 +8,9 @@ import jakarta.persistence.IdClass;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.util.UUID;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.UUID;
 
 @Entity
 @Table(name = "lecture_attendance")
@@ -20,21 +19,21 @@ import java.util.UUID;
 @Data
 public class LectureAttendance {
 
-    @Id
-    @Column(name = "student_id", insertable = false, updatable = false)
-    private UUID studentId;
+  @Id
+  @Column(name = "student_id", insertable = false, updatable = false)
+  private UUID studentId;
 
-    @Id
-    @Column(name = "lecture_id", insertable = false, updatable = false)
-    private UUID lectureId;
+  @Id
+  @Column(name = "lecture_id", insertable = false, updatable = false)
+  private UUID lectureId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "student_id")
-    private Student student;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "student_id")
+  private Student student;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "lecture_id")
-    private Lecture lecture;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "lecture_id")
+  private Lecture lecture;
 
-    private boolean attended = true;
+  private boolean attended = true;
 }

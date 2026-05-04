@@ -17,56 +17,56 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
-    private String issuerUri;
+  @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
+  private String issuerUri;
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/swagger-ui.html",
-                                "/swagger-ui/**",
-                                "/v3/api-docs",
-                                "/v3/api-docs/**",
-                                "/swagger-resources",
-                                "/swagger-resources/**",
-                                "/webjars/**",
-                                "/api/public"
-                        ).permitAll()
-                        // 🔥 Добавляем публичный доступ к регистрации
-                        .requestMatchers("/api/v1/students/register").permitAll()
-                        .anyRequest().authenticated()
-                )
-                .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(jwt -> jwt
-                                .jwtAuthenticationConverter(grantedAuthoritiesExtractor())
-                        )
-                )
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .csrf(AbstractHttpConfigurer::disable)
-                .cors(cors -> {
-                });
+  @Bean
+  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    http
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers(
+                "/swagger-ui.html",
+                "/swagger-ui/**",
+                "/v3/api-docs",
+                "/v3/api-docs/**",
+                "/swagger-resources",
+                "/swagger-resources/**",
+                "/webjars/**",
+                "/api/public"
+            ).permitAll()
+            // 🔥 Добавляем публичный доступ к регистрации
+            .requestMatchers("/api/v1/students/register").permitAll()
+            .anyRequest().authenticated()
+        )
+        .oauth2ResourceServer(oauth2 -> oauth2
+            .jwt(jwt -> jwt
+                .jwtAuthenticationConverter(grantedAuthoritiesExtractor())
+            )
+        )
+        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .csrf(AbstractHttpConfigurer::disable)
+        .cors(cors -> {
+        });
 
-        return http.build();
-    }
+    return http.build();
+  }
 
-    /**
-     * Настройка JwtDecoder для проверки подписи JWT от Keycloak
-     */
-    @Bean
-    public JwtDecoder jwtDecoder() {
-        return NimbusJwtDecoder.withJwkSetUri(issuerUri + "/protocol/openid-connect/certs").build();
-    }
+  /**
+   * Настройка JwtDecoder для проверки подписи JWT от Keycloak
+   */
+  @Bean
+  public JwtDecoder jwtDecoder() {
+    return NimbusJwtDecoder.withJwkSetUri(issuerUri + "/protocol/openid-connect/certs").build();
+  }
 
-    /**
-     * Конвертер JWT с извлечением ролей из токена Keycloak
-     */
-    private JwtAuthenticationConverter grantedAuthoritiesExtractor() {
-        JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
-        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(
-                new KeycloakRoleConverter()
-        );
-        return jwtAuthenticationConverter;
-    }
+  /**
+   * Конвертер JWT с извлечением ролей из токена Keycloak
+   */
+  private JwtAuthenticationConverter grantedAuthoritiesExtractor() {
+    JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
+    jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(
+        new KeycloakRoleConverter()
+    );
+    return jwtAuthenticationConverter;
+  }
 }

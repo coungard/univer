@@ -4,13 +4,14 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.UUID;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -18,42 +19,36 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.UUID;
-
 @Entity
 @Table(name = "student")
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor
 @Data
-@EqualsAndHashCode(callSuper=false)
+@EqualsAndHashCode(callSuper = false)
 public class Student extends Person implements Auditable {
 
-    @Id
-    private UUID id;
+  @Id
+  private UUID id;
 
-    @PrePersist
-    public void generateId() {
-        if (id == null) {
-            id = UUID.randomUUID();
-        }
+  @PrePersist
+  public void generateId() {
+    if (id == null) {
+      id = UUID.randomUUID();
     }
+  }
 
-    @CreatedDate
-    @Column(name = "created_at")
-    private Instant createdAt;
+  @CreatedDate
+  @Column(name = "created_at")
+  private Instant createdAt;
 
-    @LastModifiedDate
-    @Column(name = "updated_at")
-    private Instant updatedAt;
+  @LastModifiedDate
+  @Column(name = "updated_at")
+  private Instant updatedAt;
 
-    @Column(name = "enrollment_date", nullable = false)
-    private LocalDate enrollmentDate;
+  @Column(name = "enrollment_date", nullable = false)
+  private LocalDate enrollmentDate;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "university_id", nullable = false)
-    private University university;
-
-
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "university_id", nullable = false)
+  private University university;
 }

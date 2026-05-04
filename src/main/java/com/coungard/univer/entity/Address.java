@@ -6,12 +6,11 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.UUID;
 
 @Entity
 @Table(name = "address")
@@ -21,34 +20,34 @@ import java.util.UUID;
 @Builder
 public class Address {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.UUID)
+  private UUID id;
 
-    @Column(nullable = false)
-    private String address;
+  @Column(nullable = false)
+  private String address;
 
-    @Column(nullable = false)
-    private String country;
+  @Column(nullable = false)
+  private String country;
 
-    @Column(nullable = false)
-    private String region;
+  @Column(nullable = false)
+  private String region;
 
-    @Column(nullable = false)
-    private String city;
+  @Column(nullable = false)
+  private String city;
 
-    @Column(nullable = false)
-    private String street;
+  @Column(nullable = false)
+  private String street;
 
-    @Column(name = "postal_code")
-    private String postalCode;
+  @Column(name = "postal_code")
+  private String postalCode;
 
-    @Column(name = "phone_fax")
-    private String phone;
+  @Column(name = "phone_fax")
+  private String phone;
 
-    @Column(nullable = false)
-    private String email;
+  @Column(nullable = false)
+  private String email;
 
-    @Column(nullable = false)
-    private String website;
+  @Column(nullable = false)
+  private String website;
 }
