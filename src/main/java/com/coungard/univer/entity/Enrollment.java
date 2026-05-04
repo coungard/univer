@@ -8,11 +8,10 @@ import jakarta.persistence.IdClass;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.time.LocalDateTime;
 import java.util.UUID;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @IdClass(EnrollmentId.class)
@@ -21,25 +20,25 @@ import java.util.UUID;
 @NoArgsConstructor
 public class Enrollment {
 
-    @Id
-    @Column(name = "student_id", insertable = false, updatable = false)
-    private UUID studentId;
+  @Id
+  @Column(name = "student_id", insertable = false, updatable = false)
+  private UUID studentId;
 
-    @Id
-    @Column(name = "course_id", insertable = false, updatable = false)
-    private UUID courseId;
+  @Id
+  @Column(name = "course_id", insertable = false, updatable = false)
+  private UUID courseId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "student_id")
-    private Student student;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "student_id")
+  private Student student;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_id")
-    private Course course;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "course_id")
+  private Course course;
 
-    @Column(name = "enrolled_at")
-    private LocalDateTime enrolledAt;
+  @Column(name = "enrolled_at")
+  private LocalDateTime enrolledAt;
 
-    @Column(length = 20)
-    private String status;
+  @Column(length = 20)
+  private String status;
 }

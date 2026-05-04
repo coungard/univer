@@ -35,85 +35,86 @@ import java.util.UUID;
 @SecurityRequirement(name = "bearerAuth")
 public class StudentController {
 
-    private final StudentService studentService;
+  private final StudentService studentService;
 
-    @Operation(
-            summary = "Получить студентов с пагинацией и фильтрацией",
-            description = "Поддерживает поиск по имени, университету и дате зачисления"
-    )
-    @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Page<StudentDto>> getStudents(
-            @RequestParam(required = false) String name,
-            @RequestParam(required = false) UUID universityId,
-            @RequestParam(required = false) LocalDate enrollmentDate,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "lastName") String sort,
-            @RequestParam(defaultValue = "asc") String direction) {
+  @Operation(
+      summary = "Получить студентов с пагинацией и фильтрацией",
+      description = "Поддерживает поиск по имени, университету и дате зачисления"
+  )
+  @GetMapping
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<Page<StudentDto>> getStudents(
+      @RequestParam(required = false) String name,
+      @RequestParam(required = false) UUID universityId,
+      @RequestParam(required = false) LocalDate enrollmentDate,
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "10") int size,
+      @RequestParam(defaultValue = "lastName") String sort,
+      @RequestParam(defaultValue = "asc") String direction) {
 
-        Page<StudentDto> students = studentService.getStudents(name, universityId, enrollmentDate, page, size, sort, direction);
-        return ResponseEntity.ok(students);
-    }
+    Page<StudentDto> students = studentService.getStudents(name, universityId, enrollmentDate, page, size, sort,
+        direction);
+    return ResponseEntity.ok(students);
+  }
 
-    @Operation(summary = "Получить студента по ID")
-    @GetMapping("/{id}")
-    @PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<StudentDto> getStudentById(@PathVariable UUID id) {
-        StudentDto dto = studentService.getStudentById(id);
-        return ResponseEntity.ok(dto);
-    }
+  @Operation(summary = "Получить студента по ID")
+  @GetMapping("/{id}")
+  @PreAuthorize("hasRole('STUDENT')")
+  public ResponseEntity<StudentDto> getStudentById(@PathVariable UUID id) {
+    StudentDto dto = studentService.getStudentById(id);
+    return ResponseEntity.ok(dto);
+  }
 
-    @Operation(summary = "Регистрация нового студента")
-    @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Студент успешно зарегистрирован"),
-            @ApiResponse(responseCode = "400", description = "Некорректные данные"),
-            @ApiResponse(responseCode = "409", description = "Пользователь с таким email уже существует")
-    })
-    @PostMapping("/register")
-    public ResponseEntity<StudentDto> registerStudent(@Valid @RequestBody RegisterStudentDto registerDto) {
-        StudentDto studentDto = studentService.registerStudent(registerDto);
+  @Operation(summary = "Регистрация нового студента")
+  @ApiResponses({
+      @ApiResponse(responseCode = "201", description = "Студент успешно зарегистрирован"),
+      @ApiResponse(responseCode = "400", description = "Некорректные данные"),
+      @ApiResponse(responseCode = "409", description = "Пользователь с таким email уже существует")
+  })
+  @PostMapping("/register")
+  public ResponseEntity<StudentDto> registerStudent(@Valid @RequestBody RegisterStudentDto registerDto) {
+    StudentDto studentDto = studentService.registerStudent(registerDto);
 
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentServletMapping()
-                .path("/api/v1/students/{id}")
-                .buildAndExpand(studentDto.id())
-                .toUri();
+    URI location = ServletUriComponentsBuilder
+        .fromCurrentServletMapping()
+        .path("/api/v1/students/{id}")
+        .buildAndExpand(studentDto.id())
+        .toUri();
 
-        return ResponseEntity.created(location).body(studentDto);
-    }
+    return ResponseEntity.created(location).body(studentDto);
+  }
 
-    @Operation(summary = "Создать нового студента")
-    @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<StudentDto> createStudent(@Valid @RequestBody StudentDto studentDto) {
-        StudentDto saved = studentService.createStudent(studentDto);
+  @Operation(summary = "Создать нового студента")
+  @PostMapping
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<StudentDto> createStudent(@Valid @RequestBody StudentDto studentDto) {
+    StudentDto saved = studentService.createStudent(studentDto);
 
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(saved.id())
-                .toUri();
+    URI location = ServletUriComponentsBuilder
+        .fromCurrentRequest()
+        .path("/{id}")
+        .buildAndExpand(saved.id())
+        .toUri();
 
-        return ResponseEntity.created(location).body(saved);
-    }
+    return ResponseEntity.created(location).body(saved);
+  }
 
-    @Operation(summary = "Обновить студента")
-    @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<StudentDto> updateStudent(
-            @PathVariable UUID id,
-            @Valid @RequestBody StudentDto studentDto) {
+  @Operation(summary = "Обновить студента")
+  @PutMapping("/{id}")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<StudentDto> updateStudent(
+      @PathVariable UUID id,
+      @Valid @RequestBody StudentDto studentDto) {
 
-        StudentDto updated = studentService.updateStudent(id, studentDto);
-        return ResponseEntity.ok(updated);
-    }
+    StudentDto updated = studentService.updateStudent(id, studentDto);
+    return ResponseEntity.ok(updated);
+  }
 
-    @Operation(summary = "Удалить студента")
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> deleteStudent(@PathVariable UUID id) {
-        studentService.deleteStudentById(id);
-        return ResponseEntity.noContent().build();
-    }
+  @Operation(summary = "Удалить студента")
+  @DeleteMapping("/{id}")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<Void> deleteStudent(@PathVariable UUID id) {
+    studentService.deleteStudentById(id);
+    return ResponseEntity.noContent().build();
+  }
 }

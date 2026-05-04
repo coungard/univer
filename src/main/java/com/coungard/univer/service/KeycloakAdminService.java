@@ -13,56 +13,56 @@ import java.util.List;
 @Service
 public class KeycloakAdminService {
 
-    private final KeycloakConfig keycloakConfig;
+  private final KeycloakConfig keycloakConfig;
 
-    public KeycloakAdminService(KeycloakConfig keycloakConfig) {
-        this.keycloakConfig = keycloakConfig;
+  public KeycloakAdminService(KeycloakConfig keycloakConfig) {
+    this.keycloakConfig = keycloakConfig;
+  }
+
+  public String createUser(RegisterStudentDto registerData) {
+    Keycloak keycloak = getKeycloakAdminClient();
+
+    UserRepresentation user = new UserRepresentation();
+    user.setEnabled(true);
+    user.setUsername(registerData.username());
+    user.setFirstName(registerData.firstname());
+    user.setLastName(registerData.lastname());
+    user.setEmail(registerData.email());
+
+    CredentialRepresentation credential = new CredentialRepresentation();
+    credential.setType(CredentialRepresentation.PASSWORD);
+    credential.setValue(registerData.password());
+    credential.setTemporary(false);
+
+    user.setCredentials(List.of(credential));
+
+    var response = keycloak.realm(keycloakConfig.getRealm()).users().create(user);
+    String locationHeader = response.getLocation().toString();
+    return locationHeader.substring(locationHeader.lastIndexOf("/") + 1);
+  }
+
+  public void deleteUser(String userId) {
+    try (Keycloak keycloak = getKeycloakAdminClient()) {
+      keycloak.realm(keycloakConfig.getRealm())
+          .users()
+          .get(userId)
+          .remove();
     }
+  }
 
-    public String createUser(RegisterStudentDto registerData) {
-        Keycloak keycloak = getKeycloakAdminClient();
+  public void assignStudentRole(String userId) {
+    var realmResource = getKeycloakAdminClient().realm(keycloakConfig.getRealm());
+    var role = realmResource.roles().get("ROLE_STUDENT").toRepresentation();
+    realmResource.users().get(userId).roles().realmLevel().add(List.of(role));
+  }
 
-        UserRepresentation user = new UserRepresentation();
-        user.setEnabled(true);
-        user.setUsername(registerData.username());
-        user.setFirstName(registerData.firstname());
-        user.setLastName(registerData.lastname());
-        user.setEmail(registerData.email());
-
-        CredentialRepresentation credential = new CredentialRepresentation();
-        credential.setType(CredentialRepresentation.PASSWORD);
-        credential.setValue(registerData.password());
-        credential.setTemporary(false);
-
-        user.setCredentials(List.of(credential));
-
-        var response = keycloak.realm(keycloakConfig.getRealm()).users().create(user);
-        String locationHeader = response.getLocation().toString();
-        return locationHeader.substring(locationHeader.lastIndexOf("/") + 1);
-    }
-
-    public void deleteUser(String userId) {
-        try (Keycloak keycloak = getKeycloakAdminClient()) {
-            keycloak.realm(keycloakConfig.getRealm())
-                    .users()
-                    .get(userId)
-                    .remove();
-        }
-    }
-
-    public void assignStudentRole(String userId) {
-        var realmResource = getKeycloakAdminClient().realm(keycloakConfig.getRealm());
-        var role = realmResource.roles().get("ROLE_STUDENT").toRepresentation();
-        realmResource.users().get(userId).roles().realmLevel().add(List.of(role));
-    }
-
-    private Keycloak getKeycloakAdminClient() {
-        return KeycloakBuilder.builder()
-                .serverUrl(keycloakConfig.getAuthServerUrl())
-                .realm("master")
-                .username(keycloakConfig.getAdminUsername())
-                .password(keycloakConfig.getAdminPassword())
-                .clientId("admin-cli")
-                .build();
-    }
+  private Keycloak getKeycloakAdminClient() {
+    return KeycloakBuilder.builder()
+        .serverUrl(keycloakConfig.getAuthServerUrl())
+        .realm("master")
+        .username(keycloakConfig.getAdminUsername())
+        .password(keycloakConfig.getAdminPassword())
+        .clientId("admin-cli")
+        .build();
+  }
 }

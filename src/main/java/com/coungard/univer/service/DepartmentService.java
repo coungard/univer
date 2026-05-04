@@ -7,15 +7,15 @@ import java.util.UUID;
 
 public interface DepartmentService {
 
-    DepartmentDto createDepartment(DepartmentDto departmentDto);
+  DepartmentDto createDepartment(DepartmentDto departmentDto);
 
-    List<DepartmentDto> getDepartmentsByFaculty(UUID facultyId);
+  List<DepartmentDto> getDepartmentsByFaculty(UUID facultyId);
 
-    List<DepartmentDto> getDepartmentsByUniversity(UUID facultyId);
+  List<DepartmentDto> getDepartmentsByUniversity(UUID facultyId);
 
-    DepartmentDto getDepartmentById(UUID id);
+  DepartmentDto getDepartmentById(UUID id);
 
-    DepartmentDto updateDepartment(UUID id, DepartmentDto departmentDto);
+  DepartmentDto updateDepartment(UUID id, DepartmentDto departmentDto);
 
-    void deleteDepartment(UUID id);
+  void deleteDepartment(UUID id);
 }

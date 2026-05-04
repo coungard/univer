@@ -1,20 +1,20 @@
 package com.coungard.univer.entity;
 
-import lombok.Data;
-
 import java.io.Serializable;
 import java.util.UUID;
+import lombok.Data;
 
 @Data
 public class LectureAttendanceId implements Serializable {
-    private UUID studentId;
-    private UUID lectureId;
 
-    public LectureAttendanceId() {
-    }
+  private UUID studentId;
+  private UUID lectureId;
 
-    public LectureAttendanceId(UUID studentId, UUID lectureId) {
-        this.studentId = studentId;
-        this.lectureId = lectureId;
-    }
+  public LectureAttendanceId() {
+  }
+
+  public LectureAttendanceId(UUID studentId, UUID lectureId) {
+    this.studentId = studentId;
+    this.lectureId = lectureId;
+  }
 }

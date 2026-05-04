@@ -4,11 +4,11 @@ import java.time.Instant;
 
 public interface Auditable {
 
-    Instant getCreatedAt();
+  Instant getCreatedAt();
 
-    void setCreatedAt(Instant createdAt);
+  void setCreatedAt(Instant createdAt);
 
-    Instant getUpdatedAt();
+  Instant getUpdatedAt();
 
-    void setUpdatedAt(Instant updatedAt);
+  void setUpdatedAt(Instant updatedAt);
 }
