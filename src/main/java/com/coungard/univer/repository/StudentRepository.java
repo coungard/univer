@@ -9,4 +9,8 @@ import java.util.UUID;
 
 @Repository
 public interface StudentRepository extends JpaRepository<Student, UUID>, JpaSpecificationExecutor<Student> {
+
+    boolean existsByEmail(String email);
+
+    boolean existsByUsername(String username);
 }

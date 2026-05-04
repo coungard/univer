@@ -93,14 +93,12 @@ class StudentServiceTest {
         StudentDto registered = studentService.registerStudent(registerDto);
 
         // Then
-        assertThat(registered.firstName()).isEqualTo("Иван");
+        assertThat(registered.firstname()).isEqualTo("Иван");
         assertThat(registered.email()).isEqualTo("ivan@example.com");
         assertThat(registered.universityId()).isEqualTo(universityId);
 
-        // Проверяем, что студент сохранён в БД
         assertThat(studentRepository.findById(UUID.fromString(mockKeycloakId))).isPresent();
 
-        // Проверяем, что вызвали Keycloak
         verify(keycloakAdminService).createUser(any(RegisterStudentDto.class));
         verify(keycloakAdminService).assignStudentRole(eq(mockKeycloakId));
     }
@@ -114,13 +112,13 @@ class StudentServiceTest {
 
         // When: Поиск по имени "Иван"
         Page<StudentDto> result = studentService.getStudents(
-                "Иван", null, null, 0, 10, "lastName", "asc"
+                "Иван", null, null, 0, 10, "lastname", "asc"
         );
 
         // Then
         assertThat(result.getContent()).hasSize(2);
         assertThat(result.getContent())
-                .extracting(StudentDto::firstName)
+                .extracting(StudentDto::firstname)
                 .containsOnly("Иван");
     }
 
@@ -138,7 +136,7 @@ class StudentServiceTest {
 
         // Then
         assertThat(result.getContent()).hasSize(1);
-        assertThat(result.getContent().get(0).firstName()).isEqualTo("Иван");
+        assertThat(result.getContent().get(0).firstname()).isEqualTo("Иван");
     }
 
     @Test
@@ -154,7 +152,7 @@ class StudentServiceTest {
 
         // Then
         assertThat(result.getContent()).hasSize(1);
-        assertThat(result.getContent().get(0).firstName()).isEqualTo("Иван");
+        assertThat(result.getContent().get(0).firstname()).isEqualTo("Иван");
     }
 
     @Test
@@ -162,39 +160,37 @@ class StudentServiceTest {
         // Given
         StudentDto original = createTestStudent("ivan", "Иван", "Иванов", LocalDate.now());
 
-        StudentDto updateDto = new StudentDto(
-                original.id(),
-                "petr",
-                "Петр",
-                "Петров",
-                "petr@example.com",
-                LocalDate.now().minusDays(1),
-                universityId
-        );
+        StudentDto updateDto = StudentDto.builder()
+                .id(original.id())
+                .username("petr")
+                .firstname("Петр")
+                .lastname("Петров")
+                .email("petr@example.com")
+                .enrollmentDate(LocalDate.now().minusDays(1))
+                .universityId(universityId)
+                .build();
 
         // When
         StudentDto updated = studentService.updateStudent(original.id(), updateDto);
 
         // Then
-        assertThat(updated.firstName()).isEqualTo("Петр");
-        assertThat(updated.lastName()).isEqualTo("Петров");
+        assertThat(updated.firstname()).isEqualTo("Петр");
+        assertThat(updated.lastname()).isEqualTo("Петров");
         assertThat(updated.email()).isEqualTo("petr@example.com");
     }
 
     @Test
     void shouldThrowExceptionWhenUpdatingNonExistentStudent() {
-        // Given
-        StudentDto dto = new StudentDto(
-                UUID.randomUUID(),
-                "petr",
-                "Петр",
-                "Петров",
-                "petr@example.com",
-                LocalDate.now(),
-                universityId
-        );
+        StudentDto dto = StudentDto.builder()
+                .id(UUID.randomUUID())
+                .username("petr")
+                .firstname("Петр")
+                .lastname("Петров")
+                .email("petr@example.com")
+                .enrollmentDate(LocalDate.now().minusDays(1))
+                .universityId(universityId)
+                .build();
 
-        // When & Then
         assertThatThrownBy(() -> studentService.updateStudent(dto.id(), dto))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("Student not found");
@@ -229,8 +225,8 @@ class StudentServiceTest {
     private StudentDto createTestStudent(String username, String firstName, String lastName, LocalDate enrollmentDate, UUID universityId) {
         Student student = new Student();
         student.setUsername(username);
-        student.setFirstName(firstName);
-        student.setLastName(lastName);
+        student.setFirstname(firstName);
+        student.setLastname(lastName);
         student.setEmail((firstName + "." + lastName + "@test.com").toLowerCase());
         student.setEnrollmentDate(enrollmentDate);
         University uni = new University();
@@ -238,15 +234,16 @@ class StudentServiceTest {
         student.setUniversity(uni);
 
         Student saved = studentRepository.save(student);
-        return new StudentDto(
-                saved.getId(),
-                saved.getUsername(),
-                saved.getFirstName(),
-                saved.getLastName(),
-                saved.getEmail(),
-                saved.getEnrollmentDate(),
-                saved.getUniversity().getId()
-        );
+
+        return StudentDto.builder()
+                .id(saved.getId())
+                .username(saved.getUsername())
+                .firstname(saved.getFirstname())
+                .lastname(saved.getLastname())
+                .email(saved.getEmail())
+                .enrollmentDate(saved.getEnrollmentDate())
+                .universityId(saved.getUniversity().getId())
+                .build();
     }
 
     private University createOtherUniversity() {

@@ -14,12 +14,12 @@ public record RegisterStudentDto(
         String username,
 
         @NotBlank(message = "Имя обязательно")
-        String firstName,
+        String firstname,
 
         @NotBlank(message = "Фамилия обязательна")
-        String lastName,
+        String lastname,
 
-        String middleName,
+        String fullname,
 
         @Email(message = "Некорректный email")
         @NotBlank(message = "Email обязателен")
