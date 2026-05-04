@@ -10,5 +10,5 @@ public record LectureDto(
     LocalDateTime scheduledTime,
     Integer durationMinutes,
     UUID courseId,
-    UUID instructorId
+    UUID teacherId
 ) {}

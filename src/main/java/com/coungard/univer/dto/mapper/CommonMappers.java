@@ -17,14 +17,6 @@ public interface CommonMappers {
         return dept;
     }
 
-    @Named("mapToInstructor")
-    default Instructor mapToInstructor(UUID id) {
-        if (id == null) return null;
-        Instructor instructor = new Instructor();
-        instructor.setId(id);
-        return instructor;
-    }
-
     @Named("mapToUniversity")
     default University mapToUniversity(UUID id) {
         if (id == null) return null;

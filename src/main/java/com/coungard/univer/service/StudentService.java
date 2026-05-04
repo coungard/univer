@@ -8,6 +8,7 @@ import com.coungard.univer.entity.University;
 import com.coungard.univer.exception.ResourceNotFoundException;
 import com.coungard.univer.repository.StudentRepository;
 import com.coungard.univer.repository.UniversityRepository;
+import com.coungard.univer.validation.StudentValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -29,6 +30,7 @@ public class StudentService {
     private final StudentRepository studentRepository;
     private final UniversityRepository universityRepository;
     private final StudentMapper studentMapper;
+    private final StudentValidator studentValidator;
 
     private final KeycloakAdminService keycloakAdminService;
 
@@ -49,8 +51,8 @@ public class StudentService {
             String likePattern = "%" + name.toLowerCase() + "%";
             spec = spec.and((root, query, cb) ->
                     cb.or(
-                            cb.like(cb.lower(root.get("firstName")), likePattern),
-                            cb.like(cb.lower(root.get("lastName")), likePattern)
+                            cb.like(cb.lower(root.get("firstname")), likePattern),
+                            cb.like(cb.lower(root.get("lastname")), likePattern)
                     )
             );
         }
@@ -83,9 +85,11 @@ public class StudentService {
     public StudentDto registerStudent(RegisterStudentDto registerDto) {
 
         String keycloakUserId = null;
+        studentValidator.validateRegisterData(registerDto);
         try {
             University university = universityRepository.findById(registerDto.universityId())
                     .orElseThrow(() -> new ResourceNotFoundException("University not found"));
+
 
             // 2. Создаём пользователя в Keycloak
             keycloakUserId = keycloakAdminService.createUser(registerDto);
@@ -94,10 +98,11 @@ public class StudentService {
             keycloakAdminService.assignStudentRole(keycloakUserId);
 
             Student student = new Student();
-            student.setUsername(registerDto.username().toLowerCase());
             student.setId(UUID.fromString(keycloakUserId)); // Используем Keycloak ID как ID студента
-            student.setFirstName(registerDto.firstName());
-            student.setLastName(registerDto.lastName());
+            student.setUsername(registerDto.username().toLowerCase());
+            student.setFirstname(registerDto.firstname());
+            student.setLastname(registerDto.lastname());
+            student.setFullname(registerDto.fullname());
             student.setEmail(registerDto.email());
             student.setEnrollmentDate(registerDto.enrollmentDate());
             student.setUniversity(university);
@@ -116,7 +121,7 @@ public class StudentService {
                     log.error(cleanupEx.getMessage(), cleanupEx);
                 }
             }
-            throw new RuntimeException("Ошибка при регистрации студента", ex);
+            throw new RuntimeException("Ошибка при регистрации студента: " + ex.getMessage());
         }
     }
 
@@ -135,8 +140,10 @@ public class StudentService {
 
         validateUniversityExists(studentDto.universityId());
 
-        existing.setFirstName(studentDto.firstName());
-        existing.setLastName(studentDto.lastName());
+        existing.setUsername(studentDto.username());
+        existing.setFirstname(studentDto.firstname());
+        existing.setLastname(studentDto.lastname());
+        existing.setFullname(studentDto.fullname());
         existing.setEmail(studentDto.email());
         existing.setEnrollmentDate(studentDto.enrollmentDate());
 

@@ -25,8 +25,8 @@ public class KeycloakAdminService {
         UserRepresentation user = new UserRepresentation();
         user.setEnabled(true);
         user.setUsername(registerData.username());
-        user.setFirstName(registerData.firstName());
-        user.setLastName(registerData.lastName());
+        user.setFirstName(registerData.firstname());
+        user.setLastName(registerData.lastname());
         user.setEmail(registerData.email());
 
         CredentialRepresentation credential = new CredentialRepresentation();

@@ -25,6 +25,7 @@ CREATE TABLE university (
     name VARCHAR(255) NOT NULL,
     description TEXT,
     created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP,
     address_id UUID NOT NULL,
     FOREIGN KEY (address_id) REFERENCES address(id) ON DELETE CASCADE
 );
@@ -53,16 +54,30 @@ CREATE TABLE department (
     UNIQUE (name, faculty_id)
 );
 
+
 -- ===================================
--- Instructor (Преподаватель)
+-- Person (Контактная информация)
 -- ===================================
-CREATE TABLE instructor (
+CREATE TABLE person (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    username VARCHAR(100) NOT NULL,
-    first_name VARCHAR(100) NOT NULL,
-    last_name VARCHAR(100) NOT NULL,
+    username VARCHAR(100) UNIQUE NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
+    firstname VARCHAR(100) NOT NULL,
+    lastname VARCHAR(100) NOT NULL,
+    fullname VARCHAR(100) NOT NULL,
+    phone VARCHAR(24)
+);
+
+-- ===================================
+-- Teacher (Преподаватель)
+-- ===================================
+CREATE TABLE teacher (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    person_id UUID,
     department_id UUID,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP,
+    FOREIGN KEY (person_id) REFERENCES person(id) ON DELETE SET NULL,
     FOREIGN KEY (department_id) REFERENCES department(id) ON DELETE SET NULL
 );
 
@@ -71,12 +86,12 @@ CREATE TABLE instructor (
 -- ===================================
 CREATE TABLE student (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    username VARCHAR(100) NOT NULL,
-    first_name VARCHAR(100) NOT NULL,
-    last_name VARCHAR(100) NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
+    person_id UUID,
     enrollment_date DATE NOT NULL,
     university_id UUID NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP,
+    FOREIGN KEY (person_id) REFERENCES person(id) ON DELETE SET NULL,
     FOREIGN KEY (university_id) REFERENCES university(id) ON DELETE CASCADE
 );
 
@@ -88,9 +103,7 @@ CREATE TABLE course (
     title VARCHAR(255) NOT NULL,
     description TEXT,
     department_id UUID NOT NULL,
-    instructor_id UUID,
-    FOREIGN KEY (department_id) REFERENCES department(id) ON DELETE SET NULL,
-    FOREIGN KEY (instructor_id) REFERENCES instructor(id) ON DELETE SET NULL
+    FOREIGN KEY (department_id) REFERENCES department(id) ON DELETE SET NULL
 );
 
 -- ===================================
@@ -103,9 +116,9 @@ CREATE TABLE lecture (
     scheduled_time TIMESTAMP NOT NULL,
     duration_minutes INT DEFAULT 90,
     course_id UUID NOT NULL,
-    instructor_id UUID,
+    teacher_id UUID,
     FOREIGN KEY (course_id) REFERENCES course(id) ON DELETE CASCADE,
-    FOREIGN KEY (instructor_id) REFERENCES instructor(id) ON DELETE SET NULL
+    FOREIGN KEY (teacher_id) REFERENCES teacher(id) ON DELETE SET NULL
 );
 
 -- ===================================
