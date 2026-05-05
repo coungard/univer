@@ -1,5 +1,7 @@
 package com.coungard.univer.config;
 
+import static java.util.Arrays.asList;
+
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
@@ -8,6 +10,9 @@ import io.swagger.v3.oas.models.security.OAuthFlows;
 import io.swagger.v3.oas.models.security.Scopes;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import java.util.Comparator;
+import java.util.List;
+import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,10 +26,17 @@ public class OpenApiConfig {
   @Value("${keycloak.auth-server-url}")
   private String keycloakAuthServerUrl;
 
+  // Список тегов в нужном порядке
+  private static final List<String> TAG_ORDER = asList(
+      "Universities",
+      "Students",
+      "Faculties",
+      "Departments"
+  );
+
   @Bean
   public OpenAPI customOpenAPI() {
     final String securitySchemeName = "bearerAuth";
-    final String issuerUri = keycloakAuthServerUrl + "/realms/univer-realm";
 
     return new OpenAPI()
         .info(new Info()
@@ -46,5 +58,15 @@ public class OpenApiConfig {
             )
         )
         .addSecurityItem(new SecurityRequirement().addList(securitySchemeName, "openid"));
+  }
+
+  @Bean
+  public OpenApiCustomizer sortTagsAlphabetically() {
+    return openApi -> {
+      openApi.getTags().sort(Comparator.comparing(tag -> {
+        int index = TAG_ORDER.indexOf(tag.getName());
+        return index == -1 ? Integer.MAX_VALUE : index;
+      }));
+    };
   }
 }
