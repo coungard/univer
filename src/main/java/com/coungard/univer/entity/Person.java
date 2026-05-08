@@ -3,21 +3,25 @@ package com.coungard.univer.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.Inheritance;
-import jakarta.persistence.InheritanceType;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import java.util.UUID;
 import lombok.Data;
 
 @Entity
 @Table(name = "person")
-@Inheritance(strategy = InheritanceType.JOINED)
 @Data
-public abstract class Person {
+public class Person {
 
   @Id
-  @Column(name = "id")
   private UUID id;
+
+  @PrePersist
+  public void generateId() {
+    if (id == null) {
+      id = UUID.randomUUID();
+    }
+  }
 
   @Column(name = "username")
   private String username;

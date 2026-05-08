@@ -73,11 +73,12 @@ CREATE TABLE person (
 -- ===================================
 CREATE TABLE teacher (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    position VARCHAR(120) NOT NULL,
     person_id UUID,
     department_id UUID,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP,
-    FOREIGN KEY (person_id) REFERENCES person(id) ON DELETE SET NULL,
+    FOREIGN KEY (person_id) REFERENCES person(id) ON DELETE CASCADE ,
     FOREIGN KEY (department_id) REFERENCES department(id) ON DELETE SET NULL
 );
 
@@ -91,7 +92,7 @@ CREATE TABLE student (
     university_id UUID NOT NULL,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP,
-    FOREIGN KEY (person_id) REFERENCES person(id) ON DELETE SET NULL,
+    FOREIGN KEY (person_id) REFERENCES person(id) ON DELETE CASCADE,
     FOREIGN KEY (university_id) REFERENCES university(id) ON DELETE CASCADE
 );
 
@@ -118,7 +119,7 @@ CREATE TABLE lecture (
     course_id UUID NOT NULL,
     teacher_id UUID,
     FOREIGN KEY (course_id) REFERENCES course(id) ON DELETE CASCADE,
-    FOREIGN KEY (teacher_id) REFERENCES teacher(id) ON DELETE SET NULL
+    FOREIGN KEY (teacher_id) REFERENCES person(id) ON DELETE SET NULL
 );
 
 -- ===================================
@@ -130,7 +131,7 @@ CREATE TABLE enrollment (
     enrolled_at TIMESTAMP DEFAULT NOW(),
     status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'completed', 'dropped')),
     PRIMARY KEY (student_id, course_id),
-    FOREIGN KEY (student_id) REFERENCES student(id) ON DELETE CASCADE,
+    FOREIGN KEY (student_id) REFERENCES person(id) ON DELETE CASCADE,
     FOREIGN KEY (course_id) REFERENCES course(id) ON DELETE CASCADE
 );
 
@@ -142,7 +143,7 @@ CREATE TABLE lecture_attendance (
     lecture_id UUID NOT NULL,
     attended BOOLEAN DEFAULT TRUE,
     PRIMARY KEY (student_id, lecture_id),
-    FOREIGN KEY (student_id) REFERENCES student(id) ON DELETE CASCADE,
+    FOREIGN KEY (student_id) REFERENCES person(id) ON DELETE CASCADE,
     FOREIGN KEY (lecture_id) REFERENCES lecture(id) ON DELETE CASCADE
 );
 

@@ -1,4 +1,4 @@
-package com.coungard.univer.dto;
+package com.coungard.univer.dto.registration;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -8,7 +8,7 @@ import jakarta.validation.constraints.PastOrPresent;
 import java.time.LocalDate;
 import java.util.UUID;
 
-public record RegisterStudentDto(
+public record RegisterStudentRequest(
 
         @NotBlank(message = "Логин обязателен")
         String username,

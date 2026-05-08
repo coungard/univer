@@ -2,15 +2,25 @@ package com.coungard.univer.dto.mapper;
 
 import com.coungard.univer.dto.StudentDto;
 import com.coungard.univer.entity.Student;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.springframework.stereotype.Component;
 
-@Mapper(componentModel = "spring", uses = {UniversityMapper.class, CommonMappers.class})
-public interface StudentMapper {
+@Component
+public class StudentMapper {
 
-    @Mapping(source = "university.id", target = "universityId")
-    StudentDto toDto(Student entity);
-
-    @Mapping(target = "university", source = "universityId", qualifiedByName = "mapToUniversity")
-    Student toEntity(StudentDto dto);
+  public StudentDto toDto(Student student) {
+    if (student == null) {
+      return null;
+    }
+    return StudentDto.builder()
+        .id(student.getId())
+        .username(student.getPerson().getUsername())
+        .email(student.getPerson().getEmail())
+        .firstname(student.getPerson().getFirstname())
+        .lastname(student.getPerson().getLastname())
+        .fullname(student.getPerson().getFullname())
+        .universityId(student.getUniversity().getId())
+        .createdAt(student.getCreatedAt())
+        .updatedAt(student.getUpdatedAt())
+        .build();
+  }
 }

@@ -1,7 +1,7 @@
 package com.coungard.univer.controller;
 
-import com.coungard.univer.dto.RegisterStudentDto;
 import com.coungard.univer.dto.StudentDto;
+import com.coungard.univer.dto.registration.RegisterStudentRequest;
 import com.coungard.univer.service.StudentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -9,8 +9,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.net.URI;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,10 +28,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.net.URI;
-import java.time.LocalDate;
-import java.util.UUID;
-
 @RestController
 @RequestMapping("/api/v1/students")
 @RequiredArgsConstructor
@@ -37,23 +37,15 @@ public class StudentController {
 
   private final StudentService studentService;
 
-  @Operation(
-      summary = "Получить студентов с пагинацией и фильтрацией",
-      description = "Поддерживает поиск по имени, университету и дате зачисления"
-  )
+  @Operation(summary = "Получить студентов с пагинацией")
   @GetMapping
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<Page<StudentDto>> getStudents(
-      @RequestParam(required = false) String name,
-      @RequestParam(required = false) UUID universityId,
-      @RequestParam(required = false) LocalDate enrollmentDate,
       @RequestParam(defaultValue = "0") int page,
-      @RequestParam(defaultValue = "10") int size,
-      @RequestParam(defaultValue = "lastName") String sort,
-      @RequestParam(defaultValue = "asc") String direction) {
+      @RequestParam(defaultValue = "10") int size) {
 
-    Page<StudentDto> students = studentService.getStudents(name, universityId, enrollmentDate, page, size, sort,
-        direction);
+    Pageable pageable = PageRequest.of(page, size);
+    Page<StudentDto> students = studentService.getStudents(pageable);
     return ResponseEntity.ok(students);
   }
 
@@ -72,7 +64,7 @@ public class StudentController {
       @ApiResponse(responseCode = "409", description = "Пользователь с таким email уже существует")
   })
   @PostMapping("/register")
-  public ResponseEntity<StudentDto> registerStudent(@Valid @RequestBody RegisterStudentDto registerDto) {
+  public ResponseEntity<StudentDto> registerStudent(@Valid @RequestBody RegisterStudentRequest registerDto) {
     StudentDto studentDto = studentService.registerStudent(registerDto);
 
     URI location = ServletUriComponentsBuilder
@@ -82,21 +74,6 @@ public class StudentController {
         .toUri();
 
     return ResponseEntity.created(location).body(studentDto);
-  }
-
-  @Operation(summary = "Создать нового студента")
-  @PostMapping
-  @PreAuthorize("hasRole('ADMIN')")
-  public ResponseEntity<StudentDto> createStudent(@Valid @RequestBody StudentDto studentDto) {
-    StudentDto saved = studentService.createStudent(studentDto);
-
-    URI location = ServletUriComponentsBuilder
-        .fromCurrentRequest()
-        .path("/{id}")
-        .buildAndExpand(saved.id())
-        .toUri();
-
-    return ResponseEntity.created(location).body(saved);
   }
 
   @Operation(summary = "Обновить студента")
