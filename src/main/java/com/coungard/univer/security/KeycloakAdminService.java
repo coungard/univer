@@ -1,14 +1,13 @@
-package com.coungard.univer.service;
+package com.coungard.univer.security;
 
 import com.coungard.univer.config.KeycloakConfig;
-import com.coungard.univer.dto.RegisterStudentDto;
+import com.coungard.univer.dto.registration.RegisterData;
+import java.util.List;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class KeycloakAdminService {
@@ -19,7 +18,7 @@ public class KeycloakAdminService {
     this.keycloakConfig = keycloakConfig;
   }
 
-  public String createUser(RegisterStudentDto registerData) {
+  public String createUser(RegisterData registerData) {
     Keycloak keycloak = getKeycloakAdminClient();
 
     UserRepresentation user = new UserRepresentation();
@@ -50,12 +49,6 @@ public class KeycloakAdminService {
     }
   }
 
-  public void assignStudentRole(String userId) {
-    var realmResource = getKeycloakAdminClient().realm(keycloakConfig.getRealm());
-    var role = realmResource.roles().get("ROLE_STUDENT").toRepresentation();
-    realmResource.users().get(userId).roles().realmLevel().add(List.of(role));
-  }
-
   private Keycloak getKeycloakAdminClient() {
     return KeycloakBuilder.builder()
         .serverUrl(keycloakConfig.getAuthServerUrl())
@@ -64,5 +57,11 @@ public class KeycloakAdminService {
         .password(keycloakConfig.getAdminPassword())
         .clientId("admin-cli")
         .build();
+  }
+
+  public void assignRole(String userId, Role roleName) {
+    var realmResource = getKeycloakAdminClient().realm(keycloakConfig.getRealm());
+    var role = realmResource.roles().get(roleName.name()).toRepresentation();
+    realmResource.users().get(userId).roles().realmLevel().add(List.of(role));
   }
 }

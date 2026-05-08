@@ -30,6 +30,7 @@ public class OpenApiConfig {
   private static final List<String> TAG_ORDER = asList(
       "Universities",
       "Students",
+      "Teachers",
       "Faculties",
       "Departments"
   );

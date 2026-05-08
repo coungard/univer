@@ -1,14 +1,15 @@
 package com.coungard.univer.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import java.time.Instant;
 import java.util.UUID;
@@ -25,11 +26,17 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @EntityListeners(AuditingEntityListener.class)
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class Teacher extends Person implements Auditable {
+public class Teacher implements Auditable {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
+
+  @PrePersist
+  public void generateId() {
+    if (id == null) {
+      id = UUID.randomUUID();
+    }
+  }
 
   @CreatedDate
   @Column(name = "created_at")
@@ -42,4 +49,10 @@ public class Teacher extends Person implements Auditable {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "department_id")
   private Department department;
+
+  @OneToOne(cascade = CascadeType.ALL)
+  @JoinColumn(name = "person_id", referencedColumnName = "id")
+  private Person person;
+
+  private String position;
 }
