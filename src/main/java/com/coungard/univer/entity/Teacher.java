@@ -55,4 +55,6 @@ public class Teacher implements Auditable {
   private Person person;
 
   private String position;
+
+  private boolean registered;
 }

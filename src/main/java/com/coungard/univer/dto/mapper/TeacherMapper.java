@@ -22,6 +22,7 @@ public class TeacherMapper {
         .fullname(teacher.getPerson().getFullname())
         .departmentId(teacher.getDepartment().getId())
         .position(teacher.getPosition())
+        .registered(teacher.isRegistered())
         .createdAt(teacher.getCreatedAt())
         .updatedAt(teacher.getUpdatedAt())
         .build();

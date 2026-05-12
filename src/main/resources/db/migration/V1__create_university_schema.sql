@@ -74,6 +74,7 @@ CREATE TABLE person (
 CREATE TABLE teacher (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     position VARCHAR(120) NOT NULL,
+    registered BOOLEAN default false ,
     person_id UUID,
     department_id UUID,
     created_at TIMESTAMP DEFAULT NOW(),

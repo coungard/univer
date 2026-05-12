@@ -64,6 +64,7 @@ public class TeacherServiceImpl implements TeacherService {
 
     Teacher teacher = teacherMapper.fromRegisterToEntity(request);
     teacher.setDepartment(department);
+    teacher.setRegistered(true); // Устанавливаем флаг зарегистрированности
     teacher.setId(UUID.fromString(keycloakId)); // Используем Keycloak ID как ID студента
 
     Teacher saved = teacherRepository.save(teacher);
@@ -82,9 +83,11 @@ public class TeacherServiceImpl implements TeacherService {
     Teacher teacher = new Teacher();
     teacher.setDepartment(department);
     teacher.setPosition(teacherDto.position());
+    teacher.setRegistered(false);
 
     Person person = new Person();
 
+    person.setUsername(teacherDto.username());
     person.setFirstname(teacherDto.firstname());
     person.setLastname(teacherDto.lastname());
     person.setFullname(teacherDto.fullname());

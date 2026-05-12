@@ -32,7 +32,9 @@ public record TeacherDto(
     UUID departmentId,
 
     @NotBlank(message = "Должность должна быть заполнена")
-    String position
+    String position,
+
+    Boolean registered
 ) {
 
 }
