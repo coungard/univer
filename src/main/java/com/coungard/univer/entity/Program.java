@@ -1,33 +1,26 @@
 package com.coungard.univer.entity;
 
-import jakarta.persistence.CascadeType;
+import com.coungard.univer.dto.EducationForm;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
-import jakarta.persistence.FetchType;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.util.UUID;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
-@Table(name = "students")
+@Table(name = "programs")
 @EntityListeners(AuditingEntityListener.class)
-@NoArgsConstructor
 @Data
-@EqualsAndHashCode(callSuper = false)
-public class Student implements Auditable {
+public class Program {
 
   @Id
   private UUID id;
@@ -39,6 +32,34 @@ public class Student implements Auditable {
     }
   }
 
+  @Column(name = "faculty_id")
+  private UUID facultyId;
+
+  @Column(name = "code", length = 36)
+  private String code;
+
+  @Column(name = "name", length = 72)
+  private String name;
+
+  @Column(name = "profession", length = 120)
+  private String profession;
+
+  @Column(name = "direction", length = 240)
+  private String direction;
+
+  @Column(name = "education_level", length = 80)
+  private String educationLevel;
+
+  @Column(name = "education_form", length = 32)
+  @Enumerated(EnumType.STRING)
+  private EducationForm educationForm;
+
+  @Column(name = "duration_of_study")
+  private Integer durationOfStudy;
+
+  @Column(name = "qualification", length = 120)
+  private String qualification;
+
   @CreatedDate
   @Column(name = "created_at")
   private Instant createdAt;
@@ -46,15 +67,4 @@ public class Student implements Auditable {
   @LastModifiedDate
   @Column(name = "updated_at")
   private Instant updatedAt;
-
-  @Column(name = "enrollment_date", nullable = false)
-  private LocalDate enrollmentDate;
-
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "university_id", nullable = false)
-  private University university;
-
-  @OneToOne(cascade = CascadeType.ALL)
-  @JoinColumn(name = "person_id", referencedColumnName = "id")
-  private Person person;
 }
