@@ -1,4 +1,4 @@
-package com.coungard.univer.dto.mapper;
+package com.coungard.univer.mapper;
 
 import com.coungard.univer.dto.AddressDto;
 import com.coungard.univer.dto.DepartmentDto;

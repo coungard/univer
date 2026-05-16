@@ -1,7 +1,7 @@
 package com.coungard.univer.service.impl;
 
 import com.coungard.univer.dto.StudentDto;
-import com.coungard.univer.dto.mapper.StudentMapper;
+import com.coungard.univer.mapper.StudentMapper;
 import com.coungard.univer.dto.registration.RegisterData;
 import com.coungard.univer.dto.registration.RegisterStudentRequest;
 import com.coungard.univer.entity.Person;

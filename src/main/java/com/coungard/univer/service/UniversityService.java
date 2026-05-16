@@ -1,7 +1,7 @@
 package com.coungard.univer.service;
 
 import com.coungard.univer.dto.UniversityDto;
-import com.coungard.univer.dto.mapper.UniversityMapper;
+import com.coungard.univer.mapper.UniversityMapper;
 import com.coungard.univer.entity.Address;
 import com.coungard.univer.entity.University;
 import com.coungard.univer.exception.ResourceNotFoundException;

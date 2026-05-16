@@ -9,7 +9,7 @@ import java.util.UUID;
 import lombok.Data;
 
 @Entity
-@Table(name = "person")
+@Table(name = "persons")
 @Data
 public class Person {
 

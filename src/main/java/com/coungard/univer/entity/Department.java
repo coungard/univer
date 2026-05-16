@@ -13,7 +13,7 @@ import java.util.UUID;
 import lombok.Data;
 
 @Entity
-@Table(name = "department", uniqueConstraints = {
+@Table(name = "departments", uniqueConstraints = {
     @UniqueConstraint(columnNames = {"name", "faculty_id"})
 })
 @Data

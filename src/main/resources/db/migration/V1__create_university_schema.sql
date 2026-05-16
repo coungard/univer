@@ -20,7 +20,7 @@ CREATE TABLE address (
 -- ===================================
 -- University (Университет)
 -- ===================================
-CREATE TABLE university (
+CREATE TABLE universities (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(255) NOT NULL,
     description TEXT,
@@ -33,32 +33,31 @@ CREATE TABLE university (
 -- ===================================
 -- Faculty (Факультет)
 -- ===================================
-CREATE TABLE faculty (
+CREATE TABLE faculties (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(255) NOT NULL,
     description TEXT,
     university_id UUID NOT NULL,
-    FOREIGN KEY (university_id) REFERENCES university(id) ON DELETE CASCADE,
+    FOREIGN KEY (university_id) REFERENCES universities(id) ON DELETE CASCADE,
     UNIQUE (name, university_id)
 );
 
 -- ===================================
 -- Department (Кафедра)
 -- ===================================
-CREATE TABLE department (
+CREATE TABLE departments (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(255) NOT NULL,
     description TEXT,
     faculty_id UUID NOT NULL,
-    FOREIGN KEY (faculty_id) REFERENCES faculty(id) ON DELETE CASCADE,
+    FOREIGN KEY (faculty_id) REFERENCES faculties(id) ON DELETE CASCADE,
     UNIQUE (name, faculty_id)
 );
-
 
 -- ===================================
 -- Person (Контактная информация)
 -- ===================================
-CREATE TABLE person (
+CREATE TABLE persons (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     username VARCHAR(100) UNIQUE NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
@@ -71,7 +70,7 @@ CREATE TABLE person (
 -- ===================================
 -- Teacher (Преподаватель)
 -- ===================================
-CREATE TABLE teacher (
+CREATE TABLE teachers (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     position VARCHAR(120) NOT NULL,
     registered BOOLEAN default false ,
@@ -79,39 +78,58 @@ CREATE TABLE teacher (
     department_id UUID,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP,
-    FOREIGN KEY (person_id) REFERENCES person(id) ON DELETE CASCADE ,
-    FOREIGN KEY (department_id) REFERENCES department(id) ON DELETE SET NULL
+    FOREIGN KEY (person_id) REFERENCES persons(id) ON DELETE CASCADE ,
+    FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE SET NULL
 );
 
 -- ===================================
 -- Student (Студент)
 -- ===================================
-CREATE TABLE student (
+CREATE TABLE students (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     person_id UUID,
     enrollment_date DATE NOT NULL,
     university_id UUID NOT NULL,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP,
-    FOREIGN KEY (person_id) REFERENCES person(id) ON DELETE CASCADE,
-    FOREIGN KEY (university_id) REFERENCES university(id) ON DELETE CASCADE
+    FOREIGN KEY (person_id) REFERENCES persons(id) ON DELETE CASCADE,
+    FOREIGN KEY (university_id) REFERENCES universities(id) ON DELETE CASCADE
+);
+
+-- ===================================
+-- Program (Образовательная программа)
+-- ===================================
+CREATE TABLE programs (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    faculty_id UUID,
+    code VARCHAR(36), -- Код профессии, специальности (08.02.01)
+    name VARCHAR(72),  -- Наименовние учебного плана
+    profession VARCHAR(120), -- Наименование профессии, специальности, направления подготовки
+    direction VARCHAR(240), -- Образовательная программа, направленность, профиль
+    education_level VARCHAR(180), --  Уровень образования (Высшее образование - бакалавриат)
+    education_form VARCHAR(32),  -- Форма обучения (Очная/Заочная и т.д.)
+    duration_of_study INTEGER, -- Срок обучение в месяцах
+    qualification VARCHAR(120), -- Присваевываемая квалификационная категория
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP,
+    FOREIGN KEY (faculty_id) REFERENCES faculties(id)
 );
 
 -- ===================================
 -- Course (Курс)
 -- ===================================
-CREATE TABLE course (
+CREATE TABLE courses (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     title VARCHAR(255) NOT NULL,
     description TEXT,
     department_id UUID NOT NULL,
-    FOREIGN KEY (department_id) REFERENCES department(id) ON DELETE SET NULL
+    FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE SET NULL
 );
 
 -- ===================================
 -- Lecture (Лекция)
 -- ===================================
-CREATE TABLE lecture (
+CREATE TABLE lectures (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     title VARCHAR(255) NOT NULL,
     content TEXT,
@@ -119,8 +137,8 @@ CREATE TABLE lecture (
     duration_minutes INT DEFAULT 90,
     course_id UUID NOT NULL,
     teacher_id UUID,
-    FOREIGN KEY (course_id) REFERENCES course(id) ON DELETE CASCADE,
-    FOREIGN KEY (teacher_id) REFERENCES person(id) ON DELETE SET NULL
+    FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
+    FOREIGN KEY (teacher_id) REFERENCES persons(id) ON DELETE SET NULL
 );
 
 -- ===================================
@@ -132,8 +150,8 @@ CREATE TABLE enrollment (
     enrolled_at TIMESTAMP DEFAULT NOW(),
     status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'completed', 'dropped')),
     PRIMARY KEY (student_id, course_id),
-    FOREIGN KEY (student_id) REFERENCES person(id) ON DELETE CASCADE,
-    FOREIGN KEY (course_id) REFERENCES course(id) ON DELETE CASCADE
+    FOREIGN KEY (student_id) REFERENCES persons(id) ON DELETE CASCADE,
+    FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
 );
 
 -- ===================================
@@ -144,14 +162,14 @@ CREATE TABLE lecture_attendance (
     lecture_id UUID NOT NULL,
     attended BOOLEAN DEFAULT TRUE,
     PRIMARY KEY (student_id, lecture_id),
-    FOREIGN KEY (student_id) REFERENCES person(id) ON DELETE CASCADE,
-    FOREIGN KEY (lecture_id) REFERENCES lecture(id) ON DELETE CASCADE
+    FOREIGN KEY (student_id) REFERENCES persons(id) ON DELETE CASCADE,
+    FOREIGN KEY (lecture_id) REFERENCES lectures(id) ON DELETE CASCADE
 );
 
 -- ===================================
 -- Индексы для производительности
 -- ===================================
-CREATE INDEX idx_course_department ON course(department_id);
-CREATE INDEX idx_lecture_course ON lecture(course_id);
+CREATE INDEX idx_course_department ON courses(department_id);
+CREATE INDEX idx_lecture_course ON lectures(course_id);
 CREATE INDEX idx_enrollment_student ON enrollment(student_id);
 CREATE INDEX idx_lecture_attendance_student ON lecture_attendance(student_id);

@@ -5,7 +5,7 @@ import com.coungard.univer.entity.Faculty;
 import com.coungard.univer.entity.University;
 import com.coungard.univer.repository.FacultyRepository;
 import com.coungard.univer.repository.UniversityRepository;
-import com.coungard.univer.dto.mapper.FacultyMapper;
+import com.coungard.univer.mapper.FacultyMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
