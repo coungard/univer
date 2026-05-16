@@ -4,6 +4,10 @@
   "displayName": "University Realm",
   "enabled": true,
   "registrationAllowed": false,
+  "accessTokenLifespan": 3000,
+  "accessTokenLifespanForImplicitFlow": 3000,
+  "ssoSessionIdleTimeout": 3600,
+  "ssoSessionMaxLifespan": 7200,
   "clients": [
     {
       "clientId": "univer-client",

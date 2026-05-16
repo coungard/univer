@@ -1,6 +1,7 @@
 package com.coungard.univer.dto.request;
 
 import com.coungard.univer.dto.EducationForm;
+import com.coungard.univer.dto.StudyDuration;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
@@ -25,7 +26,7 @@ public record CreateProgramRequest(
     EducationForm educationForm,
 
     @NotNull(message = "Срок обучения обязателен")
-    Integer durationOfStudy,
+    StudyDuration durationOfStudy,
 
     String qualification
 ) {

@@ -1,7 +1,10 @@
 package com.coungard.univer.entity;
 
+import com.coungard.univer.converter.StudyIntervalConverter;
 import com.coungard.univer.dto.EducationForm;
+import com.coungard.univer.dto.StudyDuration;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
@@ -55,7 +58,8 @@ public class Program {
   private EducationForm educationForm;
 
   @Column(name = "duration_of_study")
-  private Integer durationOfStudy;
+  @Convert(converter = StudyIntervalConverter.class)
+  private StudyDuration durationOfStudy;
 
   @Column(name = "qualification", length = 120)
   private String qualification;

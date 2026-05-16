@@ -108,7 +108,7 @@ CREATE TABLE programs (
     direction VARCHAR(240), -- Образовательная программа, направленность, профиль
     education_level VARCHAR(180), --  Уровень образования (Высшее образование - бакалавриат)
     education_form VARCHAR(32),  -- Форма обучения (Очная/Заочная и т.д.)
-    duration_of_study INTEGER, -- Срок обучение в месяцах
+    duration_of_study INTERVAL, -- Срок обучение
     qualification VARCHAR(120), -- Присваевываемая квалификационная категория
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP,

@@ -11,7 +11,7 @@ public record ProgramDto(
     String direction,
     String educationLevel,
     EducationForm educationForm,
-    Integer durationOfStudy,
+    StudyDuration durationOfStudy,
     String qualification
 ) {
 
