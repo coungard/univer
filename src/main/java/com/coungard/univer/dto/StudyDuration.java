@@ -9,5 +9,5 @@ public class StudyDuration {
 
   private int years;
   private int months;
-  private int hours;
+  private int days;
 }
