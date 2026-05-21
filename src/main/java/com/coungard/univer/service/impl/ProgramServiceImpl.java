@@ -69,7 +69,7 @@ public class ProgramServiceImpl implements ProgramService {
     program.setDirection(programDto.direction());
     program.setEducationLevel(programDto.educationLevel());
     program.setEducationForm(programDto.educationForm());
-    program.setDurationOfStudy(programDto.durationOfStudy());
+    program.setDurationOfStudy(programMapper.studyDurationToDuration(programDto.durationOfStudy()));
     program.setQualification(programDto.qualification());
 
     Program updated = programRepository.save(program);

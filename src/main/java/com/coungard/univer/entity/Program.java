@@ -1,10 +1,7 @@
 package com.coungard.univer.entity;
 
-import com.coungard.univer.converter.StudyIntervalConverter;
 import com.coungard.univer.dto.EducationForm;
-import com.coungard.univer.dto.StudyDuration;
 import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
@@ -13,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import java.time.Instant;
+import java.time.Period;
 import java.util.UUID;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
@@ -58,8 +56,8 @@ public class Program {
   private EducationForm educationForm;
 
   @Column(name = "duration_of_study")
-  @Convert(converter = StudyIntervalConverter.class)
-  private StudyDuration durationOfStudy;
+//  @Convert(converter = DurationToIntervalConverter.class)
+  private Period durationOfStudy;
 
   @Column(name = "qualification", length = 120)
   private String qualification;
