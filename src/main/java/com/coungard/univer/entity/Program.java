@@ -55,8 +55,7 @@ public class Program {
   @Enumerated(EnumType.STRING)
   private EducationForm educationForm;
 
-  @Column(name = "duration_of_study")
-//  @Convert(converter = DurationToIntervalConverter.class)
+  @Column(name = "duration_of_study", columnDefinition = "INTERVAL")
   private Period durationOfStudy;
 
   @Column(name = "qualification", length = 120)

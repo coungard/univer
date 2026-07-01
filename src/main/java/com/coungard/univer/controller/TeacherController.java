@@ -40,11 +40,11 @@ public class TeacherController {
   private final TeacherService teacherService;
 
   @Operation(
-      summary = "Получить преподавателей с пагинацией и фильтрацией",
+      summary = "Получить всех преподавателей",
       description = "Поддерживает поиск по имени, университету"
   )
   @GetMapping
-  @PreAuthorize("hasRole('ADMIN')")
+//  @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<Page<TeacherDto>> getTeachers(
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "10") int size) {
@@ -82,7 +82,7 @@ public class TeacherController {
 
   @Operation(summary = "Создать нового преподавателя")
   @PostMapping
-  @PreAuthorize("hasRole('ADMIN')")
+//  @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<TeacherDto> createTeacher(@Valid @RequestBody TeacherDto teacherDto) {
     TeacherDto saved = teacherService.createTeacher(teacherDto);
 
