@@ -37,6 +37,7 @@ public class SecurityConfig {
             // 🔥 Добавляем публичный доступ к регистрации
             .requestMatchers("/api/v1/students/register").permitAll()
             .requestMatchers("/api/v1/teachers/register").permitAll()
+            .requestMatchers("/api/v1/teachers*").permitAll()
             .anyRequest().authenticated()
         )
         .oauth2ResourceServer(oauth2 -> oauth2

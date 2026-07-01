@@ -37,7 +37,7 @@ public class ProgramController {
   private final ProgramService programService;
 
   @PostMapping
-  @PreAuthorize("hasRole('ADMIN')")
+//  @PreAuthorize("hasRole('ADMIN')")
   @Operation(summary = "Создать новую образовательную программу")
   public ResponseEntity<ProgramDto> createProgram(@Valid @RequestBody CreateProgramRequest request) {
     ProgramDto dto = programService.createProgram(request);
@@ -52,7 +52,7 @@ public class ProgramController {
   }
 
   @GetMapping("/{id}")
-  @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER') or hasRole('STUDENT')")
+//  @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER') or hasRole('STUDENT')")
   @Operation(summary = "Получить программу по ID")
   public ResponseEntity<ProgramDto> getProgramById(@PathVariable UUID id) {
     ProgramDto dto = programService.getProgramById(id);
@@ -60,7 +60,7 @@ public class ProgramController {
   }
 
   @GetMapping
-  @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER') or hasRole('STUDENT')")
+//  @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER') or hasRole('STUDENT')")
   @Operation(summary = "Поиск образовательных программ")
   public ResponseEntity<Page<ProgramDto>> searchPrograms(
       @RequestParam(defaultValue = "0") int page,

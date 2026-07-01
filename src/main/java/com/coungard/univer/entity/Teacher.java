@@ -47,8 +47,8 @@ public class Teacher implements Auditable {
   private Instant updatedAt;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "department_id")
-  private Department department;
+  @JoinColumn(name = "faculty_id")
+  private Faculty faculty;
 
   @OneToOne(cascade = CascadeType.ALL)
   @JoinColumn(name = "person_id", referencedColumnName = "id")

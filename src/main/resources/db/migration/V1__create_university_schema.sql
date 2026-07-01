@@ -64,7 +64,7 @@ CREATE TABLE persons (
     firstname VARCHAR(100) NOT NULL,
     lastname VARCHAR(100) NOT NULL,
     fullname VARCHAR(100) NOT NULL,
-    phone VARCHAR(24)
+    phone VARCHAR(50)
 );
 
 -- ===================================
@@ -75,11 +75,11 @@ CREATE TABLE teachers (
     position VARCHAR(120) NOT NULL,
     registered BOOLEAN default false ,
     person_id UUID,
-    department_id UUID,
+    faculty_id UUID,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP,
     FOREIGN KEY (person_id) REFERENCES persons(id) ON DELETE CASCADE ,
-    FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE SET NULL
+    FOREIGN KEY (faculty_id) REFERENCES faculties(id) ON DELETE SET NULL
 );
 
 -- ===================================

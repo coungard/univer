@@ -25,11 +25,13 @@ public record TeacherDto(
     @NotBlank(message = "Email обязателен")
     String email,
 
+    String phone,
+
     Instant createdAt,
     Instant updatedAt,
 
-    @NotNull(message = "ID кафедры обязателен")
-    UUID departmentId,
+    @NotNull(message = "ID факультета обязателен")
+    UUID facultyId,
 
     @NotBlank(message = "Должность должна быть заполнена")
     String position,

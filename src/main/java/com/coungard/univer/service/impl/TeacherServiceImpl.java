@@ -1,15 +1,15 @@
 package com.coungard.univer.service.impl;
 
 import com.coungard.univer.dto.TeacherDto;
-import com.coungard.univer.mapper.TeacherMapper;
 import com.coungard.univer.dto.registration.RegisterData;
 import com.coungard.univer.dto.registration.RegisterTeacherRequest;
-import com.coungard.univer.entity.Department;
+import com.coungard.univer.entity.Faculty;
 import com.coungard.univer.entity.Person;
 import com.coungard.univer.entity.Teacher;
 import com.coungard.univer.exception.ResourceNotFoundException;
 import com.coungard.univer.exception.ValidationException;
-import com.coungard.univer.repository.DepartmentRepository;
+import com.coungard.univer.mapper.TeacherMapper;
+import com.coungard.univer.repository.FacultyRepository;
 import com.coungard.univer.repository.TeacherRepository;
 import com.coungard.univer.security.KeycloakAdminService;
 import com.coungard.univer.security.Role;
@@ -28,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class TeacherServiceImpl implements TeacherService {
 
   private final TeacherRepository teacherRepository;
-  private final DepartmentRepository departmentRepository;
+  private final FacultyRepository facultyRepository;
   private final KeycloakAdminService keycloakAdminService;
   private final TeacherValidator teacherValidator;
   private final TeacherMapper teacherMapper;
@@ -50,8 +50,8 @@ public class TeacherServiceImpl implements TeacherService {
   public TeacherDto registerTeacher(RegisterTeacherRequest request) {
     teacherValidator.validateRegisterTeacher(request);
 
-    Department department = departmentRepository.findById(request.getDepartmentId())
-        .orElseThrow(() -> new ResourceNotFoundException("Department not found"));
+    Faculty faculty = facultyRepository.findById(request.getDepartmentId())
+        .orElseThrow(() -> new ResourceNotFoundException("Faculty not found"));
 
     String keycloakId = keycloakAdminService.createUser(RegisterData.builder()
         .username(request.getUsername())
@@ -63,7 +63,7 @@ public class TeacherServiceImpl implements TeacherService {
     keycloakAdminService.assignRole(keycloakId, Role.ROLE_STUDENT);
 
     Teacher teacher = teacherMapper.fromRegisterToEntity(request);
-    teacher.setDepartment(department);
+    teacher.setFaculty(faculty);
     teacher.setRegistered(true); // Устанавливаем флаг зарегистрированности
     teacher.setId(UUID.fromString(keycloakId)); // Используем Keycloak ID как ID студента
 
@@ -77,11 +77,11 @@ public class TeacherServiceImpl implements TeacherService {
     if (teacherRepository.existsByPersonEmail(teacherDto.email())) {
       throw new ValidationException("Преподаватель с таким email уже существует: " + teacherDto.email());
     }
-    Department department = departmentRepository.findById(teacherDto.departmentId())
-        .orElseThrow(() -> new ResourceNotFoundException("Department not found"));
+    Faculty faculty = facultyRepository.findById(teacherDto.facultyId())
+        .orElseThrow(() -> new ResourceNotFoundException("Faculty not found"));
 
     Teacher teacher = new Teacher();
-    teacher.setDepartment(department);
+    teacher.setFaculty(faculty);
     teacher.setPosition(teacherDto.position());
     teacher.setRegistered(false);
 
@@ -92,6 +92,7 @@ public class TeacherServiceImpl implements TeacherService {
     person.setLastname(teacherDto.lastname());
     person.setFullname(teacherDto.fullname());
     person.setEmail(teacherDto.email());
+    person.setPhone(teacherDto.phone());
 
     teacher.setPerson(person);
 
@@ -104,14 +105,14 @@ public class TeacherServiceImpl implements TeacherService {
     Teacher teacher = teacherRepository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("Преподаватель не найден с ID: " + id));
 
-    Department department = departmentRepository.findById(teacherDto.departmentId())
-        .orElseThrow(() -> new ResourceNotFoundException("Department not found"));
+    Faculty faculty = facultyRepository.findById(teacherDto.facultyId())
+        .orElseThrow(() -> new ResourceNotFoundException("Faculty not found"));
 
     teacher.getPerson().setFirstname(teacherDto.firstname());
     teacher.getPerson().setLastname(teacherDto.lastname());
     teacher.getPerson().setFullname(teacherDto.fullname());
     teacher.getPerson().setEmail(teacherDto.email());
-    teacher.setDepartment(department);
+    teacher.setFaculty(faculty);
 
     Teacher updated = teacherRepository.save(teacher);
     return teacherMapper.toDto(updated);
