@@ -18,7 +18,7 @@
 |---|---|---|
 | `University` | ⚠️ Долг | CRUD работает, но сервис без интерфейса, поля через `@Autowired` — выбивается из паттерна проекта |
 | `Faculty` | ✅ Готово | Полный стек по эталонному паттерну (interface + Impl, `ResourceNotFoundException`), покрыт тестами |
-| `Department` | ✅ Готово | Полный стек по эталонному паттерну, тестов нет |
+| `Department` | ✅ Готово | Полный стек по эталонному паттерну, покрыт тестами |
 | `Program` | ✅ Готово | Полный стек + insert-скрипт данных, тестов нет |
 | `Student` | ✅ Готово | Полный стек, регистрация через Keycloak, единственный модуль с тестами и пагинацией |
 | `Teacher` | ✅ Готово | Полный стек, регистрация через Keycloak, тестов нет |
@@ -50,7 +50,8 @@
 | ~~Вынести интерфейс + Impl~~ | `University` | ✅ Готово — конструкторная инъекция вместо `@Autowired`-полей, единый паттерн со всеми остальными сервисами |
 | ~~Вынести интерфейс + Impl~~ | `Faculty` | ✅ Готово — `ResourceNotFoundException` вместо `ResponseStatusException`, единый формат ошибок через `GlobalExceptionHandler` |
 | ~~Тесты сервиса~~ | `Faculty` | ✅ Готово — `FacultyServiceTest` (Testcontainers) по образцу `StudentServiceTest` |
-| Тесты сервисов | `Department`, `Program`, `Teacher` | Testcontainers-тесты по образцу `StudentServiceTest` |
+| ~~Тесты сервиса~~ | `Department` | ✅ Готово — `DepartmentServiceTest` (Testcontainers) по образцу `StudentServiceTest` |
+| Тесты сервисов | `Program`, `Teacher` | Testcontainers-тесты по образцу `StudentServiceTest` |
 | Пагинация списков *(не блокирует MVP)* | `University`, `Faculty`, `Department`, `Program`, `Teacher` | `Pageable` вместо полной выдачи, как уже сделано у Student |
 
 ### 2. Курсы и лекции
