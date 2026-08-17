@@ -21,7 +21,7 @@
 | `Department` | ✅ Готово | Полный стек по эталонному паттерну, покрыт тестами |
 | `Program` | ✅ Готово | Полный стек + insert-скрипт данных, покрыт тестами |
 | `Student` | ✅ Готово | Полный стек, регистрация через Keycloak, единственный модуль с тестами и пагинацией |
-| `Teacher` | ✅ Готово | Полный стек, регистрация через Keycloak, тестов нет |
+| `Teacher` | ✅ Готово | Полный стек, регистрация через Keycloak, покрыт тестами (кроме `registerTeacher` — баг, см. находки) |
 | `Course` | ❌ Нет API | Есть entity, repository и таблица в схеме — нет DTO/service/controller |
 | `Lecture` | ❌ Нет API | Есть entity, repository и таблица в схеме — нет DTO/service/controller |
 | `Enrollment` | ❌ Нет API | Есть entity, repository и таблица в схеме — нет DTO/service/controller |
@@ -30,6 +30,7 @@
 **Находки:**
 
 - **Роль TEACHER отсутствует** — сущность Teacher есть, но `security.Role` знает только `ROLE_ADMIN` и `ROLE_STUDENT`. Вопрос, кто управляет курсами/лекциями, не решён.
+- **`TeacherServiceImpl.registerTeacher` сломан** — `TeacherValidator` проверяет `departmentId` через `DepartmentRepository`, а сам метод тут же ищет по этому же ID факультет через `FacultyRepository`; `Teacher` вообще не связан с `Department`. На реальных данных ID кафедры и ID факультета не совпадают, поэтому `POST /api/v1/teachers/register` всегда падает с «Faculty not found». См. issue #28.
 - **CORS не настроен явно** — в `SecurityConfig` вызов `.cors(cors -> {})` ничего не задаёт, поведение зависит от дефолтов Spring.
 - **Секреты в открытом виде** — пароли Postgres и admin-креды Keycloak лежат прямо в `application.yml` и `docker-compose.yml`.
 - **Само приложение не в docker-compose** — файл поднимает только Postgres и Keycloak, Dockerfile для самого сервиса отсутствует.
@@ -52,7 +53,7 @@
 | ~~Тесты сервиса~~ | `Faculty` | ✅ Готово — `FacultyServiceTest` (Testcontainers) по образцу `StudentServiceTest` |
 | ~~Тесты сервиса~~ | `Department` | ✅ Готово — `DepartmentServiceTest` (Testcontainers) по образцу `StudentServiceTest` |
 | ~~Тесты сервиса~~ | `Program` | ✅ Готово — `ProgramServiceTest` (Testcontainers) по образцу `StudentServiceTest` |
-| Тесты сервиса | `Teacher` | Testcontainers-тесты по образцу `StudentServiceTest` |
+| ~~Тесты сервиса~~ | `Teacher` | ✅ Готово — `TeacherServiceTest` (Testcontainers) по образцу `StudentServiceTest` |
 | Пагинация списков *(не блокирует MVP)* | `University`, `Faculty`, `Department`, `Program`, `Teacher` | `Pageable` вместо полной выдачи, как уже сделано у Student |
 
 ### 2. Курсы и лекции
