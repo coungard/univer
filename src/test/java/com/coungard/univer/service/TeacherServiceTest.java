@@ -2,10 +2,14 @@ package com.coungard.univer.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.coungard.univer.UniverApplication;
 import com.coungard.univer.dto.TeacherDto;
+import com.coungard.univer.dto.registration.RegisterData;
 import com.coungard.univer.dto.registration.RegisterTeacherRequest;
 import com.coungard.univer.entity.Department;
 import com.coungard.univer.entity.Faculty;
@@ -19,6 +23,7 @@ import com.coungard.univer.repository.FacultyRepository;
 import com.coungard.univer.repository.TeacherRepository;
 import com.coungard.univer.repository.UniversityRepository;
 import com.coungard.univer.security.KeycloakAdminService;
+import com.coungard.univer.security.Role;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -258,21 +263,15 @@ class TeacherServiceTest {
         .hasMessageContaining("Преподаватель не найден");
   }
 
-  /**
-   * Документирует текущий баг: {@code RegisterTeacherRequest.departmentId} проверяется через
-   * {@code DepartmentRepository}, но {@code TeacherServiceImpl.registerTeacher} тут же ищет по
-   * этому же ID факультет через {@code FacultyRepository}. В реальных данных ID кафедры и ID
-   * факультета не совпадают, поэтому регистрация падает даже на валидном запросе.
-   * См. issue #28 на исправление.
-   */
   @Test
-  void shouldFailToRegisterTeacherBecauseDepartmentIdIsLookedUpAsFacultyId() {
-    // Given: валидная кафедра существует, но её ID не совпадает с ID факультета
+  void shouldRegisterNewTeacher() {
+    // Given
     Department department = new Department();
     department.setName("Department of Algorithms");
     department.setFaculty(facultyRepository.getReferenceById(facultyId));
     UUID departmentId = departmentRepository.save(department).getId();
 
+    String mockKeycloakId = UUID.randomUUID().toString();
     RegisterTeacherRequest request = RegisterTeacherRequest.builder()
         .username("newteacher")
         .firstname("Новый")
@@ -283,10 +282,37 @@ class TeacherServiceTest {
         .position("Доцент")
         .build();
 
-    // When & Then
+    // When
+    when(keycloakAdminService.createUser(any(RegisterData.class))).thenReturn(mockKeycloakId);
+
+    TeacherDto registered = teacherService.registerTeacher(request);
+
+    // Then
+    assertThat(registered.firstname()).isEqualTo("Новый");
+    assertThat(registered.email()).isEqualTo("newteacher@example.com");
+    assertThat(registered.facultyId()).isEqualTo(facultyId);
+    assertThat(registered.registered()).isTrue();
+
+    assertThat(teacherRepository.findById(UUID.fromString(mockKeycloakId))).isPresent();
+
+    verify(keycloakAdminService).createUser(any(RegisterData.class));
+    verify(keycloakAdminService).assignRole(eq(mockKeycloakId), eq(Role.ROLE_TEACHER));
+  }
+
+  @Test
+  void shouldThrowExceptionWhenRegisteringTeacherWithNonExistentDepartment() {
+    RegisterTeacherRequest request = RegisterTeacherRequest.builder()
+        .username("newteacher")
+        .firstname("Новый")
+        .lastname("Преподаватель")
+        .password("password123")
+        .email("newteacher@example.com")
+        .departmentId(UUID.randomUUID())
+        .position("Доцент")
+        .build();
+
     assertThatThrownBy(() -> teacherService.registerTeacher(request))
-        .isInstanceOf(ResourceNotFoundException.class)
-        .hasMessageContaining("Faculty not found");
+        .isInstanceOf(ResourceNotFoundException.class);
   }
 
   // === Вспомогательные методы ===

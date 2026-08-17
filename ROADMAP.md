@@ -29,8 +29,8 @@
 
 **Находки:**
 
-- **Роль TEACHER отсутствует** — сущность Teacher есть, но `security.Role` знает только `ROLE_ADMIN` и `ROLE_STUDENT`. Вопрос, кто управляет курсами/лекциями, не решён.
-- **`TeacherServiceImpl.registerTeacher` сломан** — `TeacherValidator` проверяет `departmentId` через `DepartmentRepository`, а сам метод тут же ищет по этому же ID факультет через `FacultyRepository`; `Teacher` вообще не связан с `Department`. На реальных данных ID кафедры и ID факультета не совпадают, поэтому `POST /api/v1/teachers/register` всегда падает с «Faculty not found». См. issue #28.
+- ~~Роль TEACHER отсутствует~~ — уточнение: `ROLE_TEACHER` в `security.Role` уже существует, но до исправления #28 `registerTeacher` по ошибке назначал `ROLE_STUDENT` (копипаста из `StudentServiceImpl`). Вопрос, кто управляет курсами/лекциями на уровне `@PreAuthorize`, всё ещё не решён.
+- ~~`TeacherServiceImpl.registerTeacher` сломан~~ — ✅ исправлено (issue #28): факультет теперь берётся из найденной по `departmentId` кафедры (`department.getFaculty()`), а не по чужому ID напрямую; заодно исправлено назначение роли — `ROLE_TEACHER` вместо `ROLE_STUDENT`.
 - **CORS не настроен явно** — в `SecurityConfig` вызов `.cors(cors -> {})` ничего не задаёт, поведение зависит от дефолтов Spring.
 - **Секреты в открытом виде** — пароли Postgres и admin-креды Keycloak лежат прямо в `application.yml` и `docker-compose.yml`.
 - **Само приложение не в docker-compose** — файл поднимает только Postgres и Keycloak, Dockerfile для самого сервиса отсутствует.
