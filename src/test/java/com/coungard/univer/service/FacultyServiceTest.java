@@ -10,12 +10,14 @@ import com.coungard.univer.entity.University;
 import com.coungard.univer.exception.ResourceNotFoundException;
 import com.coungard.univer.repository.FacultyRepository;
 import com.coungard.univer.repository.UniversityRepository;
-import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -105,11 +107,12 @@ class FacultyServiceTest {
     createTestFaculty("Faculty of Law", otherUniversityId);
 
     // When
-    List<FacultyDto> faculties = facultyService.getFacultiesByUniversity(universityId);
+    Pageable pageable = PageRequest.of(0, 10);
+    Page<FacultyDto> faculties = facultyService.getFacultiesByUniversity(universityId, pageable);
 
     // Then
-    assertThat(faculties).hasSize(2);
-    assertThat(faculties)
+    assertThat(faculties.getContent()).hasSize(2);
+    assertThat(faculties.getContent())
         .extracting(FacultyDto::name)
         .containsExactlyInAnyOrder("Faculty of Mathematics", "Faculty of Physics");
   }

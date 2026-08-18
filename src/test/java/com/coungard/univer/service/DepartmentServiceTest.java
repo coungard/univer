@@ -12,12 +12,14 @@ import com.coungard.univer.exception.ResourceNotFoundException;
 import com.coungard.univer.repository.DepartmentRepository;
 import com.coungard.univer.repository.FacultyRepository;
 import com.coungard.univer.repository.UniversityRepository;
-import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -122,11 +124,12 @@ class DepartmentServiceTest {
     createTestDepartment("Department of Physics", facultyId);
 
     // When
-    List<DepartmentDto> departments = departmentService.getDepartmentsByFaculty(facultyId);
+    Pageable pageable = PageRequest.of(0, 10);
+    Page<DepartmentDto> departments = departmentService.getDepartmentsByFaculty(facultyId, pageable);
 
     // Then
-    assertThat(departments).hasSize(2);
-    assertThat(departments)
+    assertThat(departments.getContent()).hasSize(2);
+    assertThat(departments.getContent())
         .extracting(DepartmentDto::name)
         .containsExactlyInAnyOrder("Department of Mathematics", "Department of Physics");
   }
@@ -145,11 +148,12 @@ class DepartmentServiceTest {
     University myUniversity = facultyRepository.findById(facultyId).orElseThrow().getUniversity();
 
     // When
-    List<DepartmentDto> departments = departmentService.getDepartmentsByUniversity(myUniversity.getId());
+    Pageable pageable = PageRequest.of(0, 10);
+    Page<DepartmentDto> departments = departmentService.getDepartmentsByUniversity(myUniversity.getId(), pageable);
 
     // Then
-    assertThat(departments).hasSize(1);
-    assertThat(departments.get(0).name()).isEqualTo("Department of Chemistry");
+    assertThat(departments.getContent()).hasSize(1);
+    assertThat(departments.getContent().get(0).name()).isEqualTo("Department of Chemistry");
   }
 
   @Test

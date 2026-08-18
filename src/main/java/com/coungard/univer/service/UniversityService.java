@@ -1,15 +1,19 @@
 package com.coungard.univer.service;
 
 import com.coungard.univer.dto.UniversityDto;
-import java.util.List;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface UniversityService {
 
   /**
-   * Получить все университеты
+   * Получить страницу университетов с пагинацией и сортировкой.
+   *
+   * @param pageable параметры пагинации и сортировки
+   * @return страница UniversityDto
    */
-  List<UniversityDto> getAllUniversities();
+  Page<UniversityDto> getUniversities(Pageable pageable);
 
   /**
    * Получить университет по ID

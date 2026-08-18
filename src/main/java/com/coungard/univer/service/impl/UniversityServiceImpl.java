@@ -8,9 +8,10 @@ import com.coungard.univer.mapper.UniversityMapper;
 import com.coungard.univer.repository.AddressRepository;
 import com.coungard.univer.repository.UniversityRepository;
 import com.coungard.univer.service.UniversityService;
-import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,8 +25,8 @@ public class UniversityServiceImpl implements UniversityService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<UniversityDto> getAllUniversities() {
-    return universityMapper.toDtoList(universityRepository.findAll());
+  public Page<UniversityDto> getUniversities(Pageable pageable) {
+    return universityRepository.findAll(pageable).map(universityMapper::toDto);
   }
 
   @Override

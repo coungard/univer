@@ -8,9 +8,10 @@ import com.coungard.univer.mapper.FacultyMapper;
 import com.coungard.univer.repository.FacultyRepository;
 import com.coungard.univer.repository.UniversityRepository;
 import com.coungard.univer.service.FacultyService;
-import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,10 +39,9 @@ public class FacultyServiceImpl implements FacultyService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<FacultyDto> getFacultiesByUniversity(UUID universityId) {
-    return facultyRepository.findByUniversityId(universityId).stream()
-        .map(facultyMapper::toDto)
-        .toList();
+  public Page<FacultyDto> getFacultiesByUniversity(UUID universityId, Pageable pageable) {
+    return facultyRepository.findByUniversityId(universityId, pageable)
+        .map(facultyMapper::toDto);
   }
 
   @Override
