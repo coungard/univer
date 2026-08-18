@@ -16,13 +16,13 @@
 
 | Модуль | Статус | Комментарий |
 |---|---|---|
-| `University` | ⚠️ Долг | CRUD работает, но сервис без интерфейса, поля через `@Autowired` — выбивается из паттерна проекта |
+| `University` | ✅ Готово | Полный стек, конструкторная инъекция, покрыт тестами |
 | `Faculty` | ✅ Готово | Полный стек по эталонному паттерну (interface + Impl, `ResourceNotFoundException`), покрыт тестами |
 | `Department` | ✅ Готово | Полный стек по эталонному паттерну, покрыт тестами |
 | `Program` | ✅ Готово | Полный стек + insert-скрипт данных, покрыт тестами |
-| `Student` | ✅ Готово | Полный стек, регистрация через Keycloak, единственный модуль с тестами и пагинацией |
-| `Teacher` | ✅ Готово | Полный стек, регистрация через Keycloak, покрыт тестами (кроме `registerTeacher` — баг, см. находки) |
-| `Course` | ❌ Нет API | Есть entity, repository и таблица в схеме — нет DTO/service/controller |
+| `Student` | ✅ Готово | Полный стек, регистрация через Keycloak, покрыт тестами и пагинацией |
+| `Teacher` | ✅ Готово | Полный стек, регистрация через Keycloak, покрыт тестами (баг `registerTeacher` исправлен) |
+| `Course` | ✅ Готово | Полный стек (DTO/Mapper/Service/Controller), CRUD + пагинация, покрыт тестами (issue #29) |
 | `Lecture` | ❌ Нет API | Есть entity, repository и таблица в схеме — нет DTO/service/controller |
 | `Enrollment` | ❌ Нет API | Есть entity, repository и таблица в схеме — нет DTO/service/controller |
 | `LectureAttendance` | ❌ Нет API | Есть entity, repository и таблица в схеме — нет DTO/service/controller |
@@ -34,13 +34,15 @@
 - **CORS не настроен явно** — в `SecurityConfig` вызов `.cors(cors -> {})` ничего не задаёт, поведение зависит от дефолтов Spring.
 - **Секреты в открытом виде** — пароли Postgres и admin-креды Keycloak лежат прямо в `application.yml` и `docker-compose.yml`.
 - **Само приложение не в docker-compose** — файл поднимает только Postgres и Keycloak, Dockerfile для самого сервиса отсутствует.
-- **Пагинация только у Student** — остальные списковые эндпоинты отдают всё разом.
+- ~~Пагинация только у Student~~ — ✅ добавлена во все списковые эндпоинты: `University` (`getUniversities`),
+  `Faculty` (`getFacultiesByUniversity`), `Department` (`getDepartmentsByFaculty`, `getDepartmentsByUniversity`);
+  `Program` и `Teacher` уже были пагинированы ранее.
 
 ---
 
 ## Этапы
 
-### 1. Фундамент
+### 1. Фундамент ✅ Готово
 
 *до старта новых модулей*
 
@@ -54,7 +56,7 @@
 | ~~Тесты сервиса~~ | `Department` | ✅ Готово — `DepartmentServiceTest` (Testcontainers) по образцу `StudentServiceTest` |
 | ~~Тесты сервиса~~ | `Program` | ✅ Готово — `ProgramServiceTest` (Testcontainers) по образцу `StudentServiceTest` |
 | ~~Тесты сервиса~~ | `Teacher` | ✅ Готово — `TeacherServiceTest` (Testcontainers) по образцу `StudentServiceTest` |
-| Пагинация списков *(не блокирует MVP)* | `University`, `Faculty`, `Department`, `Program`, `Teacher` | `Pageable` вместо полной выдачи, как уже сделано у Student |
+| ~~Пагинация списков~~ | `University`, `Faculty`, `Department`, `Program`, `Teacher` | ✅ Готово — `Pageable` вместо полной выдачи во всех списковых эндпоинтах |
 
 ### 2. Курсы и лекции
 
@@ -64,7 +66,7 @@
 
 | Задача | Модуль | Результат |
 |---|---|---|
-| DTO + Mapper + Service/Impl + Controller | `Course` | CRUD, привязка к обязательному Department и опциональному Teacher |
+| ~~DTO + Mapper + Service/Impl + Controller~~ | `Course` | ✅ Готово (issue #29) — CRUD, привязка к обязательному Department и опциональному Teacher, пагинация, тесты |
 | DTO + Mapper + Service/Impl + Controller | `Lecture` | CRUD, привязка к обязательному Course, расписание (`scheduledTime`, `durationMinutes`) |
 | Решить вопрос прав доступа | `security.Role` | Ввести `ROLE_TEACHER` либо явно закрепить создание курсов/лекций за ADMIN |
 | Тесты сервисов | `Course`, `Lecture` | Покрытие CRUD и связей с Department/Teacher |
@@ -109,4 +111,8 @@
 
 Документ живой — по мере закрытия задач статусы в аудите и пилюли этапов стоит обновлять вручную.
 
-**Следующий шаг → Этап 1**
+**Статус на 18.08.2026:** Этап 1 полностью закрыт — все задачи выполнены (интерфейсы+Impl для `University`/`Faculty`,
+тесты сервисов `Faculty`/`Department`/`Program`/`Teacher`, исправлен `registerTeacher`, пагинация добавлена во все
+списковые эндпоинты).
+
+**Следующий шаг → Этап 2 (Курсы и лекции)**
