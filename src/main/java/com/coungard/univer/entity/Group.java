@@ -11,6 +11,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.util.UUID;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 /**
@@ -18,11 +19,17 @@ import lombok.NoArgsConstructor;
  * «У532 КСиТ»), не разбирается на части: источник истины — связь с {@link Semester} (а через неё
  * со {@link StudyYear} и {@code Program}), а не текст названия. См. TARGET.md, раздел
  * «Группа: соглашение об именовании».
+ *
+ * <p>{@code equals}/{@code hashCode} — по ID, а не по всем полям (переопределяет поведение по
+ * умолчанию из {@code @Data}): {@code Group} участвует в {@code Set<Group>} у {@code Pair} и
+ * {@code Lecture} (многие-ко-многим), а полевой equals из {@code @Data} трогал бы ленивую связь
+ * {@code semester} и падал {@code LazyInitializationException} вне активной Hibernate-сессии.
  */
 @Entity
 @Table(name = "student_groups")
 @NoArgsConstructor
 @Data
+@EqualsAndHashCode(of = "id")
 public class Group {
 
   @Id

@@ -7,9 +7,13 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -43,4 +47,25 @@ public class Lecture {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "teacher_id")
   private Teacher teacher;
+
+  /**
+   * Шаблон циклического расписания, из которого сгенерирована лекция (опционально — лекция может
+   * быть создана и вручную). См. TARGET.md, раздел «Что это означает для будущих этапов».
+   */
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "source_pair_id")
+  private Pair sourcePair;
+
+  /**
+   * Группы, для которых читается эта лекция — многие-ко-многим, как и у {@link Pair}: поточная
+   * лекция ссылается сразу на несколько групп, а не дублируется по числу групп. См. TARGET.md,
+   * раздел «Поток: одна пара — несколько групп».
+   */
+  @ManyToMany(fetch = FetchType.LAZY)
+  @JoinTable(
+      name = "lecture_groups",
+      joinColumns = @JoinColumn(name = "lecture_id"),
+      inverseJoinColumns = @JoinColumn(name = "group_id")
+  )
+  private Set<Group> groups = new HashSet<>();
 }
