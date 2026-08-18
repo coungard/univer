@@ -88,12 +88,12 @@
 
 | Задача | Модуль | Результат |
 |---|---|---|
-| DTO + Mapper + Service/Impl + Controller | `StudyYear` | Курс обучения 1..N, привязан к `Program` (N = `Program.durationOfStudy.years`) |
-| DTO + Mapper + Service/Impl + Controller | `Semester` | Осенний/весенний, привязан к `StudyYear`, хранит `startDate` для расчёта чётности недели |
-| DTO + Mapper + Service/Impl + Controller | `Group` | Студенческая группа, привязана к `Semester`; название — свободная строка (напр. «У532 КСиТ»), связи — источник истины, не текст |
-| Миграция + связь | `students` | Добавить nullable `group_id` в таблицу `students`, `Student` получает опциональную связь с `Group` |
-| DTO + Mapper + Service/Impl + Controller | `WeekScheduleCycle` + `Pair` | Циклический шаблон расписания группы: нечётная/чётная неделя × Пн–Пт, `Pair` ссылается на `Course` и опционально на `Teacher` |
-| Тесты сервисов | `StudyYear`, `Semester`, `Group`, `WeekScheduleCycle` | Testcontainers-тесты по образцу существующих сервисов |
+| DTO + Mapper + Service/Impl + Controller | `StudyYear` | issue #33 — курс обучения 1..N, привязан к `Program` (N = `Program.durationOfStudy.years`) |
+| DTO + Mapper + Service/Impl + Controller | `Semester` | issue #34 — осенний/весенний, привязан к `StudyYear`, хранит `startDate` для расчёта чётности недели |
+| DTO + Mapper + Service/Impl + Controller | `Group` | issue #35 — студенческая группа, привязана к `Semester`; название — свободная строка (напр. «У532 КСиТ»), связи — источник истины, не текст |
+| Миграция + связь | `students` | issue #35 — добавить nullable `group_id` в таблицу `students`, `Student` получает опциональную связь с `Group` |
+| DTO + Mapper + Service/Impl + Controller | `WeekScheduleCycle` + `Pair` | issue #36 — циклический шаблон расписания группы: нечётная/чётная неделя × Пн–Пт, `Pair` ссылается на `Course` и опционально на `Teacher` |
+| Тесты сервисов | `StudyYear`, `Semester`, `Group`, `WeekScheduleCycle` | issue #37 — Testcontainers-тесты по образцу существующих сервисов |
 
 ### 4. Лекции
 
@@ -105,9 +105,9 @@
 
 | Задача | Модуль | Результат |
 |---|---|---|
-| DTO + Mapper + Service/Impl + Controller | `Lecture` | CRUD; расписание (`scheduledTime`, `durationMinutes`); опция создания на дату из шаблона `Pair` |
+| DTO + Mapper + Service/Impl + Controller | `Lecture` | issue #30 — CRUD; расписание (`scheduledTime`, `durationMinutes`); опция создания на дату из шаблона `Pair` |
 | Решить вопрос прав доступа | `security.Role` | issue #31 — ввести `ROLE_TEACHER` в `@PreAuthorize` либо явно закрепить создание курсов/лекций за ADMIN |
-| Тесты сервисов | `Lecture` | Покрытие CRUD, связи с Course/Teacher, генерации из `Pair` |
+| Тесты сервисов | `Lecture` | issue #32 — покрытие CRUD, связи с Course/Teacher, генерации из `Pair` |
 
 ### 5. Зачисление и посещаемость
 
