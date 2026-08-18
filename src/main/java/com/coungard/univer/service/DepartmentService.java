@@ -2,16 +2,17 @@ package com.coungard.univer.service;
 
 import com.coungard.univer.dto.DepartmentDto;
 
-import java.util.List;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface DepartmentService {
 
   DepartmentDto createDepartment(DepartmentDto departmentDto);
 
-  List<DepartmentDto> getDepartmentsByFaculty(UUID facultyId);
+  Page<DepartmentDto> getDepartmentsByFaculty(UUID facultyId, Pageable pageable);
 
-  List<DepartmentDto> getDepartmentsByUniversity(UUID facultyId);
+  Page<DepartmentDto> getDepartmentsByUniversity(UUID facultyId, Pageable pageable);
 
   DepartmentDto getDepartmentById(UUID id);
 

@@ -3,12 +3,14 @@ package com.coungard.univer.service.impl;
 import com.coungard.univer.dto.TeacherDto;
 import com.coungard.univer.dto.registration.RegisterData;
 import com.coungard.univer.dto.registration.RegisterTeacherRequest;
+import com.coungard.univer.entity.Department;
 import com.coungard.univer.entity.Faculty;
 import com.coungard.univer.entity.Person;
 import com.coungard.univer.entity.Teacher;
 import com.coungard.univer.exception.ResourceNotFoundException;
 import com.coungard.univer.exception.ValidationException;
 import com.coungard.univer.mapper.TeacherMapper;
+import com.coungard.univer.repository.DepartmentRepository;
 import com.coungard.univer.repository.FacultyRepository;
 import com.coungard.univer.repository.TeacherRepository;
 import com.coungard.univer.security.KeycloakAdminService;
@@ -29,6 +31,7 @@ public class TeacherServiceImpl implements TeacherService {
 
   private final TeacherRepository teacherRepository;
   private final FacultyRepository facultyRepository;
+  private final DepartmentRepository departmentRepository;
   private final KeycloakAdminService keycloakAdminService;
   private final TeacherValidator teacherValidator;
   private final TeacherMapper teacherMapper;
@@ -50,8 +53,9 @@ public class TeacherServiceImpl implements TeacherService {
   public TeacherDto registerTeacher(RegisterTeacherRequest request) {
     teacherValidator.validateRegisterTeacher(request);
 
-    Faculty faculty = facultyRepository.findById(request.getDepartmentId())
-        .orElseThrow(() -> new ResourceNotFoundException("Faculty not found"));
+    Department department = departmentRepository.findById(request.getDepartmentId())
+        .orElseThrow(() -> new ResourceNotFoundException("Department not found"));
+    Faculty faculty = department.getFaculty();
 
     String keycloakId = keycloakAdminService.createUser(RegisterData.builder()
         .username(request.getUsername())
@@ -60,7 +64,7 @@ public class TeacherServiceImpl implements TeacherService {
         .firstname(request.getFirstname())
         .lastname(request.getLastname())
         .build());
-    keycloakAdminService.assignRole(keycloakId, Role.ROLE_STUDENT);
+    keycloakAdminService.assignRole(keycloakId, Role.ROLE_TEACHER);
 
     Teacher teacher = teacherMapper.fromRegisterToEntity(request);
     teacher.setFaculty(faculty);

@@ -8,13 +8,15 @@ import com.coungard.univer.dto.AddressDto;
 import com.coungard.univer.dto.UniversityDto;
 import com.coungard.univer.exception.ResourceNotFoundException;
 import com.coungard.univer.repository.UniversityRepository;
-import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -120,11 +122,12 @@ class UniversityServiceTest {
     universityService.createUniversity(oxfordDto);
 
     // When
-    List<UniversityDto> all = universityService.getAllUniversities();
+    Pageable pageable = PageRequest.of(0, 10);
+    Page<UniversityDto> all = universityService.getUniversities(pageable);
 
     // Then
-    assertThat(all).hasSize(2);
-    assertThat(all)
+    assertThat(all.getContent()).hasSize(2);
+    assertThat(all.getContent())
         .extracting(UniversityDto::name)
         .containsExactlyInAnyOrder("Harvard", "Oxford");
   }

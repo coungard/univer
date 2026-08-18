@@ -11,6 +11,9 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.ErrorResponse;
@@ -21,26 +24,30 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/universities")
 @RequiredArgsConstructor
-@Tag(name = "Universities", description = "CRUD операции для университетов")
+@Tag(name = "Universities", description = "CRUD и поиск университетов с пагинацией")
 @SecurityRequirement(name = "bearerAuth") // Подключаем Bearer Token
 public class UniversityController {
 
   private final UniversityService universityService;
 
   @GetMapping
-  @Operation(summary = "Получить все университеты")
-  public ResponseEntity<List<UniversityDto>> getAllUniversities() {
-    List<UniversityDto> universities = universityService.getAllUniversities();
+  @Operation(summary = "Получить университеты с пагинацией")
+  public ResponseEntity<Page<UniversityDto>> getUniversities(
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "10") int size) {
+
+    Pageable pageable = PageRequest.of(page, size);
+    Page<UniversityDto> universities = universityService.getUniversities(pageable);
     return ResponseEntity.ok(universities);
   }
 
