@@ -8,18 +8,31 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.coungard.univer.UniverApplication;
+import com.coungard.univer.dto.EducationForm;
+import com.coungard.univer.dto.SemesterType;
 import com.coungard.univer.dto.StudentDto;
 import com.coungard.univer.dto.registration.RegisterData;
 import com.coungard.univer.dto.registration.RegisterStudentRequest;
+import com.coungard.univer.entity.Faculty;
+import com.coungard.univer.entity.Group;
 import com.coungard.univer.entity.Person;
+import com.coungard.univer.entity.Program;
+import com.coungard.univer.entity.Semester;
 import com.coungard.univer.entity.Student;
+import com.coungard.univer.entity.StudyYear;
 import com.coungard.univer.entity.University;
 import com.coungard.univer.exception.ResourceNotFoundException;
+import com.coungard.univer.repository.FacultyRepository;
+import com.coungard.univer.repository.GroupRepository;
+import com.coungard.univer.repository.ProgramRepository;
+import com.coungard.univer.repository.SemesterRepository;
 import com.coungard.univer.repository.StudentRepository;
+import com.coungard.univer.repository.StudyYearRepository;
 import com.coungard.univer.repository.UniversityRepository;
 import com.coungard.univer.security.KeycloakAdminService;
 import com.coungard.univer.security.Role;
 import java.time.LocalDate;
+import java.time.Period;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -62,6 +75,21 @@ class StudentServiceTest {
   @Autowired
   private UniversityRepository universityRepository;
 
+  @Autowired
+  private FacultyRepository facultyRepository;
+
+  @Autowired
+  private ProgramRepository programRepository;
+
+  @Autowired
+  private StudyYearRepository studyYearRepository;
+
+  @Autowired
+  private SemesterRepository semesterRepository;
+
+  @Autowired
+  private GroupRepository groupRepository;
+
   @MockBean
   private KeycloakAdminService keycloakAdminService;
 
@@ -70,6 +98,11 @@ class StudentServiceTest {
   @BeforeEach
   void setUp() {
     studentRepository.deleteAll();
+    groupRepository.deleteAll();
+    semesterRepository.deleteAll();
+    studyYearRepository.deleteAll();
+    programRepository.deleteAll();
+    facultyRepository.deleteAll();
     universityRepository.deleteAll();
 
     University university = new University();
@@ -143,6 +176,50 @@ class StudentServiceTest {
     assertThat(updated.firstname()).isEqualTo("Петр");
     assertThat(updated.lastname()).isEqualTo("Петров");
     assertThat(updated.email()).isEqualTo("petr@example.com");
+  }
+
+  @Test
+  void shouldAssignGroupToStudent() {
+    // Given
+    StudentDto original = createTestStudent("ivan", "Иван", "Иванов", LocalDate.now());
+    Group group = createTestGroup("У532 КСиТ");
+
+    StudentDto updateDto = StudentDto.builder()
+        .id(original.id())
+        .firstname(original.firstname())
+        .lastname(original.lastname())
+        .email(original.email())
+        .enrollmentDate(original.enrollmentDate())
+        .universityId(universityId)
+        .groupId(group.getId())
+        .build();
+
+    // When
+    StudentDto updated = studentService.updateStudent(original.id(), updateDto);
+
+    // Then
+    assertThat(updated.groupId()).isEqualTo(group.getId());
+  }
+
+  @Test
+  void shouldThrowExceptionWhenUpdatingStudentWithNonExistentGroup() {
+    // Given
+    StudentDto original = createTestStudent("ivan", "Иван", "Иванов", LocalDate.now());
+
+    StudentDto updateDto = StudentDto.builder()
+        .id(original.id())
+        .firstname(original.firstname())
+        .lastname(original.lastname())
+        .email(original.email())
+        .enrollmentDate(original.enrollmentDate())
+        .universityId(universityId)
+        .groupId(UUID.randomUUID())
+        .build();
+
+    // When & Then
+    assertThatThrownBy(() -> studentService.updateStudent(original.id(), updateDto))
+        .isInstanceOf(ResourceNotFoundException.class)
+        .hasMessageContaining("Group not found");
   }
 
   @Test
@@ -221,5 +298,38 @@ class StudentServiceTest {
     University university = new University();
     university.setName("Other University");
     return universityRepository.save(university);
+  }
+
+  private Group createTestGroup(String name) {
+    Faculty faculty = Faculty.builder()
+        .name("Faculty of Computer Science")
+        .university(universityRepository.getReferenceById(universityId))
+        .build();
+    UUID facultyId = facultyRepository.save(faculty).getId();
+
+    Program program = new Program();
+    program.setFacultyId(facultyId);
+    program.setCode("09.03.04");
+    program.setName("Software Engineering");
+    program.setEducationLevel("Bachelor");
+    program.setEducationForm(EducationForm.FULL_TIME);
+    program.setDurationOfStudy(Period.ofYears(4));
+    UUID programId = programRepository.save(program).getId();
+
+    StudyYear studyYear = new StudyYear();
+    studyYear.setProgram(programRepository.getReferenceById(programId));
+    studyYear.setYearNumber(5);
+    UUID studyYearId = studyYearRepository.save(studyYear).getId();
+
+    Semester semester = new Semester();
+    semester.setStudyYear(studyYearRepository.getReferenceById(studyYearId));
+    semester.setType(SemesterType.AUTUMN);
+    semester.setStartDate(LocalDate.of(2026, 9, 1));
+    UUID semesterId = semesterRepository.save(semester).getId();
+
+    Group group = new Group();
+    group.setSemester(semesterRepository.getReferenceById(semesterId));
+    group.setName(name);
+    return groupRepository.save(group);
   }
 }

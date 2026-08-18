@@ -37,6 +37,8 @@ public record StudentDto(
         LocalDate enrollmentDate,
 
         @NotNull(message = "ID университета обязателен")
-        UUID universityId
+        UUID universityId,
+
+        UUID groupId
 ) {
 }

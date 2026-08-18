@@ -54,6 +54,10 @@ public class Student implements Auditable {
   @JoinColumn(name = "university_id", nullable = false)
   private University university;
 
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "group_id")
+  private Group group;
+
   @OneToOne(cascade = CascadeType.ALL)
   @JoinColumn(name = "person_id", referencedColumnName = "id")
   private Person person;

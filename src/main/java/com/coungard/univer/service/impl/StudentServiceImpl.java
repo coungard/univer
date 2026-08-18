@@ -4,10 +4,12 @@ import com.coungard.univer.dto.StudentDto;
 import com.coungard.univer.mapper.StudentMapper;
 import com.coungard.univer.dto.registration.RegisterData;
 import com.coungard.univer.dto.registration.RegisterStudentRequest;
+import com.coungard.univer.entity.Group;
 import com.coungard.univer.entity.Person;
 import com.coungard.univer.entity.Student;
 import com.coungard.univer.entity.University;
 import com.coungard.univer.exception.ResourceNotFoundException;
+import com.coungard.univer.repository.GroupRepository;
 import com.coungard.univer.repository.StudentRepository;
 import com.coungard.univer.repository.UniversityRepository;
 import com.coungard.univer.security.KeycloakAdminService;
@@ -29,6 +31,7 @@ public class StudentServiceImpl implements StudentService {
 
   private final StudentRepository studentRepository;
   private final UniversityRepository universityRepository;
+  private final GroupRepository groupRepository;
   private final StudentMapper studentMapper;
   private final StudentValidator studentValidator;
 
@@ -118,6 +121,14 @@ public class StudentServiceImpl implements StudentService {
     University university = universityRepository.findById(studentDto.universityId())
         .orElseThrow(() -> new ResourceNotFoundException("University not found with id: " + studentDto.universityId()));
     existing.setUniversity(university);
+
+    if (studentDto.groupId() == null) {
+      existing.setGroup(null);
+    } else {
+      Group group = groupRepository.findById(studentDto.groupId())
+          .orElseThrow(() -> new ResourceNotFoundException("Group not found with id: " + studentDto.groupId()));
+      existing.setGroup(group);
+    }
 
     Student updated = studentRepository.save(existing);
     return studentMapper.toDto(updated);
