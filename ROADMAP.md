@@ -26,7 +26,7 @@
 | `StudyYear` | ❌ Не спроектировано | Целевая сущность из `TARGET.md` — курс обучения (1..N, N = `Program.durationOfStudy.years`), в коде не заведена |
 | `Semester` | ❌ Не спроектировано | Целевая сущность из `TARGET.md` — осенний/весенний, хранит `startDate` для расчёта чётности недели |
 | `Group` | ❌ Не спроектировано | Целевая сущность из `TARGET.md` — студенческая группа; `Student` пока не имеет связи с группой |
-| `WeekScheduleCycle` / `Pair` | ❌ Не спроектировано | Целевая сущность из `TARGET.md` — циклический шаблон расписания группы (нечётная/чётная неделя, Пн–Пт) |
+| `WeekScheduleCycle` / `Pair` | ❌ Не спроектировано | Целевая сущность из `TARGET.md` — циклическое расписание семестра (нечётная/чётная неделя, Пн–Пт); `Pair` связан с `Group` многие-ко-многим (поток) |
 | `Lecture` | ❌ Нет API | Есть entity, repository и таблица в схеме — нет DTO/service/controller. По `TARGET.md` должна уметь порождаться из `Pair` на конкретную дату, не только создаваться вручную |
 | `Enrollment` | ❌ Нет API | Есть entity, repository и таблица в схеме — нет DTO/service/controller |
 | `LectureAttendance` | ❌ Нет API | Есть entity, repository и таблица в схеме — нет DTO/service/controller |
@@ -79,12 +79,13 @@
 
 ### 3. Циклическое расписание
 
-*StudyYear → Semester → Group → WeekScheduleCycle/Pair*
+*StudyYear → Semester → WeekScheduleCycle/Pair, Group — многие-ко-многим с Pair*
 
 Целевая модель зафиксирована в `TARGET.md`. Стоит перед `Lecture` намеренно: `Lecture` должна уметь
-порождаться из шаблона `Pair` на конкретную дату, а для этого сначала нужны `Group` (кому расписание
-принадлежит) и `Semester` (откуда считать чётность недели). Если сделать `Lecture` раньше этого этапа,
-её потом придётся переделывать под `Group`.
+порождаться из шаблона `Pair` на конкретную дату, а для этого сначала нужны `Semester` (откуда считать
+чётность недели — `WeekScheduleCycle` принадлежит семестру, не отдельной группе) и `Group` (с кем связан
+`Pair`, причём один `Pair` может быть связан сразу с несколькими группами — поточная лекция). Если сделать
+`Lecture` раньше этого этапа, её потом придётся переделывать под `Group`.
 
 | Задача | Модуль | Результат |
 |---|---|---|
@@ -92,8 +93,8 @@
 | DTO + Mapper + Service/Impl + Controller | `Semester` | issue #34 — осенний/весенний, привязан к `StudyYear`, хранит `startDate` для расчёта чётности недели |
 | DTO + Mapper + Service/Impl + Controller | `Group` | issue #35 — студенческая группа, привязана к `Semester`; название — свободная строка (напр. «У532 КСиТ»), связи — источник истины, не текст |
 | Миграция + связь | `students` | issue #35 — добавить nullable `group_id` в таблицу `students`, `Student` получает опциональную связь с `Group` |
-| DTO + Mapper + Service/Impl + Controller | `WeekScheduleCycle` + `Pair` | issue #36 — циклический шаблон расписания группы: нечётная/чётная неделя × Пн–Пт, `Pair` ссылается на `Course` и опционально на `Teacher` |
-| Тесты сервисов | `StudyYear`, `Semester`, `Group`, `WeekScheduleCycle` | issue #37 — Testcontainers-тесты по образцу существующих сервисов |
+| DTO + Mapper + Service/Impl + Controller | `WeekScheduleCycle` + `Pair` | issue #36 — циклическое расписание семестра: нечётная/чётная неделя × Пн–Пт; `Pair` ссылается на `Course` и опционально на `Teacher`, а с `Group` связан многие-ко-многим (join-таблица) — лекция может идти потоком нескольким группам разом |
+| Тесты сервисов | `StudyYear`, `Semester`, `Group`, `WeekScheduleCycle` | issue #37 — Testcontainers-тесты по образцу существующих сервисов, включая сценарий потока (один `Pair` — несколько `Group`) |
 
 ### 4. Лекции
 
