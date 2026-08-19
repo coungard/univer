@@ -28,13 +28,11 @@ springdoc:
   swagger-ui:
     oauth:
       client-id: univer-client
+      client-secret: univer-client-secret
       realm: univer-realm
       app-name: University API
-      use-pkce-with-authorization-code-grant: true
       scope-separator: " "
       scopes: openid
-      # Опционально:
-      oauth2-redirect-url: http://localhost:8023/swagger-ui/oauth2-redirect.html
 
 # Keycloak Config
 keycloak:
