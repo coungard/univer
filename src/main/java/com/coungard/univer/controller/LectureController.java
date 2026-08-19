@@ -79,7 +79,7 @@ public class LectureController {
 
   @Operation(summary = "Создать лекцию вручную")
   @PostMapping
-  @PreAuthorize("hasRole('ADMIN')")
+  @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER')")
   public ResponseEntity<LectureDto> createLecture(@Valid @RequestBody LectureDto lectureDto) {
     LectureDto saved = lectureService.createLecture(lectureDto);
 
@@ -98,7 +98,7 @@ public class LectureController {
           + "дата должна соответствовать дню недели и чётности недели пары"
   )
   @PostMapping("/generate")
-  @PreAuthorize("hasRole('ADMIN')")
+  @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER')")
   public ResponseEntity<LectureDto> generateFromPair(@Valid @RequestBody GenerateLectureRequest request) {
     LectureDto saved = lectureService.generateFromPair(request);
 
@@ -113,7 +113,7 @@ public class LectureController {
 
   @Operation(summary = "Обновить лекцию")
   @PutMapping("/{id}")
-  @PreAuthorize("hasRole('ADMIN')")
+  @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER')")
   public ResponseEntity<LectureDto> updateLecture(
       @PathVariable UUID id,
       @Valid @RequestBody LectureDto lectureDto) {
@@ -124,7 +124,7 @@ public class LectureController {
 
   @Operation(summary = "Удалить лекцию")
   @DeleteMapping("/{id}")
-  @PreAuthorize("hasRole('ADMIN')")
+  @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER')")
   public ResponseEntity<Void> deleteLecture(@PathVariable UUID id) {
     lectureService.deleteLecture(id);
     return ResponseEntity.noContent().build();

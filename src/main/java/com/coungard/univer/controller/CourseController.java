@@ -66,7 +66,7 @@ public class CourseController {
 
   @Operation(summary = "Создать курс")
   @PostMapping
-  @PreAuthorize("hasRole('ADMIN')")
+  @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER')")
   public ResponseEntity<CourseDto> createCourse(@Valid @RequestBody CourseDto courseDto) {
     CourseDto saved = courseService.createCourse(courseDto);
 
@@ -81,7 +81,7 @@ public class CourseController {
 
   @Operation(summary = "Обновить курс")
   @PutMapping("/{id}")
-  @PreAuthorize("hasRole('ADMIN')")
+  @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER')")
   public ResponseEntity<CourseDto> updateCourse(
       @PathVariable UUID id,
       @Valid @RequestBody CourseDto courseDto) {
@@ -92,7 +92,7 @@ public class CourseController {
 
   @Operation(summary = "Удалить курс")
   @DeleteMapping("/{id}")
-  @PreAuthorize("hasRole('ADMIN')")
+  @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER')")
   public ResponseEntity<Void> deleteCourse(@PathVariable UUID id) {
     courseService.deleteCourse(id);
     return ResponseEntity.noContent().build();
