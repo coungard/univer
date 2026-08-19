@@ -1,7 +1,10 @@
 package com.coungard.univer.entity;
 
+import com.coungard.univer.dto.EnrollmentStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
@@ -21,24 +24,25 @@ import lombok.NoArgsConstructor;
 public class Enrollment {
 
   @Id
-  @Column(name = "student_id", insertable = false, updatable = false)
+  @Column(name = "student_id")
   private UUID studentId;
 
   @Id
-  @Column(name = "course_id", insertable = false, updatable = false)
+  @Column(name = "course_id")
   private UUID courseId;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "student_id")
+  @JoinColumn(name = "student_id", insertable = false, updatable = false)
   private Student student;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "course_id")
+  @JoinColumn(name = "course_id", insertable = false, updatable = false)
   private Course course;
 
   @Column(name = "enrolled_at")
   private LocalDateTime enrolledAt;
 
+  @Enumerated(EnumType.STRING)
   @Column(length = 20)
-  private String status;
+  private EnrollmentStatus status;
 }

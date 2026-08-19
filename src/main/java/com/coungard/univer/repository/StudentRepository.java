@@ -1,6 +1,7 @@
 package com.coungard.univer.repository;
 
 import com.coungard.univer.entity.Student;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -12,4 +13,6 @@ public interface StudentRepository extends JpaRepository<Student, UUID>, JpaSpec
   boolean existsByPersonEmail(String email);
 
   boolean existsByPersonUsername(String username);
+
+  List<Student> findByGroupId(UUID groupId);
 }

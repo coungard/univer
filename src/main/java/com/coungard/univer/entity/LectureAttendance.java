@@ -20,19 +20,19 @@ import lombok.NoArgsConstructor;
 public class LectureAttendance {
 
   @Id
-  @Column(name = "student_id", insertable = false, updatable = false)
+  @Column(name = "student_id")
   private UUID studentId;
 
   @Id
-  @Column(name = "lecture_id", insertable = false, updatable = false)
+  @Column(name = "lecture_id")
   private UUID lectureId;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "student_id")
+  @JoinColumn(name = "student_id", insertable = false, updatable = false)
   private Student student;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "lecture_id")
+  @JoinColumn(name = "lecture_id", insertable = false, updatable = false)
   private Lecture lecture;
 
   private boolean attended = true;
