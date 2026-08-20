@@ -48,6 +48,10 @@ public class Lecture {
   @JoinColumn(name = "teacher_id")
   private Teacher teacher;
 
+  /** Аудитория — свободная строка, при генерации из {@link Pair} копируется из {@code Pair.room}. */
+  @Column(name = "room", length = 32)
+  private String room;
+
   /**
    * Шаблон циклического расписания, из которого сгенерирована лекция (опционально — лекция может
    * быть создана и вручную). См. TARGET.md, раздел «Что это означает для будущих этапов».

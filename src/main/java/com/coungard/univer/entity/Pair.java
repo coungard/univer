@@ -67,6 +67,13 @@ public class Pair {
   @JoinColumn(name = "teacher_id")
   private Teacher teacher;
 
+  /**
+   * Аудитория — свободная строка (например, "125"), не отдельная сущность (см. TARGET.md, где
+   * {@code Room} задумана как полноценная связь {@code Pair }o--o| Room}). Опциональна.
+   */
+  @Column(name = "room", length = 32)
+  private String room;
+
   @ManyToMany(fetch = FetchType.LAZY)
   @JoinTable(
       name = "pair_groups",

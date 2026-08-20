@@ -27,6 +27,8 @@ public record LectureDto(
 
     UUID teacherId,
 
+    String room,
+
     /** Заполняется автоматически при генерации из шаблона Pair — не для ручного заполнения. */
     UUID sourcePairId,
 

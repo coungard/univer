@@ -110,6 +110,7 @@ public class PairServiceImpl implements PairService {
     existing.setPairNumber(pairDto.pairNumber());
     existing.setStartTime(pairDto.startTime());
     existing.setEndTime(pairDto.endTime());
+    existing.setRoom(pairDto.room());
     existing.setGroups(resolveGroups(pairDto.groupIds()));
 
     Pair updated = pairRepository.save(existing);

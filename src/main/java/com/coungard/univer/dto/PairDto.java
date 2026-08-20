@@ -37,6 +37,8 @@ public record PairDto(
 
     UUID teacherId,
 
+    String room,
+
     @NotEmpty(message = "Пара должна быть привязана хотя бы к одной группе")
     Set<UUID> groupIds
 ) {
