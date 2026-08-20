@@ -15,7 +15,7 @@ public class CourseMapper {
         .id(course.getId())
         .title(course.getTitle())
         .description(course.getDescription())
-        .departmentId(course.getDepartment().getId())
+        .departmentId(course.getDepartment() != null ? course.getDepartment().getId() : null)
         .teacherId(course.getTeacher() != null ? course.getTeacher().getId() : null)
         .build();
   }
