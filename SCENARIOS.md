@@ -159,3 +159,137 @@ curl -s "http://localhost:8023/api/v1/groups/semester/96ba5814-c675-4bc4-9831-39
 дальнейшим сценариям Этапа 3–5: привязка `Student` к группе (`group_id`), циклическое расписание
 (`WeekScheduleCycle`/`Pair`), массовое зачисление группы на курс (`POST
 /api/v1/enrollments/group/{groupId}/course/{courseId}`, Этап 5).
+
+---
+
+## Сценарий 2: Регистрация студента и привязка к группе из Сценария 1
+
+**Цель:** зарегистрировать нового студента и привязать его к группе `РПиС-11`, созданной в Сценарии 1.
+
+Прогнан 20.08.2026 против живого приложения; все ID и тела ответов ниже — фактические, подтверждены
+прямым SQL-запросом к Postgres.
+
+### Исходные данные (уже есть в БД / из Сценария 1)
+
+| Сущность | Значение | ID |
+|---|---|---|
+| Университет | ДГТУ | `796c5ad4-52ba-482f-a3bb-31c5de38762d` |
+| Группа | РПиС-11 (Сценарий 1) | `30ddeb19-db99-435a-b3f3-207eb32a209e` |
+
+### Шаг 0. Получить access-токен ADMIN
+
+См. Сценарий 1, Шаг 0. Токен нужен только для Шага 2 (`PUT /students/{id}` требует роль `ADMIN`) — сама
+регистрация (Шаг 1) публична и токена не требует.
+
+### Шаг 1. Зарегистрировать студента
+
+`POST /api/v1/students/register` — публичный эндпоинт (`permitAll()` в `SecurityConfig`), доступен без
+токена. Регистрация создаёт пользователя в Keycloak (роль `ROLE_STUDENT`) и локальную сущность `Student`
+с тем же ID, что и Keycloak user ID (см. `CLAUDE.md`, «Флоу регистрации»).
+
+```bash
+curl -s -X POST "http://localhost:8023/api/v1/students/register" \
+  -H "Content-Type: application/json; charset=utf-8" \
+  -d '{
+        "username": "ivanov.i",
+        "firstname": "Иван",
+        "lastname": "Иванов",
+        "fullname": "Иванов Иван Иванович",
+        "email": "ivanov.i@dstu-student.ru",
+        "password": "P@ssw0rd123",
+        "enrollmentDate": "2026-08-15",
+        "universityId": "796c5ad4-52ba-482f-a3bb-31c5de38762d"
+      }'
+```
+
+> На Windows/Git Bash см. примечание про кодировку кириллицы у Шага 3 Сценария 1 — тот же приём
+> (`--data-binary @file` с явным UTF-8) применим и здесь.
+
+Фактический ответ (`201 Created`):
+
+```json
+{
+  "id": "a1164570-56b8-4138-9f9a-3c7b8a43a663",
+  "username": "ivanov.i",
+  "firstname": "Иван",
+  "lastname": "Иванов",
+  "fullname": "Иванов Иван Иванович",
+  "createdAt": "2026-08-20T08:53:28.861184800Z",
+  "updatedAt": "2026-08-20T08:53:28.861184800Z",
+  "email": "ivanov.i@dstu-student.ru",
+  "enrollmentDate": "2026-08-15",
+  "universityId": "796c5ad4-52ba-482f-a3bb-31c5de38762d",
+  "groupId": null
+}
+```
+
+> **Исправленный баг (20.08.2026).** `StudentMapper.toDto` не мапил `enrollmentDate` в `StudentDto` —
+> любой ответ со студентом (`register`/`GET`/`PUT`) отдавал `enrollmentDate: null`, хотя в БД значение
+> сохранялось верно. Это ломало естественный workflow «получить студента → переслать тело с добавленным
+> `groupId`»: наивный `PUT` в Шаге 2 падал `400 {"enrollmentDate":"Дата зачисления обязательна"}`,
+> потому что `StudentDto.enrollmentDate` помечено `@NotNull`. Исправлено — `StudentMapper.toDto` теперь
+> явно мапит `.enrollmentDate(student.getEnrollmentDate())`. Ответ выше — уже с исправлением; `groupId`
+> пока `null`, так как связь с группой выставляется отдельным шагом ниже.
+
+### Шаг 2. Привязать студента к группе
+
+Прямого эндпоинта «привязать студента к группе» нет — связь выставляется через `PUT /api/v1/students/{id}`
+(требует `hasRole('ADMIN')`) с полным телом `StudentDto`, где `groupId` — единственное новое поле;
+остальные поля берутся из ответа Шага 1. `PUT` — не PATCH: все `@NotNull`/`@NotBlank` поля `StudentDto`
+обязательны, включая `username` — хотя `StudentServiceImpl.updateStudent` его валидирует по DTO, но
+фактически не применяет к сущности (обновляются только `firstname`/`lastname`/`fullname`/`email`/
+`enrollmentDate`/`university`/`group`; логин менять через этот эндпоинт нельзя).
+
+```bash
+curl -s -X PUT "http://localhost:8023/api/v1/students/a1164570-56b8-4138-9f9a-3c7b8a43a663" \
+  -H "Authorization: Bearer <ACCESS_TOKEN>" \
+  -H "Content-Type: application/json; charset=utf-8" \
+  -d '{
+        "username": "ivanov.i",
+        "firstname": "Иван",
+        "lastname": "Иванов",
+        "fullname": "Иванов Иван Иванович",
+        "email": "ivanov.i@dstu-student.ru",
+        "enrollmentDate": "2026-08-15",
+        "universityId": "796c5ad4-52ba-482f-a3bb-31c5de38762d",
+        "groupId": "30ddeb19-db99-435a-b3f3-207eb32a209e"
+      }'
+```
+
+Фактический ответ (`200 OK`):
+
+```json
+{
+  "id": "a1164570-56b8-4138-9f9a-3c7b8a43a663",
+  "username": "ivanov.i",
+  "firstname": "Иван",
+  "lastname": "Иванов",
+  "fullname": "Иванов Иван Иванович",
+  "createdAt": "2026-08-20T08:53:28.861185Z",
+  "updatedAt": "2026-08-20T08:53:40.605967Z",
+  "email": "ivanov.i@dstu-student.ru",
+  "enrollmentDate": "2026-08-15",
+  "universityId": "796c5ad4-52ba-482f-a3bb-31c5de38762d",
+  "groupId": "30ddeb19-db99-435a-b3f3-207eb32a209e"
+}
+```
+
+### Шаг 3. Проверить результат
+
+`GET /api/v1/students/{id}` требует роль `STUDENT` (не `ADMIN`) — токеном ADMIN его не вызвать (403).
+Для проверки под ADMIN удобнее списковый эндпоинт:
+
+```bash
+curl -s "http://localhost:8023/api/v1/students?page=0&size=10" \
+  -H "Authorization: Bearer <ACCESS_TOKEN>"
+```
+
+В ответе у нужного студента `"groupId": "30ddeb19-db99-435a-b3f3-207eb32a209e"`.
+
+### Итог
+
+Зарегистрирован студент Иван Иванов (`ivanov.i`, `id = a1164570-56b8-4138-9f9a-3c7b8a43a663`) через
+`POST /students/register` (Keycloak-пользователь + локальная сущность с тем же ID) и привязан к группе
+`РПиС-11` из Сценария 1 через `PUT /students/{id}` с `groupId`. Заодно найден и исправлен баг маппинга
+`enrollmentDate` в `StudentMapper`, ломавший естественный round-trip «прочитать → дозаполнить → отправить»
+для любого клиента Student API.
