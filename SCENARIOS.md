@@ -1,10 +1,15 @@
 # Сценарии — Univer Backend
 
-> Пошаговые прикладные сценарии работы с REST API: реальные ID из dev-БД (`docker-compose.yml`,
-> Postgres на `5435`), запросы через `curl` к приложению на `http://localhost:8023`. Сценарий 1 реально
-> прогнан 20.08.2026 против живого приложения — все ID в примерах ответов ниже (`StudyYear`, `Semester`,
-> `Group`) настоящие, из dev-БД, а не выдуманные плейсхолдеры; каждая строка дополнительно подтверждена
-> прямым SQL-запросом (`docker exec postgres-univer psql`), не только ответом API.
+> Пошаговые прикладные сценарии работы с REST API: `curl`-запросы к приложению на `http://localhost:8023`
+> (Keycloak на `8082`, Postgres на `5435` — `docker-compose.yml`). ID сущностей, которые уже существуют в
+> dev-БД до начала сценария (`ДГТУ`, факультет, программа, кафедра, преподаватель — из
+> `V2__insert_universities_data.sql` / `V3__insert_teachers_data.sql`), настоящие. Каждый сценарий ниже
+> реально прогонялся и был проверен против живого приложения и Postgres 20.08.2026, но созданные им
+> данные (`StudyYear`, `Semester`, `Group`, `Student`, `WeekScheduleCycle`, `Course`, `Pair`, `Lecture`)
+> впоследствии удалены из dev-БД для чистоты — поэтому их ID в примерах ответов ниже заменены на моковые
+> плейсхолдеры (`11111111-...`, `22222222-...` и т.д.), не связанные с текущим состоянием БД. При
+> повторном прогоне сценария реальные ID в ответах API будут другими — сама механика (эндпоинты, поля,
+> порядок шагов, найденные по пути баги и особенности) проверена и актуальна.
 
 ---
 
@@ -61,11 +66,11 @@ curl -s -X POST "http://localhost:8023/api/v1/study-years" \
       }'
 ```
 
-Фактический ответ (`201 Created`):
+Пример ответа (`201 Created`):
 
 ```json
 {
-  "id": "86395c37-ed33-404d-be41-7680c3bf605e",
+  "id": "11111111-1111-1111-1111-111111111111",
   "programId": "0812c171-3317-4ee2-bc3c-cba404fd53d6",
   "yearNumber": 1
 }
@@ -78,18 +83,18 @@ curl -s -X POST "http://localhost:8023/api/v1/semesters" \
   -H "Authorization: Bearer <ACCESS_TOKEN>" \
   -H "Content-Type: application/json" \
   -d '{
-        "studyYearId": "86395c37-ed33-404d-be41-7680c3bf605e",
+        "studyYearId": "11111111-1111-1111-1111-111111111111",
         "type": "AUTUMN",
         "startDate": "2026-09-01"
       }'
 ```
 
-Фактический ответ (`201 Created`):
+Пример ответа (`201 Created`):
 
 ```json
 {
-  "id": "96ba5814-c675-4bc4-9831-3960edffeae4",
-  "studyYearId": "86395c37-ed33-404d-be41-7680c3bf605e",
+  "id": "22222222-2222-2222-2222-222222222222",
+  "studyYearId": "11111111-1111-1111-1111-111111111111",
   "type": "AUTUMN",
   "startDate": "2026-09-01"
 }
@@ -105,17 +110,17 @@ curl -s -X POST "http://localhost:8023/api/v1/groups" \
   -H "Authorization: Bearer <ACCESS_TOKEN>" \
   -H "Content-Type: application/json" \
   -d '{
-        "semesterId": "96ba5814-c675-4bc4-9831-3960edffeae4",
+        "semesterId": "22222222-2222-2222-2222-222222222222",
         "name": "У533 РПИС"
       }'
 ```
 
-Фактический ответ (`201 Created`):
+Пример ответа (`201 Created`):
 
 ```json
 {
-  "id": "30ddeb19-db99-435a-b3f3-207eb32a209e",
-  "semesterId": "96ba5814-c675-4bc4-9831-3960edffeae4",
+  "id": "33333333-3333-3333-3333-333333333333",
+  "semesterId": "22222222-2222-2222-2222-222222222222",
   "name": "У533 РПИС"
 }
 ```
@@ -129,7 +134,7 @@ curl -s -X POST "http://localhost:8023/api/v1/groups" \
 > UTF-8 (кодировка консоли/шелла, а не баг Spring/Jackson на стороне сервера). Обходной путь — сохранить
 > JSON в файл в явном UTF-8 и отправить через `--data-binary @file`:
 > ```bash
-> printf '{"semesterId": "96ba5814-c675-4bc4-9831-3960edffeae4", "name": "\xd0\xa3533 \xd0\xa0\xd0\x9f\xd0\x98\xd0\xa1"}' > group.json
+> printf '{"semesterId": "22222222-2222-2222-2222-222222222222", "name": "\xd0\xa3533 \xd0\xa0\xd0\x9f\xd0\x98\xd0\xa1"}' > group.json
 > curl -s -X POST "http://localhost:8023/api/v1/groups" \
 >   -H "Authorization: Bearer <ACCESS_TOKEN>" \
 >   -H "Content-Type: application/json; charset=utf-8" \
@@ -141,14 +146,14 @@ curl -s -X POST "http://localhost:8023/api/v1/groups" \
 ### Шаг 4. Проверить результат
 
 ```bash
-curl -s "http://localhost:8023/api/v1/groups/30ddeb19-db99-435a-b3f3-207eb32a209e" \
+curl -s "http://localhost:8023/api/v1/groups/33333333-3333-3333-3333-333333333333" \
   -H "Authorization: Bearer <ACCESS_TOKEN>"
 ```
 
 или список групп семестра:
 
 ```bash
-curl -s "http://localhost:8023/api/v1/groups/semester/96ba5814-c675-4bc4-9831-3960edffeae4?page=0&size=10" \
+curl -s "http://localhost:8023/api/v1/groups/semester/22222222-2222-2222-2222-222222222222?page=0&size=10" \
   -H "Authorization: Bearer <ACCESS_TOKEN>"
 ```
 
@@ -163,17 +168,17 @@ curl -s -X POST "http://localhost:8023/api/v1/groups" \
   -H "Authorization: Bearer <ACCESS_TOKEN>" \
   -H "Content-Type: application/json" \
   -d '{
-        "semesterId": "96ba5814-c675-4bc4-9831-3960edffeae4",
+        "semesterId": "22222222-2222-2222-2222-222222222222",
         "name": "У530 РПИС"
       }'
 ```
 
-Фактический ответ (`201 Created`):
+Пример ответа (`201 Created`):
 
 ```json
 {
-  "id": "0bbd0d2a-6510-4bc9-a336-17e7416227cb",
-  "semesterId": "96ba5814-c675-4bc4-9831-3960edffeae4",
+  "id": "44444444-4444-4444-4444-444444444444",
+  "semesterId": "22222222-2222-2222-2222-222222222222",
   "name": "У530 РПИС"
 }
 ```
@@ -181,23 +186,23 @@ curl -s -X POST "http://localhost:8023/api/v1/groups" \
 ### Шаг 6. Проверить обе группы
 
 ```bash
-curl -s "http://localhost:8023/api/v1/groups/semester/96ba5814-c675-4bc4-9831-3960edffeae4?page=0&size=10" \
+curl -s "http://localhost:8023/api/v1/groups/semester/22222222-2222-2222-2222-222222222222?page=0&size=10" \
   -H "Authorization: Bearer <ACCESS_TOKEN>"
 ```
 
-Фактический ответ (`200 OK`, сокращено до `content`):
+Пример ответа (`200 OK`, сокращено до `content`):
 
 ```json
 {
   "content": [
     {
-      "id": "30ddeb19-db99-435a-b3f3-207eb32a209e",
-      "semesterId": "96ba5814-c675-4bc4-9831-3960edffeae4",
+      "id": "33333333-3333-3333-3333-333333333333",
+      "semesterId": "22222222-2222-2222-2222-222222222222",
       "name": "У533 РПИС"
     },
     {
-      "id": "0bbd0d2a-6510-4bc9-a336-17e7416227cb",
-      "semesterId": "96ba5814-c675-4bc4-9831-3960edffeae4",
+      "id": "44444444-4444-4444-4444-444444444444",
+      "semesterId": "22222222-2222-2222-2222-222222222222",
       "name": "У530 РПИС"
     }
   ],
@@ -205,9 +210,9 @@ curl -s "http://localhost:8023/api/v1/groups/semester/96ba5814-c675-4bc4-9831-39
 }
 ```
 
-Обе группы — с одним и тем же `semesterId`; напрямую в БД это дополнительно подтверждено JOIN'ом
-`student_groups → semesters → study_years` — у обеих строк один и тот же `program_id`
-(`0812c171-3317-4ee2-bc3c-cba404fd53d6`).
+Обе группы — с одним и тем же `semesterId`; при реальном прогоне 20.08.2026 это дополнительно было
+подтверждено JOIN'ом `student_groups → semesters → study_years` в Postgres — у обеих строк был один и тот
+же `program_id` (`0812c171-3317-4ee2-bc3c-cba404fd53d6`).
 
 ### Итог
 
@@ -223,15 +228,16 @@ curl -s "http://localhost:8023/api/v1/groups/semester/96ba5814-c675-4bc4-9831-39
 
 **Цель:** зарегистрировать нового студента и привязать его к группе `У533 РПИС`, созданной в Сценарии 1.
 
-Прогнан 20.08.2026 против живого приложения; все ID и тела ответов ниже — фактические, подтверждены
-прямым SQL-запросом к Postgres.
+Сценарий прогонялся 20.08.2026 против живого приложения и был проверен прямым SQL-запросом к Postgres;
+созданные им данные с тех пор удалены из dev-БД — ID и тела ответов ниже приведены в том же формате, что
+вернул реальный прогон (моковые плейсхолдеры вместо удалённых реальных ID).
 
 ### Исходные данные (уже есть в БД / из Сценария 1)
 
 | Сущность | Значение | ID |
 |---|---|---|
 | Университет | ДГТУ | `796c5ad4-52ba-482f-a3bb-31c5de38762d` |
-| Группа | У533 РПИС (Сценарий 1) | `30ddeb19-db99-435a-b3f3-207eb32a209e` |
+| Группа | У533 РПИС (Сценарий 1) | `33333333-3333-3333-3333-333333333333` |
 
 ### Шаг 0. Получить access-токен ADMIN
 
@@ -262,11 +268,11 @@ curl -s -X POST "http://localhost:8023/api/v1/students/register" \
 > На Windows/Git Bash см. примечание про кодировку кириллицы у Шага 3 Сценария 1 — тот же приём
 > (`--data-binary @file` с явным UTF-8) применим и здесь.
 
-Фактический ответ (`201 Created`):
+Пример ответа (`201 Created`):
 
 ```json
 {
-  "id": "a1164570-56b8-4138-9f9a-3c7b8a43a663",
+  "id": "55555555-5555-5555-5555-555555555555",
   "username": "ivanov.i",
   "firstname": "Иван",
   "lastname": "Иванов",
@@ -298,7 +304,7 @@ curl -s -X POST "http://localhost:8023/api/v1/students/register" \
 `enrollmentDate`/`university`/`group`; логин менять через этот эндпоинт нельзя).
 
 ```bash
-curl -s -X PUT "http://localhost:8023/api/v1/students/a1164570-56b8-4138-9f9a-3c7b8a43a663" \
+curl -s -X PUT "http://localhost:8023/api/v1/students/55555555-5555-5555-5555-555555555555" \
   -H "Authorization: Bearer <ACCESS_TOKEN>" \
   -H "Content-Type: application/json; charset=utf-8" \
   -d '{
@@ -309,15 +315,15 @@ curl -s -X PUT "http://localhost:8023/api/v1/students/a1164570-56b8-4138-9f9a-3c
         "email": "ivanov.i@dstu-student.ru",
         "enrollmentDate": "2026-08-15",
         "universityId": "796c5ad4-52ba-482f-a3bb-31c5de38762d",
-        "groupId": "30ddeb19-db99-435a-b3f3-207eb32a209e"
+        "groupId": "33333333-3333-3333-3333-333333333333"
       }'
 ```
 
-Фактический ответ (`200 OK`):
+Пример ответа (`200 OK`):
 
 ```json
 {
-  "id": "a1164570-56b8-4138-9f9a-3c7b8a43a663",
+  "id": "55555555-5555-5555-5555-555555555555",
   "username": "ivanov.i",
   "firstname": "Иван",
   "lastname": "Иванов",
@@ -327,7 +333,7 @@ curl -s -X PUT "http://localhost:8023/api/v1/students/a1164570-56b8-4138-9f9a-3c
   "email": "ivanov.i@dstu-student.ru",
   "enrollmentDate": "2026-08-15",
   "universityId": "796c5ad4-52ba-482f-a3bb-31c5de38762d",
-  "groupId": "30ddeb19-db99-435a-b3f3-207eb32a209e"
+  "groupId": "33333333-3333-3333-3333-333333333333"
 }
 ```
 
@@ -341,11 +347,11 @@ curl -s "http://localhost:8023/api/v1/students?page=0&size=10" \
   -H "Authorization: Bearer <ACCESS_TOKEN>"
 ```
 
-В ответе у нужного студента `"groupId": "30ddeb19-db99-435a-b3f3-207eb32a209e"`.
+В ответе у нужного студента `"groupId": "33333333-3333-3333-3333-333333333333"`.
 
 ### Итог
 
-Зарегистрирован студент Иван Иванов (`ivanov.i`, `id = a1164570-56b8-4138-9f9a-3c7b8a43a663`) через
+Зарегистрирован студент Иван Иванов (`ivanov.i`, `id = 55555555-5555-5555-5555-555555555555`) через
 `POST /students/register` (Keycloak-пользователь + локальная сущность с тем же ID) и привязан к группе
 `У533 РПИС` из Сценария 1 через `PUT /students/{id}` с `groupId`. Заодно найден и исправлен баг маппинга
 `enrollmentDate` в `StudentMapper`, ломавший естественный round-trip «прочитать → дозаполнить → отправить»
@@ -359,8 +365,9 @@ curl -s "http://localhost:8023/api/v1/students?page=0&size=10" \
 неделя семестра), учебный курс «История России» в кабинете 125, преподаватель — Казакбиева Ольга
 Ивановна, поточно для обеих групп 1 курса РПиС из Сценария 1 (`У533 РПИС` и `У530 РПИС`).
 
-Прогнан 20.08.2026 против живого приложения; все ID и тела ответов ниже — фактические, подтверждены
-прямым SQL-запросом к Postgres.
+Сценарий прогонялся 20.08.2026 против живого приложения и был проверен прямым SQL-запросом к Postgres;
+созданные им данные с тех пор удалены из dev-БД — ID и тела ответов ниже приведены в том же формате, что
+вернул реальный прогон (моковые плейсхолдеры вместо удалённых реальных ID).
 
 > **Добавлено поле `room` (20.08.2026).** До этого сценария в модели не было понятия «аудитория» —
 > ни у `Pair`, ни у `Lecture` (см. `TARGET.md`, где `Room` зафиксирована как `❌ не реализовано —
@@ -374,9 +381,9 @@ curl -s "http://localhost:8023/api/v1/students?page=0&size=10" \
 
 | Сущность | Значение | ID |
 |---|---|---|
-| Семестр | Осенний 2026, 1 курс РПиС (Сценарий 1) | `96ba5814-c675-4bc4-9831-3960edffeae4` |
-| Группа | У533 РПИС (Сценарий 1) | `30ddeb19-db99-435a-b3f3-207eb32a209e` |
-| Группа | У530 РПИС (Сценарий 1) | `0bbd0d2a-6510-4bc9-a336-17e7416227cb` |
+| Семестр | Осенний 2026, 1 курс РПиС (Сценарий 1) | `22222222-2222-2222-2222-222222222222` |
+| Группа | У533 РПИС (Сценарий 1) | `33333333-3333-3333-3333-333333333333` |
+| Группа | У530 РПИС (Сценарий 1) | `44444444-4444-4444-4444-444444444444` |
 | Кафедра | Кафедра гуманитарных наук | `d76edda8-f468-484d-8fa4-e0a2f52c9092` |
 | Преподаватель | Казакбиева Ольга Ивановна, ст. преподаватель, к.и.н. | `d05c213f-efcf-4327-9e1c-65455fa68845` |
 
@@ -394,15 +401,15 @@ curl -s "http://localhost:8023/api/v1/students?page=0&size=10" \
 curl -s -X POST "http://localhost:8023/api/v1/week-schedule-cycles" \
   -H "Authorization: Bearer <ACCESS_TOKEN>" \
   -H "Content-Type: application/json" \
-  -d '{"semesterId": "96ba5814-c675-4bc4-9831-3960edffeae4"}'
+  -d '{"semesterId": "22222222-2222-2222-2222-222222222222"}'
 ```
 
-Фактический ответ (`201 Created`):
+Пример ответа (`201 Created`):
 
 ```json
 {
-  "id": "010d063c-8b30-4eb6-8232-b4ab3a4d2781",
-  "semesterId": "96ba5814-c675-4bc4-9831-3960edffeae4"
+  "id": "66666666-6666-6666-6666-666666666666",
+  "semesterId": "22222222-2222-2222-2222-222222222222"
 }
 ```
 
@@ -422,11 +429,11 @@ curl -s -X POST "http://localhost:8023/api/v1/courses" \
       }'
 ```
 
-Фактический ответ (`201 Created`):
+Пример ответа (`201 Created`):
 
 ```json
 {
-  "id": "50e81981-37c2-4675-b29e-2ecb4e5f3679",
+  "id": "77777777-7777-7777-7777-777777777777",
   "title": "История России",
   "departmentId": "d76edda8-f468-484d-8fa4-e0a2f52c9092",
   "teacherId": "d05c213f-efcf-4327-9e1c-65455fa68845"
@@ -445,40 +452,41 @@ curl -s -X POST "http://localhost:8023/api/v1/pairs" \
   -H "Authorization: Bearer <ACCESS_TOKEN>" \
   -H "Content-Type: application/json" \
   -d '{
-        "weekScheduleCycleId": "010d063c-8b30-4eb6-8232-b4ab3a4d2781",
+        "weekScheduleCycleId": "66666666-6666-6666-6666-666666666666",
         "dayOfWeek": "MONDAY",
         "weekParity": "ODD",
         "pairNumber": 1,
         "startTime": "08:00:00",
         "endTime": "09:30:00",
-        "courseId": "50e81981-37c2-4675-b29e-2ecb4e5f3679",
+        "courseId": "77777777-7777-7777-7777-777777777777",
         "teacherId": "d05c213f-efcf-4327-9e1c-65455fa68845",
         "room": "125",
-        "groupIds": ["30ddeb19-db99-435a-b3f3-207eb32a209e", "0bbd0d2a-6510-4bc9-a336-17e7416227cb"]
+        "groupIds": ["33333333-3333-3333-3333-333333333333", "44444444-4444-4444-4444-444444444444"]
       }'
 ```
 
-Фактический ответ (`201 Created`):
+Пример ответа (`201 Created`):
 
 ```json
 {
-  "id": "f9434354-7280-450b-9580-0447a56214f3",
-  "weekScheduleCycleId": "010d063c-8b30-4eb6-8232-b4ab3a4d2781",
+  "id": "88888888-8888-8888-8888-888888888888",
+  "weekScheduleCycleId": "66666666-6666-6666-6666-666666666666",
   "dayOfWeek": "MONDAY",
   "weekParity": "ODD",
   "pairNumber": 1,
   "startTime": "08:00:00",
   "endTime": "09:30:00",
-  "courseId": "50e81981-37c2-4675-b29e-2ecb4e5f3679",
+  "courseId": "77777777-7777-7777-7777-777777777777",
   "teacherId": "d05c213f-efcf-4327-9e1c-65455fa68845",
   "room": "125",
-  "groupIds": ["0bbd0d2a-6510-4bc9-a336-17e7416227cb", "30ddeb19-db99-435a-b3f3-207eb32a209e"]
+  "groupIds": ["44444444-4444-4444-4444-444444444444", "33333333-3333-3333-3333-333333333333"]
 }
 ```
 
-Сверено напрямую в БД: `pairs ⋈ courses ⋈ teachers ⋈ pair_groups ⋈ student_groups` — у обеих строк
-(по группе на строку из-за join) один и тот же `room = 125`, `course = 'История России'`,
-`teacher.person_id` = person Казакбиевой Ольги Ивановны.
+При реальном прогоне 20.08.2026 это дополнительно было сверено напрямую в БД:
+`pairs ⋈ courses ⋈ teachers ⋈ pair_groups ⋈ student_groups` — у обеих строк (по группе на строку из-за
+join) был один и тот же `room = 125`, `course = 'История России'`, `teacher.person_id` = person
+Казакбиевой Ольги Ивановны.
 
 ### Шаг 4. Сгенерировать лекцию из пары на конкретную дату (опционально, для проверки)
 
@@ -491,29 +499,29 @@ curl -s -X POST "http://localhost:8023/api/v1/pairs" \
 curl -s -X POST "http://localhost:8023/api/v1/lectures/generate" \
   -H "Authorization: Bearer <ACCESS_TOKEN>" \
   -H "Content-Type: application/json" \
-  -d '{"pairId": "f9434354-7280-450b-9580-0447a56214f3", "date": "2026-09-07"}'
+  -d '{"pairId": "88888888-8888-8888-8888-888888888888", "date": "2026-09-07"}'
 ```
 
-Фактический ответ (`201 Created`):
+Пример ответа (`201 Created`):
 
 ```json
 {
-  "id": "fa030f70-993b-4be4-bdd1-ecc5dc5548ef",
+  "id": "99999999-9999-9999-9999-999999999999",
   "title": "История России",
   "content": null,
   "scheduledTime": "2026-09-07T08:00:00",
   "durationMinutes": 90,
-  "courseId": "50e81981-37c2-4675-b29e-2ecb4e5f3679",
+  "courseId": "77777777-7777-7777-7777-777777777777",
   "teacherId": "d05c213f-efcf-4327-9e1c-65455fa68845",
   "room": "125",
-  "sourcePairId": "f9434354-7280-450b-9580-0447a56214f3",
-  "groupIds": ["0bbd0d2a-6510-4bc9-a336-17e7416227cb", "30ddeb19-db99-435a-b3f3-207eb32a209e"]
+  "sourcePairId": "88888888-8888-8888-8888-888888888888",
+  "groupIds": ["44444444-4444-4444-4444-444444444444", "33333333-3333-3333-3333-333333333333"]
 }
 ```
 
 ### Итог
 
-Создана пара `Pair` №1 «История России» (`id = f9434354-7280-450b-9580-0447a56214f3`): понедельник,
+Создана пара `Pair` №1 «История России» (`id = 88888888-8888-8888-8888-888888888888`): понедельник,
 нечётная неделя, 08:00–09:30, кабинет 125, преподаватель Казакбиева О.И., поточно для `У533 РПИС` и
 `У530 РПИС`. По пути в модель добавлено поле `room` (`Pair` и `Lecture`), которого раньше не было вовсе.
 Дополнительно продемонстрирована генерация конкретной лекции из этого шаблона на `2026-09-07` — `room`
