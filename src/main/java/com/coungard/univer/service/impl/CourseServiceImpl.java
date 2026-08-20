@@ -29,11 +29,8 @@ public class CourseServiceImpl implements CourseService {
   @Override
   @Transactional
   public CourseDto createCourse(CourseDto courseDto) {
-    Department department = departmentRepository.findById(courseDto.departmentId())
-        .orElseThrow(() -> new ResourceNotFoundException("Кафедра не найдена с ID: " + courseDto.departmentId()));
-
     Course course = courseMapper.toEntity(courseDto);
-    course.setDepartment(department);
+    course.setDepartment(resolveDepartment(courseDto.departmentId()));
     course.setTeacher(resolveTeacher(courseDto.teacherId()));
 
     Course saved = courseRepository.save(course);
@@ -66,12 +63,9 @@ public class CourseServiceImpl implements CourseService {
     Course existing = courseRepository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("Курс не найден с ID: " + id));
 
-    Department department = departmentRepository.findById(courseDto.departmentId())
-        .orElseThrow(() -> new ResourceNotFoundException("Кафедра не найдена с ID: " + courseDto.departmentId()));
-
     existing.setTitle(courseDto.title());
     existing.setDescription(courseDto.description());
-    existing.setDepartment(department);
+    existing.setDepartment(resolveDepartment(courseDto.departmentId()));
     existing.setTeacher(resolveTeacher(courseDto.teacherId()));
 
     Course updated = courseRepository.save(existing);
@@ -85,6 +79,14 @@ public class CourseServiceImpl implements CourseService {
       throw new ResourceNotFoundException("Курс не найден с ID: " + id);
     }
     courseRepository.deleteById(id);
+  }
+
+  private Department resolveDepartment(UUID departmentId) {
+    if (departmentId == null) {
+      return null;
+    }
+    return departmentRepository.findById(departmentId)
+        .orElseThrow(() -> new ResourceNotFoundException("Кафедра не найдена с ID: " + departmentId));
   }
 
   private Teacher resolveTeacher(UUID teacherId) {
