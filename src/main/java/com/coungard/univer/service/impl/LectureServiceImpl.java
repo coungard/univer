@@ -88,6 +88,7 @@ public class LectureServiceImpl implements LectureService {
     lecture.setDurationMinutes((int) ChronoUnit.MINUTES.between(pair.getStartTime(), pair.getEndTime()));
     lecture.setCourse(pair.getCourse());
     lecture.setTeacher(pair.getTeacher());
+    lecture.setRoom(pair.getRoom());
     lecture.setSourcePair(pair);
     lecture.setGroups(new HashSet<>(pair.getGroups()));
 
@@ -136,6 +137,7 @@ public class LectureServiceImpl implements LectureService {
     existing.setDurationMinutes(lectureDto.durationMinutes() != null ? lectureDto.durationMinutes() : 90);
     existing.setCourse(course);
     existing.setTeacher(resolveTeacher(lectureDto.teacherId()));
+    existing.setRoom(lectureDto.room());
     existing.setGroups(resolveGroups(lectureDto.groupIds()));
 
     Lecture updated = lectureRepository.save(existing);

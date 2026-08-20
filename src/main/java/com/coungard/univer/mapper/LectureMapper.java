@@ -21,6 +21,7 @@ public class LectureMapper {
         .durationMinutes(lecture.getDurationMinutes())
         .courseId(lecture.getCourse().getId())
         .teacherId(lecture.getTeacher() != null ? lecture.getTeacher().getId() : null)
+        .room(lecture.getRoom())
         .sourcePairId(lecture.getSourcePair() != null ? lecture.getSourcePair().getId() : null)
         .groupIds(lecture.getGroups().stream().map(Group::getId).collect(Collectors.toSet()))
         .build();
@@ -35,6 +36,7 @@ public class LectureMapper {
     lecture.setContent(dto.content());
     lecture.setScheduledTime(dto.scheduledTime());
     lecture.setDurationMinutes(dto.durationMinutes() != null ? dto.durationMinutes() : 90);
+    lecture.setRoom(dto.room());
     return lecture;
   }
 }

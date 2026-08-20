@@ -24,6 +24,7 @@ public class PairMapper {
         .endTime(pair.getEndTime())
         .courseId(pair.getCourse().getId())
         .teacherId(pair.getTeacher() != null ? pair.getTeacher().getId() : null)
+        .room(pair.getRoom())
         .groupIds(pair.getGroups().stream().map(Group::getId).collect(Collectors.toSet()))
         .build();
   }
@@ -38,6 +39,7 @@ public class PairMapper {
     pair.setPairNumber(dto.pairNumber());
     pair.setStartTime(dto.startTime());
     pair.setEndTime(dto.endTime());
+    pair.setRoom(dto.room());
     return pair;
   }
 }
