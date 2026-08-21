@@ -26,10 +26,10 @@ public record PairDto(
     @Min(value = 1, message = "Номер пары не может быть меньше 1")
     Integer pairNumber,
 
-    @NotNull(message = "Время начала пары обязательно")
+    // Опционально: если не задано, подставляется из справочника звонкового расписания
+    // (BellScheduleEntry) по университету курса и pairNumber — см. PairServiceImpl.resolveSchedule.
     LocalTime startTime,
 
-    @NotNull(message = "Время окончания пары обязательно")
     LocalTime endTime,
 
     @NotNull(message = "ID учебного курса обязателен")

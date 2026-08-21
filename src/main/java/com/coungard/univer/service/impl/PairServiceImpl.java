@@ -1,6 +1,7 @@
 package com.coungard.univer.service.impl;
 
 import com.coungard.univer.dto.PairDto;
+import com.coungard.univer.entity.BellScheduleEntry;
 import com.coungard.univer.entity.Course;
 import com.coungard.univer.entity.Group;
 import com.coungard.univer.entity.Pair;
@@ -9,6 +10,7 @@ import com.coungard.univer.entity.WeekScheduleCycle;
 import com.coungard.univer.exception.ResourceNotFoundException;
 import com.coungard.univer.exception.ValidationException;
 import com.coungard.univer.mapper.PairMapper;
+import com.coungard.univer.repository.BellScheduleEntryRepository;
 import com.coungard.univer.repository.CourseRepository;
 import com.coungard.univer.repository.GroupRepository;
 import com.coungard.univer.repository.PairRepository;
@@ -16,7 +18,9 @@ import com.coungard.univer.repository.TeacherRepository;
 import com.coungard.univer.repository.WeekScheduleCycleRepository;
 import com.coungard.univer.service.PairService;
 import java.time.DayOfWeek;
+import java.time.LocalTime;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +41,7 @@ public class PairServiceImpl implements PairService {
   private final CourseRepository courseRepository;
   private final TeacherRepository teacherRepository;
   private final GroupRepository groupRepository;
+  private final BellScheduleEntryRepository bellScheduleEntryRepository;
   private final PairMapper pairMapper;
 
   @Override
@@ -49,13 +54,15 @@ public class PairServiceImpl implements PairService {
     Course course = courseRepository.findById(pairDto.courseId())
         .orElseThrow(() -> new ResourceNotFoundException("Учебный курс не найден с ID: " + pairDto.courseId()));
 
-    validateSchedule(pairDto);
+    ResolvedSchedule schedule = resolveSchedule(pairDto, course);
 
     Pair pair = pairMapper.toEntity(pairDto);
     pair.setWeekScheduleCycle(cycle);
     pair.setCourse(course);
     pair.setTeacher(resolveTeacher(pairDto.teacherId()));
     pair.setGroups(resolveGroups(pairDto.groupIds()));
+    pair.setStartTime(schedule.startTime());
+    pair.setEndTime(schedule.endTime());
 
     Pair saved = pairRepository.save(pair);
     return pairMapper.toDto(saved);
@@ -100,7 +107,7 @@ public class PairServiceImpl implements PairService {
     Course course = courseRepository.findById(pairDto.courseId())
         .orElseThrow(() -> new ResourceNotFoundException("Учебный курс не найден с ID: " + pairDto.courseId()));
 
-    validateSchedule(pairDto);
+    ResolvedSchedule schedule = resolveSchedule(pairDto, course);
 
     existing.setWeekScheduleCycle(cycle);
     existing.setCourse(course);
@@ -108,8 +115,8 @@ public class PairServiceImpl implements PairService {
     existing.setDayOfWeek(pairDto.dayOfWeek());
     existing.setWeekParity(pairDto.weekParity());
     existing.setPairNumber(pairDto.pairNumber());
-    existing.setStartTime(pairDto.startTime());
-    existing.setEndTime(pairDto.endTime());
+    existing.setStartTime(schedule.startTime());
+    existing.setEndTime(schedule.endTime());
     existing.setRoom(pairDto.room());
     existing.setGroups(resolveGroups(pairDto.groupIds()));
 
@@ -126,14 +133,51 @@ public class PairServiceImpl implements PairService {
     pairRepository.deleteById(id);
   }
 
-  private void validateSchedule(PairDto pairDto) {
+  /**
+   * Разрешает день недели и время пары. Если {@code startTime}/{@code endTime} явно заданы в DTO —
+   * используются как есть (явный override, например перенос конкретного занятия). Если хотя бы
+   * одно не задано — подставляются из справочника звонкового расписания {@link BellScheduleEntry}
+   * по университету курса и номеру пары, с fallback на системную запись по умолчанию
+   * ({@code university == null}). Справочник — только источник для заполнения, не жёсткая связь:
+   * ничего не форсирует совпадение, если время задано явно.
+   */
+  private ResolvedSchedule resolveSchedule(PairDto pairDto, Course course) {
     if (!WEEKDAYS.contains(pairDto.dayOfWeek())) {
       throw new ValidationException(
           "День недели должен быть с понедельника по пятницу, получено: " + pairDto.dayOfWeek());
     }
-    if (!pairDto.endTime().isAfter(pairDto.startTime())) {
+
+    LocalTime startTime = pairDto.startTime();
+    LocalTime endTime = pairDto.endTime();
+    if (startTime == null || endTime == null) {
+      BellScheduleEntry entry = resolveBellScheduleEntry(course, pairDto.pairNumber());
+      startTime = entry.getStartTime();
+      endTime = entry.getEndTime();
+    }
+
+    if (!endTime.isAfter(startTime)) {
       throw new ValidationException("Время окончания пары должно быть позже времени начала");
     }
+    return new ResolvedSchedule(startTime, endTime);
+  }
+
+  private BellScheduleEntry resolveBellScheduleEntry(Course course, Integer pairNumber) {
+    UUID universityId = course.getDepartment() != null
+        ? course.getDepartment().getFaculty().getUniversity().getId()
+        : null;
+
+    Optional<BellScheduleEntry> entry = universityId != null
+        ? bellScheduleEntryRepository.findByUniversityIdAndPairNumber(universityId, pairNumber)
+        : Optional.empty();
+
+    return entry
+        .or(() -> bellScheduleEntryRepository.findByUniversityIsNullAndPairNumber(pairNumber))
+        .orElseThrow(() -> new ValidationException(
+            "Время пары не указано и не найдено в справочнике звонкового расписания для номера пары "
+                + pairNumber));
+  }
+
+  private record ResolvedSchedule(LocalTime startTime, LocalTime endTime) {
   }
 
   private Teacher resolveTeacher(UUID teacherId) {
