@@ -8,6 +8,7 @@ import com.coungard.univer.dto.EducationForm;
 import com.coungard.univer.dto.PairDto;
 import com.coungard.univer.dto.SemesterType;
 import com.coungard.univer.dto.WeekParity;
+import com.coungard.univer.entity.BellScheduleEntry;
 import com.coungard.univer.entity.Course;
 import com.coungard.univer.entity.Department;
 import com.coungard.univer.entity.Faculty;
@@ -19,6 +20,7 @@ import com.coungard.univer.entity.University;
 import com.coungard.univer.entity.WeekScheduleCycle;
 import com.coungard.univer.exception.ResourceNotFoundException;
 import com.coungard.univer.exception.ValidationException;
+import com.coungard.univer.repository.BellScheduleEntryRepository;
 import com.coungard.univer.repository.CourseRepository;
 import com.coungard.univer.repository.DepartmentRepository;
 import com.coungard.univer.repository.FacultyRepository;
@@ -99,6 +101,10 @@ class PairServiceTest {
   @Autowired
   private UniversityRepository universityRepository;
 
+  @Autowired
+  private BellScheduleEntryRepository bellScheduleEntryRepository;
+
+  private UUID universityId;
   private UUID weekScheduleCycleId;
   private UUID courseId;
   private UUID group1Id;
@@ -106,6 +112,7 @@ class PairServiceTest {
 
   @BeforeEach
   void setUp() {
+    bellScheduleEntryRepository.deleteAll();
     pairRepository.deleteAll();
     weekScheduleCycleRepository.deleteAll();
     groupRepository.deleteAll();
@@ -119,7 +126,7 @@ class PairServiceTest {
 
     University university = new University();
     university.setName("Test University");
-    UUID universityId = universityRepository.save(university).getId();
+    universityId = universityRepository.save(university).getId();
 
     Faculty faculty = Faculty.builder()
         .name("Faculty of Computer Science")
@@ -340,7 +347,67 @@ class PairServiceTest {
         .isInstanceOf(ResourceNotFoundException.class);
   }
 
+  @Test
+  void shouldPopulateStartAndEndTimeFromBellScheduleWhenOmitted() {
+    // Given: справочная запись для этого университета и pairNumber=1
+    saveBellScheduleEntry(universityId, 1, LocalTime.of(9, 0), LocalTime.of(10, 30));
+    PairDto dto = createDto(Set.of(group1Id)).toBuilder().startTime(null).endTime(null).build();
+
+    // When
+    PairDto created = pairService.createPair(dto);
+
+    // Then
+    assertThat(created.startTime()).isEqualTo(LocalTime.of(9, 0));
+    assertThat(created.endTime()).isEqualTo(LocalTime.of(10, 30));
+  }
+
+  @Test
+  void shouldFallBackToDefaultBellScheduleEntryWhenNoUniversitySpecificOne() {
+    // Given: только системная запись по умолчанию (university = null)
+    saveBellScheduleEntry(null, 1, LocalTime.of(9, 0), LocalTime.of(10, 30));
+    PairDto dto = createDto(Set.of(group1Id)).toBuilder().startTime(null).endTime(null).build();
+
+    // When
+    PairDto created = pairService.createPair(dto);
+
+    // Then
+    assertThat(created.startTime()).isEqualTo(LocalTime.of(9, 0));
+    assertThat(created.endTime()).isEqualTo(LocalTime.of(10, 30));
+  }
+
+  @Test
+  void shouldThrowValidationExceptionWhenTimesOmittedAndNoBellScheduleEntryExists() {
+    // Given: справочник пуст
+    PairDto dto = createDto(Set.of(group1Id)).toBuilder().startTime(null).endTime(null).build();
+
+    assertThatThrownBy(() -> pairService.createPair(dto))
+        .isInstanceOf(ValidationException.class);
+  }
+
+  @Test
+  void shouldAllowExplicitTimesToOverrideBellScheduleEntry() {
+    // Given: в справочнике другое время — явно заданное в DTO должно победить (перенос занятия)
+    saveBellScheduleEntry(universityId, 1, LocalTime.of(9, 0), LocalTime.of(10, 30));
+    PairDto dto = createDto(Set.of(group1Id));
+
+    // When
+    PairDto created = pairService.createPair(dto);
+
+    // Then: остались явные времена из createDto (8:00-9:30), а не из справочника
+    assertThat(created.startTime()).isEqualTo(LocalTime.of(8, 0));
+    assertThat(created.endTime()).isEqualTo(LocalTime.of(9, 30));
+  }
+
   // === Вспомогательные методы ===
+
+  private void saveBellScheduleEntry(UUID universityId, int pairNumber, LocalTime startTime, LocalTime endTime) {
+    BellScheduleEntry entry = new BellScheduleEntry();
+    entry.setUniversity(universityId != null ? universityRepository.getReferenceById(universityId) : null);
+    entry.setPairNumber(pairNumber);
+    entry.setStartTime(startTime);
+    entry.setEndTime(endTime);
+    bellScheduleEntryRepository.save(entry);
+  }
 
   private PairDto createDto(Set<UUID> groupIds) {
     return PairDto.builder()
