@@ -7,7 +7,10 @@ import com.coungard.univer.entity.Course;
 import com.coungard.univer.entity.Group;
 import com.coungard.univer.entity.Lecture;
 import com.coungard.univer.entity.Pair;
+import com.coungard.univer.entity.Semester;
+import com.coungard.univer.entity.Student;
 import com.coungard.univer.entity.Teacher;
+import com.coungard.univer.entity.WeekScheduleCycle;
 import com.coungard.univer.exception.ResourceNotFoundException;
 import com.coungard.univer.exception.ValidationException;
 import com.coungard.univer.mapper.LectureMapper;
@@ -15,12 +18,17 @@ import com.coungard.univer.repository.CourseRepository;
 import com.coungard.univer.repository.GroupRepository;
 import com.coungard.univer.repository.LectureRepository;
 import com.coungard.univer.repository.PairRepository;
+import com.coungard.univer.repository.StudentRepository;
 import com.coungard.univer.repository.TeacherRepository;
+import com.coungard.univer.repository.WeekScheduleCycleRepository;
 import com.coungard.univer.service.LectureService;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAdjusters;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +46,8 @@ public class LectureServiceImpl implements LectureService {
   private final TeacherRepository teacherRepository;
   private final GroupRepository groupRepository;
   private final PairRepository pairRepository;
+  private final StudentRepository studentRepository;
+  private final WeekScheduleCycleRepository weekScheduleCycleRepository;
   private final LectureMapper lectureMapper;
 
   @Override
@@ -82,18 +92,50 @@ public class LectureServiceImpl implements LectureService {
           "Лекция из пары " + pair.getId() + " на дату " + date + " уже сгенерирована");
     }
 
+    Lecture saved = lectureRepository.save(buildLectureFromPair(pair, date));
+    return lectureMapper.toDto(saved);
+  }
+
+  @Override
+  @Transactional
+  public List<LectureDto> generateSemesterLectures(UUID weekScheduleCycleId) {
+    WeekScheduleCycle cycle = weekScheduleCycleRepository.findById(weekScheduleCycleId)
+        .orElseThrow(() -> new ResourceNotFoundException(
+            "Циклическое расписание не найдено с ID: " + weekScheduleCycleId));
+
+    Semester semester = cycle.getSemester();
+    LocalDate semesterStart = semester.getStartDate();
+    LocalDate semesterEnd = semester.getEndDate();
+
+    List<LectureDto> generated = new ArrayList<>();
+    for (Pair pair : pairRepository.findByWeekScheduleCycleId(weekScheduleCycleId)) {
+      LocalDate date = semesterStart.with(TemporalAdjusters.nextOrSame(pair.getDayOfWeek()));
+      while (!date.isAfter(semesterEnd)) {
+        WeekParity actualParity = computeWeekParity(semesterStart, date);
+        if (pair.getWeekParity() == WeekParity.BOTH || pair.getWeekParity() == actualParity) {
+          LocalDateTime scheduledTime = LocalDateTime.of(date, pair.getStartTime());
+          if (!lectureRepository.existsBySourcePairIdAndScheduledTime(pair.getId(), scheduledTime)) {
+            Lecture saved = lectureRepository.save(buildLectureFromPair(pair, date));
+            generated.add(lectureMapper.toDto(saved));
+          }
+        }
+        date = date.plusWeeks(1);
+      }
+    }
+    return generated;
+  }
+
+  private Lecture buildLectureFromPair(Pair pair, LocalDate date) {
     Lecture lecture = new Lecture();
     lecture.setTitle(pair.getCourse().getTitle());
-    lecture.setScheduledTime(scheduledTime);
+    lecture.setScheduledTime(LocalDateTime.of(date, pair.getStartTime()));
     lecture.setDurationMinutes((int) ChronoUnit.MINUTES.between(pair.getStartTime(), pair.getEndTime()));
     lecture.setCourse(pair.getCourse());
     lecture.setTeacher(pair.getTeacher());
     lecture.setRoom(pair.getRoom());
     lecture.setSourcePair(pair);
     lecture.setGroups(new HashSet<>(pair.getGroups()));
-
-    Lecture saved = lectureRepository.save(lecture);
-    return lectureMapper.toDto(saved);
+    return lecture;
   }
 
   @Override
@@ -120,6 +162,20 @@ public class LectureServiceImpl implements LectureService {
   @Transactional(readOnly = true)
   public Page<LectureDto> getLecturesByGroup(UUID groupId, Pageable pageable) {
     return lectureRepository.findByGroupsId(groupId, pageable).map(lectureMapper::toDto);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Page<LectureDto> getMyLectures(UUID studentId, Pageable pageable) {
+    Student student = studentRepository.findById(studentId)
+        .orElseThrow(() -> new ResourceNotFoundException("Студент не найден с ID: " + studentId));
+
+    if (student.getGroup() == null) {
+      return Page.empty(pageable);
+    }
+
+    return lectureRepository.findByGroupsId(student.getGroup().getId(), pageable)
+        .map(lectureMapper::toDto);
   }
 
   @Override

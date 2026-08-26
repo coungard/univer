@@ -325,6 +325,7 @@ class StudentServiceTest {
     semester.setStudyYear(studyYearRepository.getReferenceById(studyYearId));
     semester.setType(SemesterType.AUTUMN);
     semester.setStartDate(LocalDate.of(2026, 9, 1));
+    semester.setEndDate(LocalDate.of(2026, 12, 20));
     UUID semesterId = semesterRepository.save(semester).getId();
 
     Group group = new Group();

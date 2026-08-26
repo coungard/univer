@@ -16,6 +16,9 @@ public record SemesterDto(
     SemesterType type,
 
     @NotNull(message = "Дата начала семестра обязательна")
-    LocalDate startDate
+    LocalDate startDate,
+
+    @NotNull(message = "Дата окончания семестра обязательна")
+    LocalDate endDate
 ) {
 }

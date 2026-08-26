@@ -4,6 +4,7 @@ import com.coungard.univer.dto.SemesterDto;
 import com.coungard.univer.entity.Semester;
 import com.coungard.univer.entity.StudyYear;
 import com.coungard.univer.exception.ResourceNotFoundException;
+import com.coungard.univer.exception.ValidationException;
 import com.coungard.univer.mapper.SemesterMapper;
 import com.coungard.univer.repository.SemesterRepository;
 import com.coungard.univer.repository.StudyYearRepository;
@@ -26,6 +27,8 @@ public class SemesterServiceImpl implements SemesterService {
   @Override
   @Transactional
   public SemesterDto createSemester(SemesterDto semesterDto) {
+    validateDateOrder(semesterDto);
+
     StudyYear studyYear = studyYearRepository.findById(semesterDto.studyYearId())
         .orElseThrow(() -> new ResourceNotFoundException(
             "Курс обучения не найден с ID: " + semesterDto.studyYearId()));
@@ -60,6 +63,8 @@ public class SemesterServiceImpl implements SemesterService {
   @Override
   @Transactional
   public SemesterDto updateSemester(UUID id, SemesterDto semesterDto) {
+    validateDateOrder(semesterDto);
+
     Semester existing = semesterRepository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("Семестр не найден с ID: " + id));
 
@@ -70,6 +75,7 @@ public class SemesterServiceImpl implements SemesterService {
     existing.setStudyYear(studyYear);
     existing.setType(semesterDto.type());
     existing.setStartDate(semesterDto.startDate());
+    existing.setEndDate(semesterDto.endDate());
 
     Semester updated = semesterRepository.save(existing);
     return semesterMapper.toDto(updated);
@@ -82,5 +88,11 @@ public class SemesterServiceImpl implements SemesterService {
       throw new ResourceNotFoundException("Семестр не найден с ID: " + id);
     }
     semesterRepository.deleteById(id);
+  }
+
+  private void validateDateOrder(SemesterDto semesterDto) {
+    if (!semesterDto.endDate().isAfter(semesterDto.startDate())) {
+      throw new ValidationException("Дата окончания семестра должна быть позже даты начала");
+    }
   }
 }
