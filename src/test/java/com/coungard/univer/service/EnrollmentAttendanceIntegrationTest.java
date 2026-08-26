@@ -179,6 +179,7 @@ class EnrollmentAttendanceIntegrationTest {
     semester.setStudyYear(studyYearRepository.getReferenceById(studyYearId));
     semester.setType(SemesterType.AUTUMN);
     semester.setStartDate(SEMESTER_START);
+    semester.setEndDate(SEMESTER_START.plusMonths(4));
     UUID semesterId = semesterRepository.save(semester).getId();
 
     WeekScheduleCycle cycle = new WeekScheduleCycle();

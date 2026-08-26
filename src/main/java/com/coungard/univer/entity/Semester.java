@@ -41,4 +41,11 @@ public class Semester {
    */
   @Column(name = "start_date", nullable = false)
   private LocalDate startDate;
+
+  /**
+   * Дата окончания семестра — верхняя граница диапазона, в котором массовая генерация {@code Lecture}
+   * из шаблонов {@code Pair} перебирает даты (см. {@code LectureService#generateSemesterLectures}).
+   */
+  @Column(name = "end_date", nullable = false)
+  private LocalDate endDate;
 }

@@ -16,6 +16,7 @@ public class SemesterMapper {
         .studyYearId(semester.getStudyYear().getId())
         .type(semester.getType())
         .startDate(semester.getStartDate())
+        .endDate(semester.getEndDate())
         .build();
   }
 
@@ -26,6 +27,7 @@ public class SemesterMapper {
     Semester semester = new Semester();
     semester.setType(dto.type());
     semester.setStartDate(dto.startDate());
+    semester.setEndDate(dto.endDate());
     return semester;
   }
 }

@@ -12,6 +12,7 @@ import com.coungard.univer.entity.Program;
 import com.coungard.univer.entity.StudyYear;
 import com.coungard.univer.entity.University;
 import com.coungard.univer.exception.ResourceNotFoundException;
+import com.coungard.univer.exception.ValidationException;
 import com.coungard.univer.repository.FacultyRepository;
 import com.coungard.univer.repository.ProgramRepository;
 import com.coungard.univer.repository.SemesterRepository;
@@ -111,6 +112,7 @@ class SemesterServiceTest {
         .studyYearId(studyYearId)
         .type(SemesterType.AUTUMN)
         .startDate(LocalDate.of(2026, 9, 1))
+        .endDate(LocalDate.of(2026, 12, 20))
         .build();
 
     // When
@@ -122,6 +124,7 @@ class SemesterServiceTest {
     assertThat(found.studyYearId()).isEqualTo(studyYearId);
     assertThat(found.type()).isEqualTo(SemesterType.AUTUMN);
     assertThat(found.startDate()).isEqualTo(LocalDate.of(2026, 9, 1));
+    assertThat(found.endDate()).isEqualTo(LocalDate.of(2026, 12, 20));
   }
 
   @Test
@@ -130,10 +133,24 @@ class SemesterServiceTest {
         .studyYearId(UUID.randomUUID())
         .type(SemesterType.AUTUMN)
         .startDate(LocalDate.of(2026, 9, 1))
+        .endDate(LocalDate.of(2026, 12, 20))
         .build();
 
     assertThatThrownBy(() -> semesterService.createSemester(dto))
         .isInstanceOf(ResourceNotFoundException.class);
+  }
+
+  @Test
+  void shouldThrowExceptionWhenEndDateNotAfterStartDate() {
+    SemesterDto dto = SemesterDto.builder()
+        .studyYearId(studyYearId)
+        .type(SemesterType.AUTUMN)
+        .startDate(LocalDate.of(2026, 9, 1))
+        .endDate(LocalDate.of(2026, 9, 1))
+        .build();
+
+    assertThatThrownBy(() -> semesterService.createSemester(dto))
+        .isInstanceOf(ValidationException.class);
   }
 
   @Test
@@ -147,9 +164,11 @@ class SemesterServiceTest {
   void shouldGetSemesters() {
     // Given
     semesterService.createSemester(SemesterDto.builder()
-        .studyYearId(studyYearId).type(SemesterType.AUTUMN).startDate(LocalDate.of(2026, 9, 1)).build());
+        .studyYearId(studyYearId).type(SemesterType.AUTUMN).startDate(LocalDate.of(2026, 9, 1))
+        .endDate(LocalDate.of(2026, 12, 20)).build());
     semesterService.createSemester(SemesterDto.builder()
-        .studyYearId(studyYearId).type(SemesterType.SPRING).startDate(LocalDate.of(2027, 2, 9)).build());
+        .studyYearId(studyYearId).type(SemesterType.SPRING).startDate(LocalDate.of(2027, 2, 9))
+        .endDate(LocalDate.of(2027, 6, 20)).build());
 
     Pageable pageable = PageRequest.of(0, 10);
 
@@ -167,7 +186,8 @@ class SemesterServiceTest {
   void shouldGetSemestersByStudyYear() {
     // Given
     semesterService.createSemester(SemesterDto.builder()
-        .studyYearId(studyYearId).type(SemesterType.AUTUMN).startDate(LocalDate.of(2026, 9, 1)).build());
+        .studyYearId(studyYearId).type(SemesterType.AUTUMN).startDate(LocalDate.of(2026, 9, 1))
+        .endDate(LocalDate.of(2026, 12, 20)).build());
 
     Pageable pageable = PageRequest.of(0, 10);
 
@@ -183,12 +203,14 @@ class SemesterServiceTest {
   void shouldUpdateSemester() {
     // Given
     SemesterDto original = semesterService.createSemester(SemesterDto.builder()
-        .studyYearId(studyYearId).type(SemesterType.AUTUMN).startDate(LocalDate.of(2026, 9, 1)).build());
+        .studyYearId(studyYearId).type(SemesterType.AUTUMN).startDate(LocalDate.of(2026, 9, 1))
+        .endDate(LocalDate.of(2026, 12, 20)).build());
 
     SemesterDto updateDto = SemesterDto.builder()
         .studyYearId(studyYearId)
         .type(SemesterType.SPRING)
         .startDate(LocalDate.of(2027, 2, 9))
+        .endDate(LocalDate.of(2027, 6, 20))
         .build();
 
     // When
@@ -202,7 +224,8 @@ class SemesterServiceTest {
   @Test
   void shouldThrowExceptionWhenUpdatingNonExistentSemester() {
     SemesterDto dto = SemesterDto.builder()
-        .studyYearId(studyYearId).type(SemesterType.AUTUMN).startDate(LocalDate.of(2026, 9, 1)).build();
+        .studyYearId(studyYearId).type(SemesterType.AUTUMN).startDate(LocalDate.of(2026, 9, 1))
+        .endDate(LocalDate.of(2026, 12, 20)).build();
 
     assertThatThrownBy(() -> semesterService.updateSemester(UUID.randomUUID(), dto))
         .isInstanceOf(ResourceNotFoundException.class);
@@ -212,7 +235,8 @@ class SemesterServiceTest {
   void shouldDeleteSemesterById() {
     // Given
     SemesterDto semester = semesterService.createSemester(SemesterDto.builder()
-        .studyYearId(studyYearId).type(SemesterType.AUTUMN).startDate(LocalDate.of(2026, 9, 1)).build());
+        .studyYearId(studyYearId).type(SemesterType.AUTUMN).startDate(LocalDate.of(2026, 9, 1))
+        .endDate(LocalDate.of(2026, 12, 20)).build());
 
     // When
     semesterService.deleteSemester(semester.id());

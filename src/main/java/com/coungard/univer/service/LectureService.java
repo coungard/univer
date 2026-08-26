@@ -2,6 +2,7 @@ package com.coungard.univer.service;
 
 import com.coungard.univer.dto.LectureDto;
 import com.coungard.univer.dto.request.GenerateLectureRequest;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +27,17 @@ public interface LectureService {
    * @return созданный LectureDto
    */
   LectureDto generateFromPair(GenerateLectureRequest request);
+
+  /**
+   * Сгенерировать лекции на весь семестр из всех Pair-шаблонов данного WeekScheduleCycle. Для каждой
+   * Pair перебираются все даты её дня недели в границах [Semester.startDate, Semester.endDate],
+   * подходящие по чётности недели; уже сгенерированные ранее пара+дата пропускаются без ошибки —
+   * операция идемпотентна, безопасно вызывать повторно (например, после добавления новых Pair).
+   *
+   * @param weekScheduleCycleId идентификатор циклического расписания (= семестра)
+   * @return список только вновь созданных LectureDto (уже существовавшие в выборку не попадают)
+   */
+  List<LectureDto> generateSemesterLectures(UUID weekScheduleCycleId);
 
   /**
    * Получить лекцию по ID.
@@ -60,6 +72,17 @@ public interface LectureService {
    * @return страница LectureDto
    */
   Page<LectureDto> getLecturesByGroup(UUID groupId, Pageable pageable);
+
+  /**
+   * Получить страницу расписания текущего студента — лекции группы, к которой он привязан.
+   * Идентификатор студента совпадает с Keycloak user ID (см. флоу регистрации). Если студент ещё
+   * не привязан к группе, возвращается пустая страница, а не ошибка.
+   *
+   * @param studentId идентификатор студента (= Keycloak subject из JWT)
+   * @param pageable параметры пагинации и сортировки
+   * @return страница LectureDto
+   */
+  Page<LectureDto> getMyLectures(UUID studentId, Pageable pageable);
 
   /**
    * Обновить лекцию.

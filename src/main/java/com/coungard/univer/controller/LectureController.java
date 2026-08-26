@@ -8,13 +8,17 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -70,6 +74,25 @@ public class LectureController {
     return ResponseEntity.ok(lectures);
   }
 
+  @Operation(
+      summary = "Получить расписание текущего студента",
+      description = "Возвращает лекции группы, к которой привязан вызывающий студент, "
+          + "отсортированные по времени начала. ID студента берётся из JWT (Keycloak subject = "
+          + "Student.id, см. флоу регистрации). Если студент ещё не привязан к группе — пустая страница."
+  )
+  @GetMapping("/me")
+  @PreAuthorize("hasRole('STUDENT')")
+  public ResponseEntity<Page<LectureDto>> getMyLectures(
+      @AuthenticationPrincipal Jwt jwt,
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "10") int size) {
+
+    UUID studentId = UUID.fromString(jwt.getSubject());
+    Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "scheduledTime"));
+    Page<LectureDto> lectures = lectureService.getMyLectures(studentId, pageable);
+    return ResponseEntity.ok(lectures);
+  }
+
   @Operation(summary = "Получить лекцию по ID")
   @GetMapping("/{id}")
   public ResponseEntity<LectureDto> getLectureById(@PathVariable UUID id) {
@@ -109,6 +132,19 @@ public class LectureController {
         .toUri();
 
     return ResponseEntity.created(location).body(saved);
+  }
+
+  @Operation(
+      summary = "Сгенерировать лекции на весь семестр из всех пар цикла расписания",
+      description = "Для каждой Pair цикла перебираются все подходящие по дню недели и чётности недели "
+          + "даты в границах [Semester.startDate, Semester.endDate]; уже сгенерированные пара+дата "
+          + "пропускаются без ошибки — операцию безопасно вызывать повторно."
+  )
+  @PostMapping("/generate/semester/{weekScheduleCycleId}")
+  @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER')")
+  public ResponseEntity<List<LectureDto>> generateSemesterLectures(@PathVariable UUID weekScheduleCycleId) {
+    List<LectureDto> generated = lectureService.generateSemesterLectures(weekScheduleCycleId);
+    return ResponseEntity.ok(generated);
   }
 
   @Operation(summary = "Обновить лекцию")

@@ -14,8 +14,10 @@ import com.coungard.univer.entity.Department;
 import com.coungard.univer.entity.Faculty;
 import com.coungard.univer.entity.Group;
 import com.coungard.univer.entity.Pair;
+import com.coungard.univer.entity.Person;
 import com.coungard.univer.entity.Program;
 import com.coungard.univer.entity.Semester;
+import com.coungard.univer.entity.Student;
 import com.coungard.univer.entity.StudyYear;
 import com.coungard.univer.entity.University;
 import com.coungard.univer.entity.WeekScheduleCycle;
@@ -29,6 +31,7 @@ import com.coungard.univer.repository.LectureRepository;
 import com.coungard.univer.repository.PairRepository;
 import com.coungard.univer.repository.ProgramRepository;
 import com.coungard.univer.repository.SemesterRepository;
+import com.coungard.univer.repository.StudentRepository;
 import com.coungard.univer.repository.StudyYearRepository;
 import com.coungard.univer.repository.UniversityRepository;
 import com.coungard.univer.repository.WeekScheduleCycleRepository;
@@ -37,6 +40,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.Period;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,6 +50,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -106,20 +111,29 @@ class LectureServiceTest {
   @Autowired
   private UniversityRepository universityRepository;
 
+  @Autowired
+  private StudentRepository studentRepository;
+
   // Семестр начинается во вторник 2026-09-01. Неделя считается 7-дневными блоками от этой даты:
   // 1-7 сент. - неделя 1 (нечётная), 8-14 сент. - неделя 2 (чётная). Первый понедельник семестра —
-  // 2026-09-07 (нечётная неделя), второй — 2026-09-14 (чётная).
+  // 2026-09-07 (нечётная неделя), второй — 2026-09-14 (чётная), третий — 2026-09-21 (снова нечётная).
+  // Семестр заканчивается 2026-09-21 — ровно три понедельника в диапазоне для тестов массовой генерации.
   private static final LocalDate SEMESTER_START = LocalDate.of(2026, 9, 1);
+  private static final LocalDate SEMESTER_END = LocalDate.of(2026, 9, 21);
   private static final LocalDate FIRST_MONDAY_ODD_WEEK = LocalDate.of(2026, 9, 7);
   private static final LocalDate SECOND_MONDAY_EVEN_WEEK = LocalDate.of(2026, 9, 14);
+  private static final LocalDate THIRD_MONDAY_ODD_WEEK = LocalDate.of(2026, 9, 21);
 
+  private UUID universityId;
   private UUID courseId;
   private UUID group1Id;
   private UUID group2Id;
   private UUID pairId; // Понедельник, нечётная неделя
+  private UUID cycleId;
 
   @BeforeEach
   void setUp() {
+    studentRepository.deleteAll();
     lectureRepository.deleteAll();
     pairRepository.deleteAll();
     weekScheduleCycleRepository.deleteAll();
@@ -134,7 +148,7 @@ class LectureServiceTest {
 
     University university = new University();
     university.setName("Test University");
-    UUID universityId = universityRepository.save(university).getId();
+    universityId = universityRepository.save(university).getId();
 
     Faculty faculty = Faculty.builder()
         .name("Faculty of Computer Science")
@@ -170,11 +184,12 @@ class LectureServiceTest {
     semester.setStudyYear(studyYearRepository.getReferenceById(studyYearId));
     semester.setType(SemesterType.AUTUMN);
     semester.setStartDate(SEMESTER_START);
+    semester.setEndDate(SEMESTER_END);
     UUID semesterId = semesterRepository.save(semester).getId();
 
     WeekScheduleCycle cycle = new WeekScheduleCycle();
     cycle.setSemester(semesterRepository.getReferenceById(semesterId));
-    UUID cycleId = weekScheduleCycleRepository.save(cycle).getId();
+    cycleId = weekScheduleCycleRepository.save(cycle).getId();
 
     Group group1 = new Group();
     group1.setSemester(semesterRepository.getReferenceById(semesterId));
@@ -297,6 +312,56 @@ class LectureServiceTest {
   }
 
   @Test
+  void shouldGetMyLecturesOrderedByScheduledTimeForStudentWithGroup() {
+    // Given: студент привязан к group1Id; лекции создаются в порядке, обратном хронологическому,
+    // чтобы тест проверял реальную сортировку, а не порядок вставки в БД
+    UUID studentId = createStudent(group1Id);
+
+    LectureDto laterDto = createDto(Set.of(group1Id)).toBuilder()
+        .scheduledTime(LocalDateTime.of(2026, 9, 8, 10, 0))
+        .build();
+    LectureDto earlierDto = createDto(Set.of(group1Id)).toBuilder()
+        .scheduledTime(LocalDateTime.of(2026, 9, 1, 8, 0))
+        .build();
+    LectureDto otherGroupDto = createDto(Set.of(group2Id));
+
+    lectureService.createLecture(laterDto);
+    lectureService.createLecture(earlierDto);
+    lectureService.createLecture(otherGroupDto);
+
+    // Пагинация с сортировкой строится контроллером; здесь воспроизводим тот же Pageable,
+    // чтобы проверить, что сервис/репозиторий её действительно применяют.
+    Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "scheduledTime"));
+
+    // When
+    Page<LectureDto> result = lectureService.getMyLectures(studentId, pageable);
+
+    // Then
+    assertThat(result.getContent()).hasSize(2);
+    assertThat(result.getContent().get(0).scheduledTime()).isEqualTo(earlierDto.scheduledTime());
+    assertThat(result.getContent().get(1).scheduledTime()).isEqualTo(laterDto.scheduledTime());
+  }
+
+  @Test
+  void shouldReturnEmptyPageWhenStudentHasNoGroup() {
+    // Given
+    UUID studentId = createStudent(null);
+    lectureService.createLecture(createDto(Set.of(group1Id)));
+
+    // When
+    Page<LectureDto> result = lectureService.getMyLectures(studentId, PageRequest.of(0, 10));
+
+    // Then
+    assertThat(result.getContent()).isEmpty();
+  }
+
+  @Test
+  void shouldThrowExceptionWhenGettingMyLecturesForNonExistentStudent() {
+    assertThatThrownBy(() -> lectureService.getMyLectures(UUID.randomUUID(), PageRequest.of(0, 10)))
+        .isInstanceOf(ResourceNotFoundException.class);
+  }
+
+  @Test
   void shouldUpdateLecture() {
     // Given
     LectureDto original = lectureService.createLecture(createDto(Set.of(group1Id)));
@@ -393,7 +458,82 @@ class LectureServiceTest {
         .isInstanceOf(ResourceNotFoundException.class);
   }
 
+  @Test
+  void shouldGenerateSemesterLecturesOnlyForMatchingParityDates() {
+    // Given: фикстурная пара — WeekParity.ODD, диапазон семестра — 3 понедельника (нечёт/чёт/нечёт)
+
+    // When
+    List<LectureDto> generated = lectureService.generateSemesterLectures(cycleId);
+
+    // Then: сгенерированы только нечётные понедельники, чётный (14 сентября) пропущен
+    assertThat(generated).hasSize(2);
+    assertThat(generated)
+        .extracting(LectureDto::scheduledTime)
+        .containsExactlyInAnyOrder(
+            LocalDateTime.of(FIRST_MONDAY_ODD_WEEK, LocalTime.of(8, 0)),
+            LocalDateTime.of(THIRD_MONDAY_ODD_WEEK, LocalTime.of(8, 0)));
+  }
+
+  @Test
+  void shouldSkipAlreadyGeneratedLecturesOnRepeatedCall() {
+    // Given
+    lectureService.generateSemesterLectures(cycleId);
+
+    // When: повторный вызов — все даты этого цикла уже сгенерированы
+    List<LectureDto> secondCall = lectureService.generateSemesterLectures(cycleId);
+
+    // Then
+    assertThat(secondCall).isEmpty();
+  }
+
+  @Test
+  void shouldGenerateSemesterLecturesForBothParityPair() {
+    // Given: вторая пара того же цикла, каждую неделю независимо от чётности
+    Pair everyWeekPair = new Pair();
+    everyWeekPair.setWeekScheduleCycle(weekScheduleCycleRepository.getReferenceById(cycleId));
+    everyWeekPair.setDayOfWeek(DayOfWeek.MONDAY);
+    everyWeekPair.setWeekParity(WeekParity.BOTH);
+    everyWeekPair.setPairNumber(2);
+    everyWeekPair.setStartTime(LocalTime.of(9, 40));
+    everyWeekPair.setEndTime(LocalTime.of(11, 10));
+    everyWeekPair.setCourse(courseRepository.getReferenceById(courseId));
+    everyWeekPair.setGroups(Set.of(groupRepository.findById(group1Id).orElseThrow()));
+    pairRepository.save(everyWeekPair);
+
+    // When
+    List<LectureDto> generated = lectureService.generateSemesterLectures(cycleId);
+
+    // Then: фикстурная ODD-пара даёт 2 лекции (07, 21 сентября) + BOTH-пара даёт 3 (07, 14, 21) = 5
+    assertThat(generated).hasSize(5);
+  }
+
+  @Test
+  void shouldThrowExceptionWhenGeneratingForNonExistentWeekScheduleCycle() {
+    assertThatThrownBy(() -> lectureService.generateSemesterLectures(UUID.randomUUID()))
+        .isInstanceOf(ResourceNotFoundException.class);
+  }
+
   // === Вспомогательные методы ===
+
+  private UUID createStudent(UUID groupId) {
+    Student student = new Student();
+    student.setUniversity(universityRepository.getReferenceById(universityId));
+    student.setEnrollmentDate(LocalDate.of(2026, 9, 1));
+    if (groupId != null) {
+      student.setGroup(groupRepository.getReferenceById(groupId));
+    }
+
+    String uniqueSuffix = UUID.randomUUID().toString();
+    Person person = new Person();
+    person.setUsername("student_" + uniqueSuffix);
+    person.setEmail("student_" + uniqueSuffix + "@example.com");
+    person.setFirstname("Иван");
+    person.setLastname("Иванов");
+    person.setFullname("Иван Иванов");
+    student.setPerson(person);
+
+    return studentRepository.save(student).getId();
+  }
 
   private LectureDto createDto(Set<UUID> groupIds) {
     return LectureDto.builder()
