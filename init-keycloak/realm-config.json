@@ -36,6 +36,25 @@
         "post.logout.redirect.uris": "+",
         "oauth2.device.authorization.grant.enabled": "true"
       }
+    },
+    {
+      "clientId": "univer-mobile",
+      "name": "University Mobile Client",
+      "description": "Публичный клиент для мобильного приложения (Authorization Code + PKCE)",
+      "protocol": "openid-connect",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "authorizationServicesEnabled": false,
+      "redirectUris": [
+        "univer://auth/callback"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "univer://auth/logout"
+      }
     }
   ],
   "roles": {
