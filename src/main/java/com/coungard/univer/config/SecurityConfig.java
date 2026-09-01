@@ -39,10 +39,14 @@ public class SecurityConfig {
             .requestMatchers("/api/v1/students/register").permitAll()
             .requestMatchers("/api/v1/teachers/register").permitAll()
             // Экран регистрации ещё не имеет токена, но должен дать выбрать университет
-            // (RegisterStudentRequest.universityId) — без этого GET /universities
-            // регистрация в принципе невозможна.
-            .requestMatchers(HttpMethod.GET, "/api/v1/universities", "/api/v1/universities/**")
-            .permitAll()
+            // (RegisterStudentRequest.universityId) / кафедру (RegisterTeacherRequest.departmentId)
+            // — без этого регистрация в принципе невозможна: курица и яйцо (нужен токен, чтобы
+            // получить список для формы, которая этот токен и выдаёт).
+            .requestMatchers(HttpMethod.GET,
+                "/api/v1/universities", "/api/v1/universities/**",
+                "/api/v1/faculties/**",
+                "/api/v1/departments/**"
+            ).permitAll()
             // Отключено намеренно: удобно для локальной отладки — требуем JWT
             // даже на списковых эндпоинтах, чтобы не путать публичное и приватное поведение.
 //            .requestMatchers("/api/v1/teachers*").permitAll()
