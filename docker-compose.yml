@@ -34,18 +34,33 @@ services:
       KC_HEALTH_ENABLED: true
       KC_LOG_LEVEL: INFO
       KC_HOSTNAME: localhost
-      KC_HOSTNAME_PORT: 8082
+      # KC_HOSTNAME_PORT намеренно не фиксируем: он раньше жёстко приклеивал 8082 ко всем сгенерированным
+      # URL (включая форму логина), из-за чего при заходе через HTTPS (8443) форма логина всё равно
+      # указывала на https://localhost:8082 — порт, где реально слушает только HTTP. Без фиксации
+      # Keycloak берёт схему/порт из Host-заголовка конкретного запроса, поэтому 8082 (HTTP) и 8443
+      # (HTTPS, issue #54) корректно работают одновременно.
       # Важно: указываем путь к realm-файлу
       KC_IMPORT: /opt/keycloak/data/import/realm-config.json
       KC_IMPORT_FORCE: true
+      # HTTPS нужен только для браузерных флоу логина (Authorization Code + PKCE, см. MOBILE.md,
+      # issue #54) — Keycloak всегда отдаёт сессионную cookie AUTH_SESSION_ID с флагом Secure, который
+      # браузер по чистому HTTP отбрасывает. Password grant (SCENARIOS.md, Swagger UI) cookie не
+      # использует и продолжает работать по HTTP на 8082, поэтому issuer-uri/auth-server-url в
+      # application.yml не меняются. Сертификат самоподписанный, только для локальной разработки —
+      # см. init-keycloak/certs/README.md.
+      KC_HTTPS_CERTIFICATE_FILE: /opt/keycloak/certs/keycloak-dev.crt
+      KC_HTTPS_CERTIFICATE_KEY_FILE: /opt/keycloak/certs/keycloak-dev.key
+      KC_HTTPS_PORT: 8443
     command: [ "start-dev", "--import-realm" ]
     ports:
       - "8082:8080"
+      - "8443:8443"
     depends_on:
       postgres:
         condition: service_healthy
     volumes:
       - ./init-keycloak/realm-config.json:/opt/keycloak/data/import/realm-config.json
+      - ./init-keycloak/certs:/opt/keycloak/certs:ro
     links:
       - postgres
 

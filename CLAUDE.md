@@ -18,8 +18,9 @@ University — REST API на Spring Boot 3 / Java 17 для управления
 ## Сборка, запуск, тесты
 
 Для локальной разработки нужны Postgres и Keycloak — поднимаются через `docker-compose.yml` (Postgres на
-`5435`, Keycloak на `8082`). Поднимайте их перед запуском приложения или любых тестов, не изолированных
-через Testcontainers:
+`5435`, Keycloak на `8082` по HTTP и на `8443` по HTTPS с dev-сертификатом — второй нужен только браузерным
+флоу логина, Authorization Code + PKCE, см. `MOBILE.md`, issue #54). Поднимайте их перед запуском
+приложения или любых тестов, не изолированных через Testcontainers:
 
 ```bash
 docker-compose up --build

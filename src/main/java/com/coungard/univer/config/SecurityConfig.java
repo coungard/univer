@@ -67,7 +67,17 @@ public class SecurityConfig {
   }
 
   /**
-   * Настройка JwtDecoder для проверки подписи JWT от Keycloak
+   * Настройка JwtDecoder для проверки подписи JWT от Keycloak.
+   * <p>
+   * Собран через {@code withJwkSetUri(...)}, а не {@code withIssuerLocation(...)}/
+   * {@code JwtValidators.createDefaultWithIssuer(...)}, поэтому claim {@code iss} НЕ проверяется —
+   * валидируются только подпись и {@code exp}/{@code nbf}. Это осознанно нужно для мобильного флоу
+   * (Authorization Code + PKCE, см. MOBILE.md, issue #54): в dev локальный Keycloak слушает и HTTP
+   * ({@code keycloak.auth-server-url}, 8082 — password grant, back-channel), и HTTPS (8443 — только
+   * браузерная страница логина, cookie сессии требует настоящего TLS), и токены с этих двух адресов
+   * несут разный {@code iss}, хотя подписаны одним и тем же ключом одного и того же realm'а. Если
+   * понадобится включить проверку issuer — нужно одновременно разрешить оба адреса как валидные, иначе
+   * токены мобильного клиента начнут получать 401.
    */
   @Bean
   public JwtDecoder jwtDecoder() {
