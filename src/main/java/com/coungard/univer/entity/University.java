@@ -39,6 +39,14 @@ public class University implements Auditable {
 
   private String description;
 
+  private String rector;
+
+  @Column(name = "founding_year")
+  private Integer foundingYear;
+
+  @Column(name = "student_count")
+  private Integer studentCount;
+
   @CreatedDate
   @Column(name = "created_at")
   private Instant createdAt;

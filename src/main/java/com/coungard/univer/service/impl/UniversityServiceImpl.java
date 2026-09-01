@@ -54,6 +54,9 @@ public class UniversityServiceImpl implements UniversityService {
 
     existing.setName(universityDto.name());
     existing.setDescription(universityDto.description());
+    existing.setRector(universityDto.rector());
+    existing.setFoundingYear(universityDto.foundingYear());
+    existing.setStudentCount(universityDto.studentCount());
 
     Address address = null;
 
