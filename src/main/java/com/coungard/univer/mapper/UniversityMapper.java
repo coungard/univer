@@ -28,6 +28,9 @@ public class UniversityMapper {
         .id(university.getId())
         .name(university.getName())
         .description(university.getDescription())
+        .rector(university.getRector())
+        .foundingYear(university.getFoundingYear())
+        .studentCount(university.getStudentCount())
         .createdAt(university.getCreatedAt())
         .updatedAt(university.getUpdatedAt())
         .address(this.toAddressDto(university.getAddress()))
@@ -89,6 +92,9 @@ public class UniversityMapper {
     university.setId(dto.id());
     university.setName(dto.name());
     university.setDescription(dto.description());
+    university.setRector(dto.rector());
+    university.setFoundingYear(dto.foundingYear());
+    university.setStudentCount(dto.studentCount());
 
     if (dto.address() != null) {
       university.setAddress(toAddressEntity(dto.address()));

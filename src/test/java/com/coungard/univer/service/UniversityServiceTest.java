@@ -69,6 +69,9 @@ class UniversityServiceTest {
     UniversityDto dto = UniversityDto.builder()
         .name("MIT")
         .description("Massachusetts Institute of Technology")
+        .rector("Sally Kornbluth")
+        .foundingYear(1861)
+        .studentCount(11858)
         .address(addressDto)
         .build();
 
@@ -80,6 +83,9 @@ class UniversityServiceTest {
     assertThat(found).isNotNull();
     assertThat(found.name()).isEqualTo("MIT");
     assertThat(found.description()).isEqualTo("Massachusetts Institute of Technology");
+    assertThat(found.rector()).isEqualTo("Sally Kornbluth");
+    assertThat(found.foundingYear()).isEqualTo(1861);
+    assertThat(found.studentCount()).isEqualTo(11858);
     assertThat(found.address()).isNotNull();
     assertThat(found.address().country()).isEqualTo("USA");
     assertThat(found.address().city()).isEqualTo("Cambridge");
