@@ -4,6 +4,7 @@ import com.coungard.univer.security.KeycloakRoleConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -37,6 +38,11 @@ public class SecurityConfig {
             // 🔥 Добавляем публичный доступ к регистрации
             .requestMatchers("/api/v1/students/register").permitAll()
             .requestMatchers("/api/v1/teachers/register").permitAll()
+            // Экран регистрации ещё не имеет токена, но должен дать выбрать университет
+            // (RegisterStudentRequest.universityId) — без этого GET /universities
+            // регистрация в принципе невозможна.
+            .requestMatchers(HttpMethod.GET, "/api/v1/universities", "/api/v1/universities/**")
+            .permitAll()
             // Отключено намеренно: удобно для локальной отладки — требуем JWT
             // даже на списковых эндпоинтах, чтобы не путать публичное и приватное поведение.
 //            .requestMatchers("/api/v1/teachers*").permitAll()
