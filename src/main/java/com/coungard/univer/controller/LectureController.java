@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -118,12 +119,17 @@ public class LectureController {
   @Operation(
       summary = "Сгенерировать лекцию из шаблона Pair",
       description = "Курс, преподаватель и группы копируются из шаблона циклического расписания; "
-          + "дата должна соответствовать дню недели и чётности недели пары"
+          + "дата должна соответствовать дню недели и чётности недели пары. ADMIN/TEACHER — без "
+          + "ограничений; STUDENT — только если Pair принадлежит его группе."
   )
   @PostMapping("/generate")
-  @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER')")
-  public ResponseEntity<LectureDto> generateFromPair(@Valid @RequestBody GenerateLectureRequest request) {
-    LectureDto saved = lectureService.generateFromPair(request);
+  @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER') or hasRole('STUDENT')")
+  public ResponseEntity<LectureDto> generateFromPair(
+      @Valid @RequestBody GenerateLectureRequest request,
+      @AuthenticationPrincipal Jwt jwt,
+      Authentication authentication) {
+
+    LectureDto saved = lectureService.generateFromPair(request, callerStudentId(jwt, authentication));
 
     URI location = ServletUriComponentsBuilder
         .fromCurrentRequest()
@@ -135,15 +141,22 @@ public class LectureController {
   }
 
   @Operation(
-      summary = "Сгенерировать лекции на весь семестр из всех пар цикла расписания",
-      description = "Для каждой Pair цикла перебираются все подходящие по дню недели и чётности недели "
-          + "даты в границах [Semester.startDate, Semester.endDate]; уже сгенерированные пара+дата "
-          + "пропускаются без ошибки — операцию безопасно вызывать повторно."
+      summary = "Сгенерировать лекции на весь семестр из пар цикла расписания",
+      description = "Для каждой подходящей Pair цикла перебираются все подходящие по дню недели и "
+          + "чётности недели даты в границах [Semester.startDate, Semester.endDate]; уже "
+          + "сгенерированные пара+дата пропускаются без ошибки — операцию безопасно вызывать "
+          + "повторно. ADMIN/TEACHER — по всем Pair цикла, как раньше; STUDENT — только по Pair "
+          + "своей группы, остальные Pair цикла пропускаются молча."
   )
   @PostMapping("/generate/semester/{weekScheduleCycleId}")
-  @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER')")
-  public ResponseEntity<List<LectureDto>> generateSemesterLectures(@PathVariable UUID weekScheduleCycleId) {
-    List<LectureDto> generated = lectureService.generateSemesterLectures(weekScheduleCycleId);
+  @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER') or hasRole('STUDENT')")
+  public ResponseEntity<List<LectureDto>> generateSemesterLectures(
+      @PathVariable UUID weekScheduleCycleId,
+      @AuthenticationPrincipal Jwt jwt,
+      Authentication authentication) {
+
+    List<LectureDto> generated = lectureService.generateSemesterLectures(
+        weekScheduleCycleId, callerStudentId(jwt, authentication));
     return ResponseEntity.ok(generated);
   }
 
@@ -164,5 +177,17 @@ public class LectureController {
   public ResponseEntity<Void> deleteLecture(@PathVariable UUID id) {
     lectureService.deleteLecture(id);
     return ResponseEntity.noContent().build();
+  }
+
+  /**
+   * {@code null}, если вызывающий — ADMIN или TEACHER (без ограничений на генерацию); иначе ID
+   * вызывающего STUDENT (JWT {@code sub} == {@code Student.id}, см. флоу регистрации), используемый
+   * сервисом для ограничения генерации его собственной группой.
+   */
+  private UUID callerStudentId(Jwt jwt, Authentication authentication) {
+    boolean isAdminOrTeacher = authentication.getAuthorities().stream()
+        .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN")
+            || authority.getAuthority().equals("ROLE_TEACHER"));
+    return isAdminOrTeacher ? null : UUID.fromString(jwt.getSubject());
   }
 }

@@ -23,21 +23,27 @@ public interface LectureService {
    * Курс, преподаватель и связанные группы копируются из шаблона; дата должна соответствовать дню
    * недели и чётности недели пары (считая от {@code Semester.startDate}).
    *
-   * @param request ID пары и дата
+   * @param request         ID пары и дата
+   * @param callerStudentId {@code null}, если вызывает ADMIN/TEACHER (без ограничений); иначе ID
+   *                        вызывающего STUDENT — целевой Pair должен принадлежать его группе
    * @return созданный LectureDto
    */
-  LectureDto generateFromPair(GenerateLectureRequest request);
+  LectureDto generateFromPair(GenerateLectureRequest request, UUID callerStudentId);
 
   /**
-   * Сгенерировать лекции на весь семестр из всех Pair-шаблонов данного WeekScheduleCycle. Для каждой
+   * Сгенерировать лекции на весь семестр из Pair-шаблонов данного WeekScheduleCycle. Для каждой
    * Pair перебираются все даты её дня недели в границах [Semester.startDate, Semester.endDate],
    * подходящие по чётности недели; уже сгенерированные ранее пара+дата пропускаются без ошибки —
    * операция идемпотентна, безопасно вызывать повторно (например, после добавления новых Pair).
    *
    * @param weekScheduleCycleId идентификатор циклического расписания (= семестра)
+   * @param callerStudentId     {@code null}, если вызывает ADMIN/TEACHER — генерируются лекции по
+   *                            всем Pair цикла, как раньше; иначе ID вызывающего STUDENT —
+   *                            генерируются лекции только по Pair его группы, остальные Pair цикла
+   *                            пропускаются молча (не ошибка — это ожидаемое сужение выборки)
    * @return список только вновь созданных LectureDto (уже существовавшие в выборку не попадают)
    */
-  List<LectureDto> generateSemesterLectures(UUID weekScheduleCycleId);
+  List<LectureDto> generateSemesterLectures(UUID weekScheduleCycleId, UUID callerStudentId);
 
   /**
    * Получить лекцию по ID.
