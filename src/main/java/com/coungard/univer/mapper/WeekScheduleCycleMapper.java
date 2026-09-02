@@ -14,6 +14,7 @@ public class WeekScheduleCycleMapper {
     return WeekScheduleCycleDto.builder()
         .id(cycle.getId())
         .semesterId(cycle.getSemester().getId())
+        .status(cycle.getStatus())
         .build();
   }
 

@@ -1,6 +1,7 @@
 package com.coungard.univer.service;
 
 import com.coungard.univer.dto.WeekScheduleCycleDto;
+import com.coungard.univer.dto.WeekScheduleCycleStatus;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -46,4 +47,14 @@ public interface WeekScheduleCycleService {
    * @param id идентификатор цикла
    */
   void deleteWeekScheduleCycle(UUID id);
+
+  /**
+   * Изменить статус согласования цикла. Переход возможен в любую сторону (в т.ч. AGREED → DRAFT
+   * для последующих исправлений расписания) — вызывающий (ADMIN) полностью контролирует переход.
+   *
+   * @param id     идентификатор цикла
+   * @param status новый статус
+   * @return обновлённый WeekScheduleCycleDto
+   */
+  WeekScheduleCycleDto updateStatus(UUID id, WeekScheduleCycleStatus status);
 }

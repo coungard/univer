@@ -7,6 +7,7 @@ import com.coungard.univer.UniverApplication;
 import com.coungard.univer.dto.EducationForm;
 import com.coungard.univer.dto.SemesterType;
 import com.coungard.univer.dto.WeekScheduleCycleDto;
+import com.coungard.univer.dto.WeekScheduleCycleStatus;
 import com.coungard.univer.entity.Faculty;
 import com.coungard.univer.entity.Program;
 import com.coungard.univer.entity.Semester;
@@ -202,6 +203,52 @@ class WeekScheduleCycleServiceTest {
   @Test
   void shouldThrowExceptionWhenDeletingNonExistentCycle() {
     assertThatThrownBy(() -> weekScheduleCycleService.deleteWeekScheduleCycle(UUID.randomUUID()))
+        .isInstanceOf(ResourceNotFoundException.class);
+  }
+
+  @Test
+  void shouldAlwaysCreateCycleInDraftStatus() {
+    // Given: клиент присылает статус, отличный от DRAFT — должен быть проигнорирован
+    WeekScheduleCycleDto dto = WeekScheduleCycleDto.builder()
+        .semesterId(semesterId)
+        .status(WeekScheduleCycleStatus.AGREED)
+        .build();
+
+    // When
+    WeekScheduleCycleDto created = weekScheduleCycleService.createWeekScheduleCycle(dto);
+
+    // Then
+    assertThat(created.status()).isEqualTo(WeekScheduleCycleStatus.DRAFT);
+  }
+
+  @Test
+  void shouldUpdateStatusFromDraftToAgreedAndBack() {
+    // Given
+    WeekScheduleCycleDto created = weekScheduleCycleService.createWeekScheduleCycle(
+        WeekScheduleCycleDto.builder().semesterId(semesterId).build());
+    assertThat(created.status()).isEqualTo(WeekScheduleCycleStatus.DRAFT);
+
+    // When
+    WeekScheduleCycleDto agreed = weekScheduleCycleService.updateStatus(
+        created.id(), WeekScheduleCycleStatus.AGREED);
+
+    // Then
+    assertThat(agreed.status()).isEqualTo(WeekScheduleCycleStatus.AGREED);
+    assertThat(weekScheduleCycleService.getWeekScheduleCycleById(created.id()).status())
+        .isEqualTo(WeekScheduleCycleStatus.AGREED);
+
+    // When: откат обратно в DRAFT для исправлений
+    WeekScheduleCycleDto backToDraft = weekScheduleCycleService.updateStatus(
+        created.id(), WeekScheduleCycleStatus.DRAFT);
+
+    // Then
+    assertThat(backToDraft.status()).isEqualTo(WeekScheduleCycleStatus.DRAFT);
+  }
+
+  @Test
+  void shouldThrowExceptionWhenUpdatingStatusOfNonExistentCycle() {
+    assertThatThrownBy(
+        () -> weekScheduleCycleService.updateStatus(UUID.randomUUID(), WeekScheduleCycleStatus.AGREED))
         .isInstanceOf(ResourceNotFoundException.class);
   }
 }
