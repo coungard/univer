@@ -214,7 +214,8 @@ class EnrollmentAttendanceIntegrationTest {
         .containsExactlyInAnyOrder(student1Id, student2Id);
 
     // 2. Сгенерировать лекцию из шаблона Pair на первый понедельник семестра
-    LectureDto lecture = lectureService.generateFromPair(new GenerateLectureRequest(pairId, FIRST_MONDAY_ODD_WEEK));
+    LectureDto lecture = lectureService.generateFromPair(
+        new GenerateLectureRequest(pairId, FIRST_MONDAY_ODD_WEEK), null);
     assertThat(lecture.groupIds()).containsExactly(groupId);
 
     // 3. Отметить посещаемость: student1 присутствовал, student2 — нет

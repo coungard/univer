@@ -67,9 +67,10 @@ public class LectureServiceImpl implements LectureService {
 
   @Override
   @Transactional
-  public LectureDto generateFromPair(GenerateLectureRequest request) {
+  public LectureDto generateFromPair(GenerateLectureRequest request, UUID callerStudentId) {
     Pair pair = pairRepository.findById(request.pairId())
         .orElseThrow(() -> new ResourceNotFoundException("Пара не найдена с ID: " + request.pairId()));
+    checkStudentCanGenerate(callerStudentId, pair.getGroups());
 
     LocalDate date = request.date();
     if (date.getDayOfWeek() != pair.getDayOfWeek()) {
@@ -98,10 +99,13 @@ public class LectureServiceImpl implements LectureService {
 
   @Override
   @Transactional
-  public List<LectureDto> generateSemesterLectures(UUID weekScheduleCycleId) {
+  public List<LectureDto> generateSemesterLectures(UUID weekScheduleCycleId, UUID callerStudentId) {
     WeekScheduleCycle cycle = weekScheduleCycleRepository.findById(weekScheduleCycleId)
         .orElseThrow(() -> new ResourceNotFoundException(
             "Циклическое расписание не найдено с ID: " + weekScheduleCycleId));
+    // Для ADMIN/TEACHER — null, генерируются лекции по всем Pair цикла, как раньше. Для STUDENT —
+    // группа вызывающего, дальше отфильтровываем ею список Pair.
+    UUID callerGroupId = resolveCallerGroupId(callerStudentId);
 
     Semester semester = cycle.getSemester();
     LocalDate semesterStart = semester.getStartDate();
@@ -109,6 +113,10 @@ public class LectureServiceImpl implements LectureService {
 
     List<LectureDto> generated = new ArrayList<>();
     for (Pair pair : pairRepository.findByWeekScheduleCycleId(weekScheduleCycleId)) {
+      if (callerGroupId != null && pair.getGroups().stream().noneMatch(g -> g.getId().equals(callerGroupId))) {
+        continue;
+      }
+
       LocalDate date = semesterStart.with(TemporalAdjusters.nextOrSame(pair.getDayOfWeek()));
       while (!date.isAfter(semesterEnd)) {
         WeekParity actualParity = computeWeekParity(semesterStart, date);
@@ -207,6 +215,38 @@ public class LectureServiceImpl implements LectureService {
       throw new ResourceNotFoundException("Лекция не найдена с ID: " + id);
     }
     lectureRepository.deleteById(id);
+  }
+
+  /**
+   * Проверка права STUDENT сгенерировать Lecture из конкретного Pair. {@code callerStudentId ==
+   * null} означает вызов от ADMIN/TEACHER — без ограничений.
+   */
+  private void checkStudentCanGenerate(UUID callerStudentId, Set<Group> pairGroups) {
+    if (callerStudentId == null) {
+      return;
+    }
+
+    UUID callerGroupId = resolveCallerGroupId(callerStudentId);
+    if (pairGroups.stream().noneMatch(g -> g.getId().equals(callerGroupId))) {
+      throw new ValidationException("Студент может генерировать лекции только для своей группы");
+    }
+  }
+
+  /**
+   * {@code null}, если {@code callerStudentId == null} (вызов от ADMIN/TEACHER — без ограничений).
+   * Иначе — ID группы вызывающего студента; студент без группы генерировать лекции не может.
+   */
+  private UUID resolveCallerGroupId(UUID callerStudentId) {
+    if (callerStudentId == null) {
+      return null;
+    }
+
+    Student student = studentRepository.findById(callerStudentId)
+        .orElseThrow(() -> new ResourceNotFoundException("Студент не найден с ID: " + callerStudentId));
+    if (student.getGroup() == null) {
+      throw new ValidationException("Студент не привязан к группе — генерация расписания недоступна");
+    }
+    return student.getGroup().getId();
   }
 
   private WeekParity computeWeekParity(LocalDate semesterStart, LocalDate date) {

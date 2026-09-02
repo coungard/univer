@@ -324,8 +324,8 @@
 | GET | `/me` | `STUDENT` | `?page&size` | — | `Page<LectureDto>`, отсортировано по `scheduledTime` ASC |
 | GET | `/{id}` | любая роль | — | — | `LectureDto` |
 | POST | `/` | `ADMIN`/`TEACHER` | — | `LectureDto` | `201` + `LectureDto` |
-| POST | `/generate` | `ADMIN`/`TEACHER` | — | `GenerateLectureRequest` | `201` + `LectureDto` |
-| POST | `/generate/semester/{weekScheduleCycleId}` | `ADMIN`/`TEACHER` | — | — | `200` + `LectureDto[]` |
+| POST | `/generate` | `ADMIN`/`TEACHER`/`STUDENT`² | — | `GenerateLectureRequest` | `201` + `LectureDto` |
+| POST | `/generate/semester/{weekScheduleCycleId}` | `ADMIN`/`TEACHER`/`STUDENT`² | — | — | `200` + `LectureDto[]` |
 | PUT | `/{id}` | `ADMIN`/`TEACHER` | — | `LectureDto` | `LectureDto` |
 | DELETE | `/{id}` | `ADMIN`/`TEACHER` | — | — | `204` |
 
@@ -333,6 +333,10 @@
   «Флоу регистрации» в `CLAUDE.md`), а не из path/query. Возвращает лекции группы, к которой привязан
   студент; если студент ещё не привязан к группе — пустая страница, а не ошибка. Это основной эндпоинт для
   экрана «моё расписание» в мобильном приложении.
+- ² `STUDENT` может генерировать лекции только для своей группы: `POST /generate` — целевой `Pair`
+  должен принадлежать его группе; `POST /generate/semester/{id}` — генерирует только по `Pair` своей
+  группы, остальные `Pair` цикла пропускаются молча (не ошибка). Статус цикла (`DRAFT`/`AGREED`, см.
+  `WeekScheduleCycles`) на генерацию не влияет. `ADMIN`/`TEACHER` не ограничены.
 - **`POST /generate`** — генерирует одну `Lecture` на конкретную `date` из шаблона `Pair` (курс,
   преподаватель, группы копируются из `Pair`); `date` должна соответствовать `dayOfWeek`/`weekParity` пары.
 - **`POST /generate/semester/{weekScheduleCycleId}`** — генерирует лекции на весь семестр разом для всех

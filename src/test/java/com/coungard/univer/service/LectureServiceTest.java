@@ -125,6 +125,7 @@ class LectureServiceTest {
   private static final LocalDate THIRD_MONDAY_ODD_WEEK = LocalDate.of(2026, 9, 21);
 
   private UUID universityId;
+  private UUID semesterId;
   private UUID courseId;
   private UUID group1Id;
   private UUID group2Id;
@@ -185,7 +186,7 @@ class LectureServiceTest {
     semester.setType(SemesterType.AUTUMN);
     semester.setStartDate(SEMESTER_START);
     semester.setEndDate(SEMESTER_END);
-    UUID semesterId = semesterRepository.save(semester).getId();
+    semesterId = semesterRepository.save(semester).getId();
 
     WeekScheduleCycle cycle = new WeekScheduleCycle();
     cycle.setSemester(semesterRepository.getReferenceById(semesterId));
@@ -411,7 +412,7 @@ class LectureServiceTest {
     GenerateLectureRequest request = new GenerateLectureRequest(pairId, FIRST_MONDAY_ODD_WEEK);
 
     // When
-    LectureDto generated = lectureService.generateFromPair(request);
+    LectureDto generated = lectureService.generateFromPair(request, null);
 
     // Then
     assertThat(generated.sourcePairId()).isEqualTo(pairId);
@@ -426,7 +427,7 @@ class LectureServiceTest {
     // Given: вторник, а пара привязана к понедельнику
     GenerateLectureRequest request = new GenerateLectureRequest(pairId, FIRST_MONDAY_ODD_WEEK.plusDays(1));
 
-    assertThatThrownBy(() -> lectureService.generateFromPair(request))
+    assertThatThrownBy(() -> lectureService.generateFromPair(request, null))
         .isInstanceOf(ValidationException.class);
   }
 
@@ -435,18 +436,18 @@ class LectureServiceTest {
     // Given: второй понедельник семестра — чётная неделя, а пара рассчитана на нечётную
     GenerateLectureRequest request = new GenerateLectureRequest(pairId, SECOND_MONDAY_EVEN_WEEK);
 
-    assertThatThrownBy(() -> lectureService.generateFromPair(request))
+    assertThatThrownBy(() -> lectureService.generateFromPair(request, null))
         .isInstanceOf(ValidationException.class);
   }
 
   @Test
   void shouldThrowExceptionWhenGeneratingDuplicateForSameDate() {
     // Given
-    lectureService.generateFromPair(new GenerateLectureRequest(pairId, FIRST_MONDAY_ODD_WEEK));
+    lectureService.generateFromPair(new GenerateLectureRequest(pairId, FIRST_MONDAY_ODD_WEEK), null);
 
     // When & Then
     assertThatThrownBy(
-        () -> lectureService.generateFromPair(new GenerateLectureRequest(pairId, FIRST_MONDAY_ODD_WEEK)))
+        () -> lectureService.generateFromPair(new GenerateLectureRequest(pairId, FIRST_MONDAY_ODD_WEEK), null))
         .isInstanceOf(ValidationException.class);
   }
 
@@ -454,7 +455,7 @@ class LectureServiceTest {
   void shouldThrowExceptionWhenGeneratingFromNonExistentPair() {
     GenerateLectureRequest request = new GenerateLectureRequest(UUID.randomUUID(), FIRST_MONDAY_ODD_WEEK);
 
-    assertThatThrownBy(() -> lectureService.generateFromPair(request))
+    assertThatThrownBy(() -> lectureService.generateFromPair(request, null))
         .isInstanceOf(ResourceNotFoundException.class);
   }
 
@@ -463,7 +464,7 @@ class LectureServiceTest {
     // Given: фикстурная пара — WeekParity.ODD, диапазон семестра — 3 понедельника (нечёт/чёт/нечёт)
 
     // When
-    List<LectureDto> generated = lectureService.generateSemesterLectures(cycleId);
+    List<LectureDto> generated = lectureService.generateSemesterLectures(cycleId, null);
 
     // Then: сгенерированы только нечётные понедельники, чётный (14 сентября) пропущен
     assertThat(generated).hasSize(2);
@@ -477,10 +478,10 @@ class LectureServiceTest {
   @Test
   void shouldSkipAlreadyGeneratedLecturesOnRepeatedCall() {
     // Given
-    lectureService.generateSemesterLectures(cycleId);
+    lectureService.generateSemesterLectures(cycleId, null);
 
     // When: повторный вызов — все даты этого цикла уже сгенерированы
-    List<LectureDto> secondCall = lectureService.generateSemesterLectures(cycleId);
+    List<LectureDto> secondCall = lectureService.generateSemesterLectures(cycleId, null);
 
     // Then
     assertThat(secondCall).isEmpty();
@@ -501,7 +502,7 @@ class LectureServiceTest {
     pairRepository.save(everyWeekPair);
 
     // When
-    List<LectureDto> generated = lectureService.generateSemesterLectures(cycleId);
+    List<LectureDto> generated = lectureService.generateSemesterLectures(cycleId, null);
 
     // Then: фикстурная ODD-пара даёт 2 лекции (07, 21 сентября) + BOTH-пара даёт 3 (07, 14, 21) = 5
     assertThat(generated).hasSize(5);
@@ -509,11 +510,93 @@ class LectureServiceTest {
 
   @Test
   void shouldThrowExceptionWhenGeneratingForNonExistentWeekScheduleCycle() {
-    assertThatThrownBy(() -> lectureService.generateSemesterLectures(UUID.randomUUID()))
+    assertThatThrownBy(() -> lectureService.generateSemesterLectures(UUID.randomUUID(), null))
         .isInstanceOf(ResourceNotFoundException.class);
   }
 
+  // === STUDENT-ограничения генерации: своя группа (issue #61) ===
+
+  @Test
+  void shouldAllowStudentToGenerateFromPairForOwnGroup() {
+    // Given: фикстурная pairId — поток на group1Id и group2Id
+    UUID studentId = createStudent(group1Id);
+    GenerateLectureRequest request = new GenerateLectureRequest(pairId, FIRST_MONDAY_ODD_WEEK);
+
+    // When
+    LectureDto generated = lectureService.generateFromPair(request, studentId);
+
+    // Then
+    assertThat(generated.sourcePairId()).isEqualTo(pairId);
+  }
+
+  @Test
+  void shouldRejectStudentGeneratingFromPairForForeignGroup() {
+    // Given: студент группы, не участвующей в этой Pair
+    UUID group3Id = createGroup("Чужая группа");
+    UUID studentId = createStudent(group3Id);
+    GenerateLectureRequest request = new GenerateLectureRequest(pairId, FIRST_MONDAY_ODD_WEEK);
+
+    // When & Then
+    assertThatThrownBy(() -> lectureService.generateFromPair(request, studentId))
+        .isInstanceOf(ValidationException.class)
+        .hasMessageContaining("своей группы");
+  }
+
+  @Test
+  void shouldRejectStudentWithoutGroupGeneratingFromPair() {
+    // Given
+    UUID studentId = createStudent(null);
+    GenerateLectureRequest request = new GenerateLectureRequest(pairId, FIRST_MONDAY_ODD_WEEK);
+
+    // When & Then
+    assertThatThrownBy(() -> lectureService.generateFromPair(request, studentId))
+        .isInstanceOf(ValidationException.class)
+        .hasMessageContaining("не привязан к группе");
+  }
+
+  @Test
+  void shouldThrowExceptionWhenCallerStudentDoesNotExist() {
+    GenerateLectureRequest request = new GenerateLectureRequest(pairId, FIRST_MONDAY_ODD_WEEK);
+
+    assertThatThrownBy(() -> lectureService.generateFromPair(request, UUID.randomUUID()))
+        .isInstanceOf(ResourceNotFoundException.class);
+  }
+
+  @Test
+  void shouldGenerateSemesterLecturesOnlyForStudentsOwnGroupPairs() {
+    // Given: вторая пара того же цикла принадлежит только чужой (для студента) группе
+    UUID group3Id = createGroup("Чужая группа");
+    Pair foreignPair = new Pair();
+    foreignPair.setWeekScheduleCycle(weekScheduleCycleRepository.getReferenceById(cycleId));
+    foreignPair.setDayOfWeek(DayOfWeek.MONDAY);
+    foreignPair.setWeekParity(WeekParity.ODD);
+    foreignPair.setPairNumber(2);
+    foreignPair.setStartTime(LocalTime.of(9, 40));
+    foreignPair.setEndTime(LocalTime.of(11, 10));
+    foreignPair.setCourse(courseRepository.getReferenceById(courseId));
+    foreignPair.setGroups(Set.of(groupRepository.findById(group3Id).orElseThrow()));
+    pairRepository.save(foreignPair);
+
+    UUID studentId = createStudent(group1Id);
+
+    // When: фикстурная pairId (group1+group2) даёт 2 лекции (07, 21 сентября); foreignPair (group3)
+    // должна быть пропущена молча, а не дать ошибку
+    List<LectureDto> generated = lectureService.generateSemesterLectures(cycleId, studentId);
+
+    // Then
+    assertThat(generated).hasSize(2);
+    assertThat(lectureRepository.findAll())
+        .allSatisfy(lecture -> assertThat(lecture.getSourcePair().getId()).isEqualTo(pairId));
+  }
+
   // === Вспомогательные методы ===
+
+  private UUID createGroup(String name) {
+    Group group = new Group();
+    group.setSemester(semesterRepository.getReferenceById(semesterId));
+    group.setName(name);
+    return groupRepository.save(group).getId();
+  }
 
   private UUID createStudent(UUID groupId) {
     Student student = new Student();
