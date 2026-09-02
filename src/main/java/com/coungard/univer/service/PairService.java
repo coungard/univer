@@ -11,10 +11,13 @@ public interface PairService {
    * Создать пару в циклическом расписании. Обязательна привязка к циклу, учебному курсу и хотя бы
    * одной группе (может быть несколько — поточная лекция). Преподаватель опционален.
    *
-   * @param pairDto данные пары
+   * @param pairDto         данные пары
+   * @param callerStudentId {@code null}, если вызывает ADMIN (без ограничений); иначе ID
+   *                        вызывающего STUDENT — пара должна принадлежать его группе, а цикл
+   *                        расписания быть в статусе DRAFT
    * @return созданный PairDto
    */
-  PairDto createPair(PairDto pairDto);
+  PairDto createPair(PairDto pairDto, UUID callerStudentId);
 
   /**
    * Получить пару по ID.
@@ -54,16 +57,22 @@ public interface PairService {
   /**
    * Обновить пару.
    *
-   * @param id идентификатор пары
-   * @param pairDto новые данные
+   * @param id              идентификатор пары
+   * @param pairDto         новые данные
+   * @param callerStudentId {@code null}, если вызывает ADMIN; иначе ID вызывающего STUDENT — и
+   *                        текущее, и новое состояние пары (группы, цикл) должны проходить проверку
+   *                        (своя группа + цикл в DRAFT), т.к. dto может переносить пару в другой
+   *                        цикл/группу
    * @return обновлённый PairDto
    */
-  PairDto updatePair(UUID id, PairDto pairDto);
+  PairDto updatePair(UUID id, PairDto pairDto, UUID callerStudentId);
 
   /**
    * Удалить пару по ID.
    *
-   * @param id идентификатор пары
+   * @param id              идентификатор пары
+   * @param callerStudentId {@code null}, если вызывает ADMIN; иначе ID вызывающего STUDENT — пара
+   *                        должна принадлежать его группе, а цикл — быть в статусе DRAFT
    */
-  void deletePair(UUID id);
+  void deletePair(UUID id, UUID callerStudentId);
 }
