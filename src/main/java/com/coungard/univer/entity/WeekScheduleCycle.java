@@ -1,6 +1,10 @@
 package com.coungard.univer.entity;
 
+import com.coungard.univer.dto.WeekScheduleCycleStatus;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -30,4 +34,14 @@ public class WeekScheduleCycle {
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "semester_id", nullable = false, unique = true)
   private Semester semester;
+
+  /**
+   * Статус согласования. Новый цикл всегда создаётся в {@code DRAFT} (см.
+   * {@code WeekScheduleCycleServiceImpl.createWeekScheduleCycle}) — поле-инициализатор здесь лишь
+   * подстраховка для случаев создания сущности в обход сервиса. Пока {@code DRAFT} — {@code Pair}
+   * цикла может править ADMIN или STUDENT своей группы; в {@code AGREED} — только ADMIN.
+   */
+  @Enumerated(EnumType.STRING)
+  @Column(name = "status", nullable = false, length = 16)
+  private WeekScheduleCycleStatus status = WeekScheduleCycleStatus.DRAFT;
 }

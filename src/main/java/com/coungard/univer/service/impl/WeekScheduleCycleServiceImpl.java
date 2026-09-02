@@ -1,6 +1,7 @@
 package com.coungard.univer.service.impl;
 
 import com.coungard.univer.dto.WeekScheduleCycleDto;
+import com.coungard.univer.dto.WeekScheduleCycleStatus;
 import com.coungard.univer.entity.Semester;
 import com.coungard.univer.entity.WeekScheduleCycle;
 import com.coungard.univer.exception.ResourceNotFoundException;
@@ -37,6 +38,8 @@ public class WeekScheduleCycleServiceImpl implements WeekScheduleCycleService {
 
     WeekScheduleCycle cycle = weekScheduleCycleMapper.toEntity(cycleDto);
     cycle.setSemester(semester);
+    // Новый цикл всегда DRAFT — присланное в cycleDto значение status (если есть) игнорируется.
+    cycle.setStatus(WeekScheduleCycleStatus.DRAFT);
 
     WeekScheduleCycle saved = weekScheduleCycleRepository.save(cycle);
     return weekScheduleCycleMapper.toDto(saved);
@@ -72,5 +75,17 @@ public class WeekScheduleCycleServiceImpl implements WeekScheduleCycleService {
       throw new ResourceNotFoundException("Циклическое расписание не найдено с ID: " + id);
     }
     weekScheduleCycleRepository.deleteById(id);
+  }
+
+  @Override
+  @Transactional
+  public WeekScheduleCycleDto updateStatus(UUID id, WeekScheduleCycleStatus status) {
+    WeekScheduleCycle cycle = weekScheduleCycleRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("Циклическое расписание не найдено с ID: " + id));
+
+    cycle.setStatus(status);
+
+    WeekScheduleCycle updated = weekScheduleCycleRepository.save(cycle);
+    return weekScheduleCycleMapper.toDto(updated);
   }
 }

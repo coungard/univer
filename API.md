@@ -248,7 +248,14 @@
 | GET | `/semester/{semesterId}` | любая роль | — | `WeekScheduleCycleDto` |
 | GET | `/{id}` | любая роль | — | `WeekScheduleCycleDto` |
 | POST | `/` | `ADMIN` | `WeekScheduleCycleDto` | `201` + `WeekScheduleCycleDto` |
+| PUT | `/{id}/status` | `ADMIN` | `UpdateWeekScheduleCycleStatusRequest` | `WeekScheduleCycleDto` |
 | DELETE | `/{id}` | `ADMIN` | — | `204` |
+
+- **`status`** (`WeekScheduleCycleDto`) — `DRAFT`/`AGREED`. Новый цикл всегда создаётся в `DRAFT`
+  (значение `status` в теле `POST /` игнорируется). Пока `DRAFT` — `Pair` цикла может редактировать
+  `ADMIN` без ограничений либо `STUDENT` своей группы; в `AGREED` — только `ADMIN` (см. раздел
+  `Pairs`). Смена статуса — `PUT /{id}/status`, только `ADMIN`, переход разрешён в обе стороны
+  (в т.ч. откат `AGREED` → `DRAFT` для исправлений).
 
 ## BellScheduleEntries — `/api/v1/bell-schedule-entries`
 
