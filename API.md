@@ -100,7 +100,14 @@
 `SemesterType` (enum): `AUTUMN` | `SPRING`.
 
 ### WeekScheduleCycleDto
-`id`, `semesterId`★. Циклическое расписание семестра — контейнер для шаблонов `Pair`.
+`id`, `semesterId`★, `status: WeekScheduleCycleStatus` (только в ответе — при создании форсируется
+`DRAFT` независимо от присланного значения, менять — только через `PUT /{id}/status`). Циклическое
+расписание семестра — контейнер для шаблонов `Pair`.
+`WeekScheduleCycleStatus` (enum): `DRAFT` (черновик, доступен для правок `ADMIN` и `STUDENT` своей
+группы) | `AGREED` (согласовано, правки только `ADMIN`).
+
+### UpdateWeekScheduleCycleStatusRequest (только запрос, `PUT /week-schedule-cycles/{id}/status`)
+`status: WeekScheduleCycleStatus`★.
 
 ### BellScheduleEntryDto
 `id`, `universityId` (`null` = дефолт для университетов без своей записи на этот `pairNumber`),
