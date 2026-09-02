@@ -19,6 +19,7 @@ import com.coungard.univer.entity.Program;
 import com.coungard.univer.entity.Semester;
 import com.coungard.univer.entity.Student;
 import com.coungard.univer.entity.StudyYear;
+import com.coungard.univer.entity.Teacher;
 import com.coungard.univer.entity.University;
 import com.coungard.univer.entity.WeekScheduleCycle;
 import com.coungard.univer.exception.ResourceNotFoundException;
@@ -33,6 +34,7 @@ import com.coungard.univer.repository.ProgramRepository;
 import com.coungard.univer.repository.SemesterRepository;
 import com.coungard.univer.repository.StudentRepository;
 import com.coungard.univer.repository.StudyYearRepository;
+import com.coungard.univer.repository.TeacherRepository;
 import com.coungard.univer.repository.UniversityRepository;
 import com.coungard.univer.repository.WeekScheduleCycleRepository;
 import java.time.DayOfWeek;
@@ -111,6 +113,9 @@ class PairServiceTest {
   @Autowired
   private StudentRepository studentRepository;
 
+  @Autowired
+  private TeacherRepository teacherRepository;
+
   private UUID universityId;
   private UUID weekScheduleCycleId;
   private UUID courseId;
@@ -122,6 +127,7 @@ class PairServiceTest {
     studentRepository.deleteAll();
     bellScheduleEntryRepository.deleteAll();
     pairRepository.deleteAll();
+    teacherRepository.deleteAll();
     weekScheduleCycleRepository.deleteAll();
     groupRepository.deleteAll();
     semesterRepository.deleteAll();
@@ -530,7 +536,114 @@ class PairServiceTest {
         .isInstanceOf(ResourceNotFoundException.class);
   }
 
+  // === Проверка конфликтов преподаватель/аудитория (issue #62) ===
+
+  @Test
+  void shouldRejectCreatingPairWithConflictingTeacher() {
+    // Given: пара группы 1 с преподавателем в этот слот
+    UUID teacherId = createTeacher();
+    pairService.createPair(createDto(Set.of(group1Id)).toBuilder().teacherId(teacherId).room("101").build(), null);
+
+    // When & Then: та же чётность/день/время, тот же преподаватель, другая аудитория, другая группа
+    PairDto conflicting = createDto(Set.of(group2Id)).toBuilder().teacherId(teacherId).room("202").build();
+    assertThatThrownBy(() -> pairService.createPair(conflicting, null))
+        .isInstanceOf(ValidationException.class)
+        .hasMessageContaining("Конфликт расписания");
+  }
+
+  @Test
+  void shouldRejectCreatingPairWithConflictingRoom() {
+    // Given
+    UUID teacher1Id = createTeacher();
+    UUID teacher2Id = createTeacher();
+    pairService.createPair(createDto(Set.of(group1Id)).toBuilder().teacherId(teacher1Id).room("101").build(), null);
+
+    // When & Then: та же чётность/день/время, та же аудитория, другой преподаватель
+    PairDto conflicting = createDto(Set.of(group2Id)).toBuilder().teacherId(teacher2Id).room("101").build();
+    assertThatThrownBy(() -> pairService.createPair(conflicting, null))
+        .isInstanceOf(ValidationException.class)
+        .hasMessageContaining("Конфликт расписания");
+  }
+
+  @Test
+  void shouldAllowConflictingTeacherOnDifferentWeekParity() {
+    // Given: тот же преподаватель/время/день, но чередующиеся недели — реального конфликта нет
+    UUID teacherId = createTeacher();
+    pairService.createPair(
+        createDto(Set.of(group1Id)).toBuilder().teacherId(teacherId).weekParity(WeekParity.ODD).build(), null);
+
+    // When
+    PairDto created = pairService.createPair(
+        createDto(Set.of(group2Id)).toBuilder().teacherId(teacherId).weekParity(WeekParity.EVEN).build(), null);
+
+    // Then
+    assertThat(created).isNotNull();
+  }
+
+  @Test
+  void shouldAllowConflictingTeacherOnNonOverlappingTime() {
+    // Given
+    UUID teacherId = createTeacher();
+    pairService.createPair(createDto(Set.of(group1Id)).toBuilder().teacherId(teacherId).build(), null);
+
+    // When: тот же день/чётность, но другой временной слот (createDto — 8:00-9:30)
+    PairDto created = pairService.createPair(
+        createDto(Set.of(group2Id)).toBuilder()
+            .teacherId(teacherId)
+            .startTime(LocalTime.of(9, 40))
+            .endTime(LocalTime.of(11, 10))
+            .build(),
+        null);
+
+    // Then
+    assertThat(created).isNotNull();
+  }
+
+  @Test
+  void shouldNotConflictWithItselfWhenUpdatingPairUnchanged() {
+    // Given
+    UUID teacherId = createTeacher();
+    PairDto original = pairService.createPair(
+        createDto(Set.of(group1Id)).toBuilder().teacherId(teacherId).room("101").build(), null);
+
+    // When: обновление без изменения слота — не должно конфликтовать само с собой
+    PairDto updated = pairService.updatePair(original.id(), original, null);
+
+    // Then
+    assertThat(updated).isNotNull();
+  }
+
+  @Test
+  void shouldRejectUpdatingPairIntoConflictWithAnotherPair() {
+    // Given: пара 1 занимает слот с преподавателем; пара 2 — в другой день, без конфликта
+    UUID teacherId = createTeacher();
+    pairService.createPair(createDto(Set.of(group1Id)).toBuilder().teacherId(teacherId).build(), null);
+    PairDto other = pairService.createPair(
+        createDto(Set.of(group2Id)).toBuilder().dayOfWeek(DayOfWeek.TUESDAY).build(), null);
+
+    // When & Then: переносим пару 2 в тот же слот с тем же преподавателем
+    PairDto movedIntoConflict = other.toBuilder().dayOfWeek(DayOfWeek.MONDAY).teacherId(teacherId).build();
+    assertThatThrownBy(() -> pairService.updatePair(other.id(), movedIntoConflict, null))
+        .isInstanceOf(ValidationException.class)
+        .hasMessageContaining("Конфликт расписания");
+  }
+
   // === Вспомогательные методы ===
+
+  private UUID createTeacher() {
+    Teacher teacher = new Teacher();
+
+    String uniqueSuffix = UUID.randomUUID().toString();
+    Person person = new Person();
+    person.setUsername("teacher_" + uniqueSuffix);
+    person.setEmail("teacher_" + uniqueSuffix + "@example.com");
+    person.setFirstname("Пётр");
+    person.setLastname("Петров");
+    person.setFullname("Пётр Петров");
+    teacher.setPerson(person);
+
+    return teacherRepository.save(teacher).getId();
+  }
 
   private UUID createStudent(UUID groupId) {
     Student student = new Student();

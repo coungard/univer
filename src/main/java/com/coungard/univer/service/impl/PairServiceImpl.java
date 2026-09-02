@@ -1,6 +1,7 @@
 package com.coungard.univer.service.impl;
 
 import com.coungard.univer.dto.PairDto;
+import com.coungard.univer.dto.WeekParity;
 import com.coungard.univer.dto.WeekScheduleCycleStatus;
 import com.coungard.univer.entity.BellScheduleEntry;
 import com.coungard.univer.entity.Course;
@@ -23,6 +24,7 @@ import com.coungard.univer.service.PairService;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -61,6 +63,7 @@ public class PairServiceImpl implements PairService {
     ResolvedSchedule schedule = resolveSchedule(pairDto, course);
     Set<Group> groups = resolveGroups(pairDto.groupIds());
     checkStudentCanEdit(callerStudentId, cycle, groups);
+    checkForConflicts(cycle, pairDto, schedule, null);
 
     Pair pair = pairMapper.toEntity(pairDto);
     pair.setWeekScheduleCycle(cycle);
@@ -119,6 +122,7 @@ public class PairServiceImpl implements PairService {
     Set<Group> groups = resolveGroups(pairDto.groupIds());
     // ...и новое (нельзя перенести пару в чужой цикл/группу или в уже согласованный цикл).
     checkStudentCanEdit(callerStudentId, cycle, groups);
+    checkForConflicts(cycle, pairDto, schedule, id);
 
     existing.setWeekScheduleCycle(cycle);
     existing.setCourse(course);
@@ -172,6 +176,61 @@ public class PairServiceImpl implements PairService {
       throw new ValidationException(
           "Циклическое расписание уже согласовано — редактирование доступно только администратору");
     }
+  }
+
+  /**
+   * Проверка конфликтов преподаватель/аудитория между Pair одного цикла (issue #62): два Pair
+   * конфликтуют, если совпадает день недели, пересекается чётность недели (с учётом BOTH),
+   * пересекаются фактические интервалы времени, и при этом совпадает преподаватель или аудитория.
+   * Действует для всех ролей (не только STUDENT) — сегодняшний ADMIN тоже может создать конфликт по
+   * недосмотру, отдельного пути в обход валидации быть не должно. Защита от гонки при параллельных
+   * сохранениях сознательно не реализована — см. решение в issue #62 (низкий риск для MVP).
+   *
+   * @param excludePairId при update — ID редактируемой пары, чтобы не конфликтовать самой с собой;
+   *                      {@code null} при create
+   */
+  private void checkForConflicts(
+      WeekScheduleCycle cycle, PairDto pairDto, ResolvedSchedule schedule, UUID excludePairId) {
+
+    UUID teacherId = pairDto.teacherId();
+    String room = pairDto.room();
+
+    List<Pair> pairsInCycle = pairRepository.findByWeekScheduleCycleId(cycle.getId());
+    for (Pair other : pairsInCycle) {
+      if (excludePairId != null && other.getId().equals(excludePairId)) {
+        continue;
+      }
+      if (other.getDayOfWeek() != pairDto.dayOfWeek()
+          || !weekParityOverlaps(other.getWeekParity(), pairDto.weekParity())
+          || !timeOverlaps(other.getStartTime(), other.getEndTime(), schedule.startTime(), schedule.endTime())) {
+        continue;
+      }
+
+      boolean teacherConflict = teacherId != null
+          && other.getTeacher() != null
+          && teacherId.equals(other.getTeacher().getId());
+      if (teacherConflict) {
+        throw new ValidationException(
+            "Конфликт расписания: преподаватель уже занят в это время парой " + other.getId()
+                + " (" + other.getDayOfWeek() + " " + other.getStartTime() + "-" + other.getEndTime() + ")");
+      }
+
+      boolean roomConflict = room != null && !room.isBlank() && room.equalsIgnoreCase(other.getRoom());
+      if (roomConflict) {
+        throw new ValidationException(
+            "Конфликт расписания: аудитория \"" + other.getRoom() + "\" уже занята в это время парой "
+                + other.getId() + " (" + other.getDayOfWeek() + " " + other.getStartTime() + "-"
+                + other.getEndTime() + ")");
+      }
+    }
+  }
+
+  private boolean weekParityOverlaps(WeekParity a, WeekParity b) {
+    return a == WeekParity.BOTH || b == WeekParity.BOTH || a == b;
+  }
+
+  private boolean timeOverlaps(LocalTime startA, LocalTime endA, LocalTime startB, LocalTime endB) {
+    return startA.isBefore(endB) && startB.isBefore(endA);
   }
 
   /**
