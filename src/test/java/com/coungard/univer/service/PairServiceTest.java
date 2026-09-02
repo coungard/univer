@@ -8,13 +8,16 @@ import com.coungard.univer.dto.EducationForm;
 import com.coungard.univer.dto.PairDto;
 import com.coungard.univer.dto.SemesterType;
 import com.coungard.univer.dto.WeekParity;
+import com.coungard.univer.dto.WeekScheduleCycleStatus;
 import com.coungard.univer.entity.BellScheduleEntry;
 import com.coungard.univer.entity.Course;
 import com.coungard.univer.entity.Department;
 import com.coungard.univer.entity.Faculty;
 import com.coungard.univer.entity.Group;
+import com.coungard.univer.entity.Person;
 import com.coungard.univer.entity.Program;
 import com.coungard.univer.entity.Semester;
+import com.coungard.univer.entity.Student;
 import com.coungard.univer.entity.StudyYear;
 import com.coungard.univer.entity.University;
 import com.coungard.univer.entity.WeekScheduleCycle;
@@ -28,6 +31,7 @@ import com.coungard.univer.repository.GroupRepository;
 import com.coungard.univer.repository.PairRepository;
 import com.coungard.univer.repository.ProgramRepository;
 import com.coungard.univer.repository.SemesterRepository;
+import com.coungard.univer.repository.StudentRepository;
 import com.coungard.univer.repository.StudyYearRepository;
 import com.coungard.univer.repository.UniversityRepository;
 import com.coungard.univer.repository.WeekScheduleCycleRepository;
@@ -104,6 +108,9 @@ class PairServiceTest {
   @Autowired
   private BellScheduleEntryRepository bellScheduleEntryRepository;
 
+  @Autowired
+  private StudentRepository studentRepository;
+
   private UUID universityId;
   private UUID weekScheduleCycleId;
   private UUID courseId;
@@ -112,6 +119,7 @@ class PairServiceTest {
 
   @BeforeEach
   void setUp() {
+    studentRepository.deleteAll();
     bellScheduleEntryRepository.deleteAll();
     pairRepository.deleteAll();
     weekScheduleCycleRepository.deleteAll();
@@ -186,7 +194,7 @@ class PairServiceTest {
     PairDto dto = createDto(Set.of(group1Id));
 
     // When
-    PairDto created = pairService.createPair(dto);
+    PairDto created = pairService.createPair(dto, null);
     PairDto found = pairService.getPairById(created.id());
 
     // Then
@@ -201,7 +209,7 @@ class PairServiceTest {
     PairDto dto = createDto(Set.of(group1Id, group2Id));
 
     // When
-    PairDto created = pairService.createPair(dto);
+    PairDto created = pairService.createPair(dto, null);
 
     // Then
     assertThat(created.groupIds()).containsExactlyInAnyOrder(group1Id, group2Id);
@@ -211,7 +219,7 @@ class PairServiceTest {
   void shouldThrowExceptionWhenCreatingPairWithNonExistentCycle() {
     PairDto dto = createDto(Set.of(group1Id)).toBuilder().weekScheduleCycleId(UUID.randomUUID()).build();
 
-    assertThatThrownBy(() -> pairService.createPair(dto))
+    assertThatThrownBy(() -> pairService.createPair(dto, null))
         .isInstanceOf(ResourceNotFoundException.class);
   }
 
@@ -219,7 +227,7 @@ class PairServiceTest {
   void shouldThrowExceptionWhenCreatingPairWithNonExistentCourse() {
     PairDto dto = createDto(Set.of(group1Id)).toBuilder().courseId(UUID.randomUUID()).build();
 
-    assertThatThrownBy(() -> pairService.createPair(dto))
+    assertThatThrownBy(() -> pairService.createPair(dto, null))
         .isInstanceOf(ResourceNotFoundException.class);
   }
 
@@ -227,7 +235,7 @@ class PairServiceTest {
   void shouldThrowExceptionWhenCreatingPairWithNonExistentGroup() {
     PairDto dto = createDto(Set.of(UUID.randomUUID()));
 
-    assertThatThrownBy(() -> pairService.createPair(dto))
+    assertThatThrownBy(() -> pairService.createPair(dto, null))
         .isInstanceOf(ResourceNotFoundException.class);
   }
 
@@ -235,7 +243,7 @@ class PairServiceTest {
   void shouldThrowExceptionWhenDayOfWeekIsWeekend() {
     PairDto dto = createDto(Set.of(group1Id)).toBuilder().dayOfWeek(DayOfWeek.SATURDAY).build();
 
-    assertThatThrownBy(() -> pairService.createPair(dto))
+    assertThatThrownBy(() -> pairService.createPair(dto, null))
         .isInstanceOf(ValidationException.class);
   }
 
@@ -246,7 +254,7 @@ class PairServiceTest {
         .endTime(LocalTime.of(9, 0))
         .build();
 
-    assertThatThrownBy(() -> pairService.createPair(dto))
+    assertThatThrownBy(() -> pairService.createPair(dto, null))
         .isInstanceOf(ValidationException.class);
   }
 
@@ -259,8 +267,8 @@ class PairServiceTest {
   @Test
   void shouldGetPairs() {
     // Given
-    pairService.createPair(createDto(Set.of(group1Id)));
-    pairService.createPair(createDto(Set.of(group2Id)).toBuilder().dayOfWeek(DayOfWeek.TUESDAY).build());
+    pairService.createPair(createDto(Set.of(group1Id)), null);
+    pairService.createPair(createDto(Set.of(group2Id)).toBuilder().dayOfWeek(DayOfWeek.TUESDAY).build(), null);
 
     Pageable pageable = PageRequest.of(0, 10);
 
@@ -274,7 +282,7 @@ class PairServiceTest {
   @Test
   void shouldGetPairsByWeekScheduleCycle() {
     // Given
-    pairService.createPair(createDto(Set.of(group1Id)));
+    pairService.createPair(createDto(Set.of(group1Id)), null);
 
     Pageable pageable = PageRequest.of(0, 10);
 
@@ -288,7 +296,7 @@ class PairServiceTest {
   @Test
   void shouldGetPairsByGroupIncludingStreamPairs() {
     // Given: поточная пара видна в расписании обеих групп
-    pairService.createPair(createDto(Set.of(group1Id, group2Id)));
+    pairService.createPair(createDto(Set.of(group1Id, group2Id)), null);
 
     Pageable pageable = PageRequest.of(0, 10);
 
@@ -305,7 +313,7 @@ class PairServiceTest {
   @Test
   void shouldUpdatePair() {
     // Given
-    PairDto original = pairService.createPair(createDto(Set.of(group1Id)));
+    PairDto original = pairService.createPair(createDto(Set.of(group1Id)), null);
 
     PairDto updateDto = original.toBuilder()
         .dayOfWeek(DayOfWeek.WEDNESDAY)
@@ -314,7 +322,7 @@ class PairServiceTest {
         .build();
 
     // When
-    PairDto updated = pairService.updatePair(original.id(), updateDto);
+    PairDto updated = pairService.updatePair(original.id(), updateDto, null);
 
     // Then
     assertThat(updated.dayOfWeek()).isEqualTo(DayOfWeek.WEDNESDAY);
@@ -326,17 +334,17 @@ class PairServiceTest {
   void shouldThrowExceptionWhenUpdatingNonExistentPair() {
     PairDto dto = createDto(Set.of(group1Id));
 
-    assertThatThrownBy(() -> pairService.updatePair(UUID.randomUUID(), dto))
+    assertThatThrownBy(() -> pairService.updatePair(UUID.randomUUID(), dto, null))
         .isInstanceOf(ResourceNotFoundException.class);
   }
 
   @Test
   void shouldDeletePairById() {
     // Given
-    PairDto pair = pairService.createPair(createDto(Set.of(group1Id)));
+    PairDto pair = pairService.createPair(createDto(Set.of(group1Id)), null);
 
     // When
-    pairService.deletePair(pair.id());
+    pairService.deletePair(pair.id(), null);
 
     // Then
     assertThat(pairRepository.findById(pair.id())).isEmpty();
@@ -344,7 +352,7 @@ class PairServiceTest {
 
   @Test
   void shouldThrowExceptionWhenDeletingNonExistentPair() {
-    assertThatThrownBy(() -> pairService.deletePair(UUID.randomUUID()))
+    assertThatThrownBy(() -> pairService.deletePair(UUID.randomUUID(), null))
         .isInstanceOf(ResourceNotFoundException.class);
   }
 
@@ -355,7 +363,7 @@ class PairServiceTest {
     PairDto dto = createDto(Set.of(group1Id)).toBuilder().startTime(null).endTime(null).build();
 
     // When
-    PairDto created = pairService.createPair(dto);
+    PairDto created = pairService.createPair(dto, null);
 
     // Then
     assertThat(created.startTime()).isEqualTo(LocalTime.of(9, 0));
@@ -369,7 +377,7 @@ class PairServiceTest {
     PairDto dto = createDto(Set.of(group1Id)).toBuilder().startTime(null).endTime(null).build();
 
     // When
-    PairDto created = pairService.createPair(dto);
+    PairDto created = pairService.createPair(dto, null);
 
     // Then
     assertThat(created.startTime()).isEqualTo(LocalTime.of(9, 0));
@@ -381,7 +389,7 @@ class PairServiceTest {
     // Given: справочник пуст
     PairDto dto = createDto(Set.of(group1Id)).toBuilder().startTime(null).endTime(null).build();
 
-    assertThatThrownBy(() -> pairService.createPair(dto))
+    assertThatThrownBy(() -> pairService.createPair(dto, null))
         .isInstanceOf(ValidationException.class);
   }
 
@@ -392,14 +400,164 @@ class PairServiceTest {
     PairDto dto = createDto(Set.of(group1Id));
 
     // When
-    PairDto created = pairService.createPair(dto);
+    PairDto created = pairService.createPair(dto, null);
 
     // Then: остались явные времена из createDto (8:00-9:30), а не из справочника
     assertThat(created.startTime()).isEqualTo(LocalTime.of(8, 0));
     assertThat(created.endTime()).isEqualTo(LocalTime.of(9, 30));
   }
 
+  // === STUDENT-ограничения: своя группа + цикл в DRAFT (issue #60/#64) ===
+
+  @Test
+  void shouldAllowStudentToCreatePairForOwnGroupWhenCycleIsDraft() {
+    // Given
+    UUID studentId = createStudent(group1Id);
+    PairDto dto = createDto(Set.of(group1Id));
+
+    // When
+    PairDto created = pairService.createPair(dto, studentId);
+
+    // Then
+    assertThat(created.groupIds()).containsExactly(group1Id);
+  }
+
+  @Test
+  void shouldRejectStudentCreatingPairForForeignGroup() {
+    // Given
+    UUID studentId = createStudent(group1Id);
+    PairDto dto = createDto(Set.of(group2Id));
+
+    // When & Then
+    assertThatThrownBy(() -> pairService.createPair(dto, studentId))
+        .isInstanceOf(ValidationException.class)
+        .hasMessageContaining("своей группы");
+  }
+
+  @Test
+  void shouldRejectStudentCreatingStreamPairEvenIncludingOwnGroup() {
+    // Given: студент не может создать поток на несколько групп, даже включив свою
+    UUID studentId = createStudent(group1Id);
+    PairDto dto = createDto(Set.of(group1Id, group2Id));
+
+    // When & Then
+    assertThatThrownBy(() -> pairService.createPair(dto, studentId))
+        .isInstanceOf(ValidationException.class)
+        .hasMessageContaining("своей группы");
+  }
+
+  @Test
+  void shouldRejectStudentCreatingPairWhenCycleIsAgreed() {
+    // Given
+    UUID studentId = createStudent(group1Id);
+    agreeCycle(weekScheduleCycleId);
+    PairDto dto = createDto(Set.of(group1Id));
+
+    // When & Then
+    assertThatThrownBy(() -> pairService.createPair(dto, studentId))
+        .isInstanceOf(ValidationException.class)
+        .hasMessageContaining("согласовано");
+  }
+
+  @Test
+  void shouldAllowAdminToCreatePairWhenCycleIsAgreed() {
+    // Given
+    agreeCycle(weekScheduleCycleId);
+    PairDto dto = createDto(Set.of(group1Id));
+
+    // When
+    PairDto created = pairService.createPair(dto, null);
+
+    // Then
+    assertThat(created.groupIds()).containsExactly(group1Id);
+  }
+
+  @Test
+  void shouldRejectStudentUpdatingPairOfForeignGroup() {
+    // Given: пара создана администратором для чужой (для студента) группы
+    PairDto pair = pairService.createPair(createDto(Set.of(group2Id)), null);
+    UUID studentId = createStudent(group1Id);
+
+    // When & Then
+    assertThatThrownBy(() -> pairService.updatePair(pair.id(), pair, studentId))
+        .isInstanceOf(ValidationException.class)
+        .hasMessageContaining("своей группы");
+  }
+
+  @Test
+  void shouldRejectStudentUpdatingPairAfterCycleBecameAgreed() {
+    // Given: пара своей группы создана, пока цикл был DRAFT, но затем согласована
+    PairDto pair = pairService.createPair(createDto(Set.of(group1Id)), null);
+    UUID studentId = createStudent(group1Id);
+    agreeCycle(weekScheduleCycleId);
+
+    // When & Then
+    assertThatThrownBy(() -> pairService.updatePair(pair.id(), pair, studentId))
+        .isInstanceOf(ValidationException.class)
+        .hasMessageContaining("согласовано");
+  }
+
+  @Test
+  void shouldRejectStudentDeletingPairOfForeignGroup() {
+    // Given
+    PairDto pair = pairService.createPair(createDto(Set.of(group2Id)), null);
+    UUID studentId = createStudent(group1Id);
+
+    // When & Then
+    assertThatThrownBy(() -> pairService.deletePair(pair.id(), studentId))
+        .isInstanceOf(ValidationException.class)
+        .hasMessageContaining("своей группы");
+  }
+
+  @Test
+  void shouldRejectStudentDeletingPairWhenCycleIsAgreed() {
+    // Given
+    PairDto pair = pairService.createPair(createDto(Set.of(group1Id)), null);
+    UUID studentId = createStudent(group1Id);
+    agreeCycle(weekScheduleCycleId);
+
+    // When & Then
+    assertThatThrownBy(() -> pairService.deletePair(pair.id(), studentId))
+        .isInstanceOf(ValidationException.class)
+        .hasMessageContaining("согласовано");
+  }
+
+  @Test
+  void shouldThrowExceptionWhenCallerStudentDoesNotExist() {
+    PairDto dto = createDto(Set.of(group1Id));
+
+    assertThatThrownBy(() -> pairService.createPair(dto, UUID.randomUUID()))
+        .isInstanceOf(ResourceNotFoundException.class);
+  }
+
   // === Вспомогательные методы ===
+
+  private UUID createStudent(UUID groupId) {
+    Student student = new Student();
+    student.setUniversity(universityRepository.getReferenceById(universityId));
+    student.setEnrollmentDate(LocalDate.of(2026, 9, 1));
+    if (groupId != null) {
+      student.setGroup(groupRepository.getReferenceById(groupId));
+    }
+
+    String uniqueSuffix = UUID.randomUUID().toString();
+    Person person = new Person();
+    person.setUsername("student_" + uniqueSuffix);
+    person.setEmail("student_" + uniqueSuffix + "@example.com");
+    person.setFirstname("Иван");
+    person.setLastname("Иванов");
+    person.setFullname("Иван Иванов");
+    student.setPerson(person);
+
+    return studentRepository.save(student).getId();
+  }
+
+  private void agreeCycle(UUID cycleId) {
+    WeekScheduleCycle cycle = weekScheduleCycleRepository.findById(cycleId)
+        .orElseThrow(() -> new IllegalStateException("Цикл не найден в тесте: " + cycleId));
+    cycle.setStatus(WeekScheduleCycleStatus.AGREED);
+    weekScheduleCycleRepository.save(cycle);
+  }
 
   private void saveBellScheduleEntry(UUID universityId, int pairNumber, LocalTime startTime, LocalTime endTime) {
     BellScheduleEntry entry = new BellScheduleEntry();

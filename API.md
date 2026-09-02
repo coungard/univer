@@ -281,9 +281,14 @@
 | GET | `/week-schedule-cycle/{weekScheduleCycleId}` | любая роль | — (`?page&size`) | `Page<PairDto>` |
 | GET | `/group/{groupId}` | любая роль | — (`?page&size`) | `Page<PairDto>` — расписание группы |
 | GET | `/{id}` | любая роль | — | `PairDto` |
-| POST | `/` | `ADMIN` | `PairDto` | `201` + `PairDto` |
-| PUT | `/{id}` | `ADMIN` | `PairDto` | `PairDto` |
-| DELETE | `/{id}` | `ADMIN` | — | `204` |
+| POST | `/` | `ADMIN`/`STUDENT`¹ | `PairDto` | `201` + `PairDto` |
+| PUT | `/{id}` | `ADMIN`/`STUDENT`¹ | `PairDto` | `PairDto` |
+| DELETE | `/{id}` | `ADMIN`/`STUDENT`¹ | — | `204` |
+
+¹ `STUDENT` может писать `Pair` только своей группы (`groupIds` должен состоять ровно из его группы,
+без потока на другие группы) и только пока `WeekScheduleCycle.status == DRAFT` (см. раздел
+`WeekScheduleCycles`) — как для текущего, так и для нового состояния пары при `PUT`. Нарушение любого
+из двух условий — `422` с соответствующим сообщением. `ADMIN` не ограничен ни группой, ни статусом.
 
 ## Groups — `/api/v1/groups`
 

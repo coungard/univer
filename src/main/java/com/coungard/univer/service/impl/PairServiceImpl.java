@@ -1,10 +1,12 @@
 package com.coungard.univer.service.impl;
 
 import com.coungard.univer.dto.PairDto;
+import com.coungard.univer.dto.WeekScheduleCycleStatus;
 import com.coungard.univer.entity.BellScheduleEntry;
 import com.coungard.univer.entity.Course;
 import com.coungard.univer.entity.Group;
 import com.coungard.univer.entity.Pair;
+import com.coungard.univer.entity.Student;
 import com.coungard.univer.entity.Teacher;
 import com.coungard.univer.entity.WeekScheduleCycle;
 import com.coungard.univer.exception.ResourceNotFoundException;
@@ -14,6 +16,7 @@ import com.coungard.univer.repository.BellScheduleEntryRepository;
 import com.coungard.univer.repository.CourseRepository;
 import com.coungard.univer.repository.GroupRepository;
 import com.coungard.univer.repository.PairRepository;
+import com.coungard.univer.repository.StudentRepository;
 import com.coungard.univer.repository.TeacherRepository;
 import com.coungard.univer.repository.WeekScheduleCycleRepository;
 import com.coungard.univer.service.PairService;
@@ -42,11 +45,12 @@ public class PairServiceImpl implements PairService {
   private final TeacherRepository teacherRepository;
   private final GroupRepository groupRepository;
   private final BellScheduleEntryRepository bellScheduleEntryRepository;
+  private final StudentRepository studentRepository;
   private final PairMapper pairMapper;
 
   @Override
   @Transactional
-  public PairDto createPair(PairDto pairDto) {
+  public PairDto createPair(PairDto pairDto, UUID callerStudentId) {
     WeekScheduleCycle cycle = weekScheduleCycleRepository.findById(pairDto.weekScheduleCycleId())
         .orElseThrow(() -> new ResourceNotFoundException(
             "Циклическое расписание не найдено с ID: " + pairDto.weekScheduleCycleId()));
@@ -55,12 +59,14 @@ public class PairServiceImpl implements PairService {
         .orElseThrow(() -> new ResourceNotFoundException("Учебный курс не найден с ID: " + pairDto.courseId()));
 
     ResolvedSchedule schedule = resolveSchedule(pairDto, course);
+    Set<Group> groups = resolveGroups(pairDto.groupIds());
+    checkStudentCanEdit(callerStudentId, cycle, groups);
 
     Pair pair = pairMapper.toEntity(pairDto);
     pair.setWeekScheduleCycle(cycle);
     pair.setCourse(course);
     pair.setTeacher(resolveTeacher(pairDto.teacherId()));
-    pair.setGroups(resolveGroups(pairDto.groupIds()));
+    pair.setGroups(groups);
     pair.setStartTime(schedule.startTime());
     pair.setEndTime(schedule.endTime());
 
@@ -96,9 +102,11 @@ public class PairServiceImpl implements PairService {
 
   @Override
   @Transactional
-  public PairDto updatePair(UUID id, PairDto pairDto) {
+  public PairDto updatePair(UUID id, PairDto pairDto, UUID callerStudentId) {
     Pair existing = pairRepository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("Пара не найдена с ID: " + id));
+    // Проверяем и текущее состояние (нельзя тронуть чужую/согласованную пару)...
+    checkStudentCanEdit(callerStudentId, existing.getWeekScheduleCycle(), existing.getGroups());
 
     WeekScheduleCycle cycle = weekScheduleCycleRepository.findById(pairDto.weekScheduleCycleId())
         .orElseThrow(() -> new ResourceNotFoundException(
@@ -108,6 +116,9 @@ public class PairServiceImpl implements PairService {
         .orElseThrow(() -> new ResourceNotFoundException("Учебный курс не найден с ID: " + pairDto.courseId()));
 
     ResolvedSchedule schedule = resolveSchedule(pairDto, course);
+    Set<Group> groups = resolveGroups(pairDto.groupIds());
+    // ...и новое (нельзя перенести пару в чужой цикл/группу или в уже согласованный цикл).
+    checkStudentCanEdit(callerStudentId, cycle, groups);
 
     existing.setWeekScheduleCycle(cycle);
     existing.setCourse(course);
@@ -118,7 +129,7 @@ public class PairServiceImpl implements PairService {
     existing.setStartTime(schedule.startTime());
     existing.setEndTime(schedule.endTime());
     existing.setRoom(pairDto.room());
-    existing.setGroups(resolveGroups(pairDto.groupIds()));
+    existing.setGroups(groups);
 
     Pair updated = pairRepository.save(existing);
     return pairMapper.toDto(updated);
@@ -126,11 +137,41 @@ public class PairServiceImpl implements PairService {
 
   @Override
   @Transactional
-  public void deletePair(UUID id) {
-    if (!pairRepository.existsById(id)) {
-      throw new ResourceNotFoundException("Пара не найдена с ID: " + id);
+  public void deletePair(UUID id, UUID callerStudentId) {
+    Pair existing = pairRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("Пара не найдена с ID: " + id));
+    checkStudentCanEdit(callerStudentId, existing.getWeekScheduleCycle(), existing.getGroups());
+
+    pairRepository.delete(existing);
+  }
+
+  /**
+   * Проверка права STUDENT редактировать Pair. {@code callerStudentId == null} означает вызов от
+   * ADMIN — без ограничений. Иначе проверяются по порядку два независимых условия, каждое со своим
+   * сообщением, чтобы клиент мог их различить: (1) пара принадлежит группе вызывающего студента и
+   * только ей, (2) цикл расписания в статусе DRAFT — как только он AGREED, редактировать может
+   * только ADMIN, даже свою группу.
+   */
+  private void checkStudentCanEdit(UUID callerStudentId, WeekScheduleCycle cycle, Set<Group> groups) {
+    if (callerStudentId == null) {
+      return;
     }
-    pairRepository.deleteById(id);
+
+    Student student = studentRepository.findById(callerStudentId)
+        .orElseThrow(() -> new ResourceNotFoundException("Студент не найден с ID: " + callerStudentId));
+
+    // Строго "ровно своя группа": студент не может ни писать чужую группу, ни превращать пару в
+    // поток на несколько групп (это затронуло бы группу, не давшую на это согласия).
+    boolean exactlyOwnGroup = student.getGroup() != null
+        && groups.size() == 1
+        && groups.stream().allMatch(g -> g.getId().equals(student.getGroup().getId()));
+    if (!exactlyOwnGroup) {
+      throw new ValidationException("Студент может редактировать пары только своей группы");
+    }
+    if (cycle.getStatus() != WeekScheduleCycleStatus.DRAFT) {
+      throw new ValidationException(
+          "Циклическое расписание уже согласовано — редактирование доступно только администратору");
+    }
   }
 
   /**
