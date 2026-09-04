@@ -76,7 +76,7 @@ INSERT INTO pair_groups (pair_id, group_id) VALUES
 INSERT INTO pairs (id, week_schedule_cycle_id, day_of_week, week_parity, pair_number, start_time, end_time, course_id, teacher_id, room) VALUES
     ('590e66f7-53e5-4b76-b435-d9a74499002c', '1c35ef07-28ef-4aa0-b52e-9fe10d560efb', 'TUESDAY', 'EVEN', 2, '10:10', '11:40', '4b1db0c5-28de-4cd1-89d4-c98bb850e3bf', '6aaa2aa7-29b6-4c17-bd08-8d7b981378a7', '547'), -- У532 Математика, Шамов Э.Ш.
     ('f58a8148-f627-4811-bd98-039ba8065712', 'fa6a23a1-620c-45e8-813c-87ada5836a9c', 'TUESDAY', 'EVEN', 2, '10:10', '11:40', '77645c49-4582-4440-9e50-1b5c9313feee', 'f9b063cf-3010-4dfa-a7a9-86c70728426a', '555'), -- У533 Математический анализ, Нурмагомедов А.М.
-    ('45d76af7-6dc3-4ae5-a9c4-9d365a6766b6', 'fa6a23a1-620c-45e8-813c-87ada5836a9c', 'TUESDAY', 'EVEN', 2, '10:10', '11:40', '3fb91377-8b1a-4197-b089-fba5bc6b0ea1', '78deebfe-dc9e-4748-b41c-ac1b1678d432', 'Зал 9'), -- У530 Основы программной инженерии (лаб, 2п/гр), Ирзаев Г.Х.
+    ('45d76af7-6dc3-4ae5-a9c4-9d365a6766b6', 'fa6a23a1-620c-45e8-813c-87ada5836a9c', 'TUESDAY', 'EVEN', 2, '10:10', '11:40', '3fb91377-8b1a-4197-b089-fba5bc6b0ea1', '23dd57e5-691a-48f9-a75c-4b6bda1d6830', 'Зал 9'), -- У530 Основы программной инженерии (лаб, 2п/гр), Ирзаев Г.Х.
     ('ea83e69e-8f9b-4758-8e63-31dd3b671b37', '69c3b8e2-6643-4cff-ae77-e781c6550a32', 'TUESDAY', 'EVEN', 2, '10:10', '11:40', '5f0c4175-7906-4bf5-81f3-9ba0c2404abd', 'a4f7ef51-0c7d-4822-ae0a-18ac91c0847d', '546'); -- У534 Дискретная математика, Умалатов С.Д.
 
 INSERT INTO pair_groups (pair_id, group_id) VALUES
@@ -89,7 +89,7 @@ INSERT INTO pair_groups (pair_id, group_id) VALUES
 -- первый вариант (Мамедова Г.Б.) как teacher_id, оба кабинета через " / " (issue #46).
 INSERT INTO pairs (id, week_schedule_cycle_id, day_of_week, week_parity, pair_number, start_time, end_time, course_id, teacher_id, room) VALUES
     ('6387e128-58ad-49ff-8889-28932887a838', '1c35ef07-28ef-4aa0-b52e-9fe10d560efb', 'TUESDAY', 'EVEN', 3, '12:20', '13:50', '083b565e-4ce4-44ff-8575-2731dcf53547', 'acc0a397-c477-4673-b29d-c817984b7a22', '511 / 252'), -- У532 Иностранный язык, Мамедова Г.Б.
-    ('77e6a495-1bc8-4568-89b8-3fe38f0cf604', 'fa6a23a1-620c-45e8-813c-87ada5836a9c', 'TUESDAY', 'EVEN', 3, '12:20', '13:50', '3fb91377-8b1a-4197-b089-fba5bc6b0ea1', '78deebfe-dc9e-4748-b41c-ac1b1678d432', 'Зал 9'), -- У533 Основы программной инженерии (лаб, "1п/гр-2нед,2п/гр-4нед" не переносится), Ирзаев Г.Х.
+    ('77e6a495-1bc8-4568-89b8-3fe38f0cf604', 'fa6a23a1-620c-45e8-813c-87ada5836a9c', 'TUESDAY', 'EVEN', 3, '12:20', '13:50', '3fb91377-8b1a-4197-b089-fba5bc6b0ea1', '23dd57e5-691a-48f9-a75c-4b6bda1d6830', 'Зал 9'), -- У533 Основы программной инженерии (лаб, "1п/гр-2нед,2п/гр-4нед" не переносится), Ирзаев Г.Х.
     ('c79b5f9b-451f-4218-aca9-7beaef1c5b03', 'fa6a23a1-620c-45e8-813c-87ada5836a9c', 'TUESDAY', 'EVEN', 3, '12:20', '13:50', '77645c49-4582-4440-9e50-1b5c9313feee', 'f9b063cf-3010-4dfa-a7a9-86c70728426a', '555'), -- У530 Математический анализ, Нурмагомедов А.М.
     ('7e477eaa-1737-4f04-bc22-6fe81c0b6df8', '69c3b8e2-6643-4cff-ae77-e781c6550a32', 'TUESDAY', 'EVEN', 3, '12:20', '13:50', '5f0c4175-7906-4bf5-81f3-9ba0c2404abd', 'a4f7ef51-0c7d-4822-ae0a-18ac91c0847d', '546'); -- У534 Дискретная математика (пз), Умалатов С.Д.
 
@@ -102,7 +102,7 @@ INSERT INTO pair_groups (pair_id, group_id) VALUES
 -- Пара 4 (14:00-15:30). У532: «РЯиКР» исправлено на «РИиКР» — опечатка, см. шапку файла.
 INSERT INTO pairs (id, week_schedule_cycle_id, day_of_week, week_parity, pair_number, start_time, end_time, course_id, teacher_id, room) VALUES
     ('52ca6138-c1bd-4393-8813-cc5d66fa14ad', '1c35ef07-28ef-4aa0-b52e-9fe10d560efb', 'TUESDAY', 'EVEN', 4, '14:00', '15:30', '4200bef3-64d9-4cd9-b089-5f75c401fd96', 'dc0ba359-e60a-41aa-83af-315c184b0e80', '546'), -- У532 РИиКР, Магомедова Х.М.
-    ('d4b6d8a5-b2ee-44aa-9b13-47db02310dba', 'fa6a23a1-620c-45e8-813c-87ada5836a9c', 'TUESDAY', 'EVEN', 4, '14:00', '15:30', '3fb91377-8b1a-4197-b089-fba5bc6b0ea1', '78deebfe-dc9e-4748-b41c-ac1b1678d432', 'Зал 9'), -- У533 Основы программной инженерии (лаб), Ирзаев Г.Х.
+    ('d4b6d8a5-b2ee-44aa-9b13-47db02310dba', 'fa6a23a1-620c-45e8-813c-87ada5836a9c', 'TUESDAY', 'EVEN', 4, '14:00', '15:30', '3fb91377-8b1a-4197-b089-fba5bc6b0ea1', '23dd57e5-691a-48f9-a75c-4b6bda1d6830', 'Зал 9'), -- У533 Основы программной инженерии (лаб), Ирзаев Г.Х.
     ('b7782af9-801b-4ae3-af58-517eba5b8070', 'fa6a23a1-620c-45e8-813c-87ada5836a9c', 'TUESDAY', 'EVEN', 4, '14:00', '15:30', '19502be0-4def-4917-aa70-8078b54d71b1', 'df70386b-cbda-42a8-a507-7609c49d2558', '221'), -- У530 Иностранный язык (1п/гр не переносится), Авчиева Д.Т.
     ('ebbd1b1f-990f-48af-8ab9-55f72fecec0f', '69c3b8e2-6643-4cff-ae77-e781c6550a32', 'TUESDAY', 'EVEN', 4, '14:00', '15:30', 'cdf2e654-c2b3-4ac5-909f-aa745d5b12d5', 'd05c213f-efcf-4327-9e1c-65455fa68845', '547'); -- У534 Правовые основы профессиональной деятельности (лк), Казакбиева О.И.
 
@@ -178,7 +178,7 @@ INSERT INTO pair_groups (pair_id, group_id) VALUES
 INSERT INTO pairs (id, week_schedule_cycle_id, day_of_week, week_parity, pair_number, start_time, end_time, course_id, teacher_id, room) VALUES
     ('6cc94238-0c41-457c-866f-7dd3c06339fa', '1c35ef07-28ef-4aa0-b52e-9fe10d560efb', 'THURSDAY', 'EVEN', 2, '10:10', '11:40', 'ffbd3cdb-bdcc-49d4-a7c3-eadb89556e3d', '5bd2bba5-03bf-492c-a224-0edb7a04f200', 'Зал 9'), -- У532 Программирование (лаб, 1п/гр), Айгумов Т.Г.
     ('57978a09-10a1-46fe-8033-9c20a202b8df', 'fa6a23a1-620c-45e8-813c-87ada5836a9c', 'THURSDAY', 'EVEN', 2, '10:10', '11:40', '19502be0-4def-4917-aa70-8078b54d71b1', '01d9e270-1777-487f-85a8-f65063362be6', '221 / 252'), -- У533 Иностранный язык, Абуева Н.Н.
-    ('4ca82cee-ff90-43b2-b92f-b585c9fac01e', 'fa6a23a1-620c-45e8-813c-87ada5836a9c', 'THURSDAY', 'EVEN', 2, '10:10', '11:40', '3fb91377-8b1a-4197-b089-fba5bc6b0ea1', '78deebfe-dc9e-4748-b41c-ac1b1678d432', '311'), -- У530 Основы программной инженерии (пз), Ирзаев Г.Х.
+    ('4ca82cee-ff90-43b2-b92f-b585c9fac01e', 'fa6a23a1-620c-45e8-813c-87ada5836a9c', 'THURSDAY', 'EVEN', 2, '10:10', '11:40', '3fb91377-8b1a-4197-b089-fba5bc6b0ea1', '23dd57e5-691a-48f9-a75c-4b6bda1d6830', '311'), -- У530 Основы программной инженерии (пз), Ирзаев Г.Х.
     ('4f692abd-e166-412c-a57c-9afc0c22397a', '69c3b8e2-6643-4cff-ae77-e781c6550a32', 'THURSDAY', 'EVEN', 2, '10:10', '11:40', '869b7201-b565-41a1-8333-ccb036952515', 'e58af1cf-fa0a-4224-972d-3ab19b8d4ea9', '538'); -- У534 Философия, Шайдаева Г.М.
 
 INSERT INTO pair_groups (pair_id, group_id) VALUES
@@ -192,7 +192,7 @@ INSERT INTO pair_groups (pair_id, group_id) VALUES
 -- teacher_id.
 INSERT INTO pairs (id, week_schedule_cycle_id, day_of_week, week_parity, pair_number, start_time, end_time, course_id, teacher_id, room) VALUES
     ('d922d968-9a1c-441e-b8e5-5c5a38791bef', '1c35ef07-28ef-4aa0-b52e-9fe10d560efb', 'THURSDAY', 'EVEN', 3, '12:20', '13:50', 'ffbd3cdb-bdcc-49d4-a7c3-eadb89556e3d', '5bd2bba5-03bf-492c-a224-0edb7a04f200', 'Зал 9'), -- У532 Программирование (лаб, 1п/гр), Айгумов Т.Г.
-    ('7e7cd624-6aab-4e80-864d-fe0c47536a28', 'fa6a23a1-620c-45e8-813c-87ada5836a9c', 'THURSDAY', 'EVEN', 3, '12:20', '13:50', '3fb91377-8b1a-4197-b089-fba5bc6b0ea1', '78deebfe-dc9e-4748-b41c-ac1b1678d432', '311'), -- У533 Основы программной инженерии (пз), Ирзаев Г.Х.
+    ('7e7cd624-6aab-4e80-864d-fe0c47536a28', 'fa6a23a1-620c-45e8-813c-87ada5836a9c', 'THURSDAY', 'EVEN', 3, '12:20', '13:50', '3fb91377-8b1a-4197-b089-fba5bc6b0ea1', '23dd57e5-691a-48f9-a75c-4b6bda1d6830', '311'), -- У533 Основы программной инженерии (пз), Ирзаев Г.Х.
     ('071d0584-36a3-4599-b633-829f59017ef4', 'fa6a23a1-620c-45e8-813c-87ada5836a9c', 'THURSDAY', 'EVEN', 3, '12:20', '13:50', '19502be0-4def-4917-aa70-8078b54d71b1', 'df70386b-cbda-42a8-a507-7609c49d2558', '252'), -- У530 Иностранный язык (2п/гр не переносится), Авчиева Д.Т.
     ('0f5e26a1-8bbf-4801-8d46-7db23e912c1b', '69c3b8e2-6643-4cff-ae77-e781c6550a32', 'THURSDAY', 'EVEN', 3, '12:20', '13:50', '4cbeea29-e53a-406b-8181-69fb62185b0e', '87675fa1-af1b-4938-b182-366ffde8bbb7', '244 / 511'); -- У534 Иностранный язык, Агасиева И.Р.
 

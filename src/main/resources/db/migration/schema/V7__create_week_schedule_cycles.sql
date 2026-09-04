@@ -6,6 +6,9 @@
 CREATE TABLE week_schedule_cycles (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     semester_id UUID NOT NULL UNIQUE,
+    -- Статус согласования циклического расписания: DRAFT (формируется, доступен для правок ADMIN и
+    -- STUDENT своей группы) / AGREED (финализирован, правки только ADMIN).
+    status VARCHAR(16) NOT NULL DEFAULT 'DRAFT' CHECK (status IN ('DRAFT', 'AGREED')),
     FOREIGN KEY (semester_id) REFERENCES semesters(id) ON DELETE CASCADE
 );
 
@@ -23,6 +26,10 @@ CREATE TABLE pairs (
     end_time TIME NOT NULL,
     course_id UUID NOT NULL,
     teacher_id UUID,
+    -- Room (аудитория) — на данном этапе не отдельная сущность (см. TARGET.md, где Room задумана как
+    -- Pair }o--o| Room), а простое опциональное поле-строка, пробрасываемое в Lecture при генерации из
+    -- шаблона Pair.
+    room VARCHAR(32),
     FOREIGN KEY (week_schedule_cycle_id) REFERENCES week_schedule_cycles(id) ON DELETE CASCADE,
     FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
     FOREIGN KEY (teacher_id) REFERENCES teachers(id) ON DELETE SET NULL

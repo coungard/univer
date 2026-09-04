@@ -27,6 +27,10 @@ CREATE TABLE universities (
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP,
     address_id UUID NOT NULL,
+    -- Справочные, необязательные поля университета: ректор, год основания, число студентов.
+    rector VARCHAR(255),
+    founding_year INT,
+    student_count INT,
     FOREIGN KEY (address_id) REFERENCES address(id) ON DELETE CASCADE
 );
 
@@ -123,53 +127,17 @@ CREATE TABLE courses (
     title VARCHAR(255) NOT NULL,
     description TEXT,
     department_id UUID,
-    FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE SET NULL
-);
-
--- ===================================
--- Lecture (Лекция)
--- ===================================
-CREATE TABLE lectures (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    title VARCHAR(255) NOT NULL,
-    content TEXT,
-    scheduled_time TIMESTAMP NOT NULL,
-    duration_minutes INT DEFAULT 90,
-    course_id UUID NOT NULL,
     teacher_id UUID,
-    FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
-    FOREIGN KEY (teacher_id) REFERENCES persons(id) ON DELETE SET NULL
-);
-
--- ===================================
--- Enrollment (Зачисление студента на курс)
--- ===================================
-CREATE TABLE enrollment (
-    student_id UUID NOT NULL,
-    course_id UUID NOT NULL,
-    enrolled_at TIMESTAMP DEFAULT NOW(),
-    status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'completed', 'dropped')),
-    PRIMARY KEY (student_id, course_id),
-    FOREIGN KEY (student_id) REFERENCES persons(id) ON DELETE CASCADE,
-    FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
-);
-
--- ===================================
--- LectureAttendance (Посещение лекций)
--- ===================================
-CREATE TABLE lecture_attendance (
-    student_id UUID NOT NULL,
-    lecture_id UUID NOT NULL,
-    attended BOOLEAN DEFAULT TRUE,
-    PRIMARY KEY (student_id, lecture_id),
-    FOREIGN KEY (student_id) REFERENCES persons(id) ON DELETE CASCADE,
-    FOREIGN KEY (lecture_id) REFERENCES lectures(id) ON DELETE CASCADE
+    FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE SET NULL,
+    FOREIGN KEY (teacher_id) REFERENCES teachers(id) ON DELETE SET NULL
 );
 
 -- ===================================
 -- Индексы для производительности
 -- ===================================
 CREATE INDEX idx_course_department ON courses(department_id);
-CREATE INDEX idx_lecture_course ON lectures(course_id);
-CREATE INDEX idx_enrollment_student ON enrollment(student_id);
-CREATE INDEX idx_lecture_attendance_student ON lecture_attendance(student_id);
+CREATE INDEX idx_course_teacher ON courses(teacher_id);
+
+-- Lecture/Enrollment/LectureAttendance создаются в V8 (create_lectures_and_attendance.sql), после
+-- WeekScheduleCycle/Pair (V7) — Lecture.source_pair_id ссылается на pairs(id), поэтому lectures не
+-- может быть создана раньше pairs.
