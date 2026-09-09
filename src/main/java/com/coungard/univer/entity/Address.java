@@ -45,7 +45,6 @@ public class Address {
   @Column(name = "phone_fax")
   private String phone;
 
-  @Column(nullable = false)
   private String email;
 
   @Column(nullable = false)

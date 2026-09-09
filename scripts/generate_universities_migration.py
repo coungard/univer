@@ -357,15 +357,25 @@ def main():
     skipped = [r for r in records if not r["email"]]
 
     print(f"Всего файлов: {len(records)}")
-    print(f"Будет добавлено в миграцию (есть проверенный сайт -> email): {len(included)}")
-    print(f"Пропущено (нет проверенного сайта, email NOT NULL нечем заполнить без выдумывания): {len(skipped)}")
-
-    skipped_report = ROOT / "scripts" / "skipped_universities.txt"
-    skipped_report.write_text(
-        "\n".join(f"{r['file']}\t{r['name']}" for r in skipped) + "\n",
-        encoding="utf-8",
+    print(f"С проверенным сайтом -> email (это и есть содержимое V14): {len(included)}")
+    print(
+        f"Без сайта на момент генерации V14 (добавлены отдельно в V16 -- см. "
+        f"generate_remaining_universities_migration.py, email/website там NULL): {len(skipped)}"
     )
-    print(f"Список пропущенных сохранён в {skipped_report.relative_to(ROOT)}")
+
+    out_dir = ROOT / "src" / "main" / "resources" / "db" / "migration" / "data"
+    out_path = out_dir / "V14__insert_universities_data_rf.sql"
+    if out_path.exists() and "--force" not in sys.argv:
+        print(
+            f"\n{out_path.relative_to(ROOT)} уже существует и, скорее всего, уже закоммичен и "
+            "применён -- CLAUDE.md запрещает редактировать такие миграции. Повторный запуск этого "
+            "скрипта пересоздал бы файл с новыми случайными UUID, что де-факто и было бы такой "
+            "правкой. Ничего не записано. Если это осознанный полный пересбор данных (например, "
+            "весь combined-датасет explore/ меняется и миграция ещё не применялась ни в одном "
+            "окружении), запустите с флагом --force.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
 
     lines = [
         "-- Добавление большинства вузов России (см. issue #73) в public.address / public.universities.",
@@ -375,9 +385,9 @@ def main():
         "-- scripts/README.md с описанием источника, формата и допущений (в т.ч. про email вида",
         "-- info@<домен сайта вуза>, когда точный email неизвестен).",
         "--",
-        "-- Вузы без проверенного сайта в explore/*.md (215 из 700 на момент генерации) в эту миграцию",
-        "-- не включены, т.к. address.email NOT NULL, а выдумывать email нельзя -- см.",
-        "-- scripts/skipped_universities.txt.",
+        "-- Вузы без проверенного сайта в explore/*.md (215 из 700 на момент генерации) сюда не",
+        "-- попадают -- см. V16__insert_universities_data_rf_remaining.sql, куда их добавляет",
+        "-- generate_remaining_universities_migration.py с email/website = NULL.",
         "",
     ]
     for r in included:
@@ -399,8 +409,6 @@ def main():
         )
         lines.append("")
 
-    out_dir = ROOT / "src" / "main" / "resources" / "db" / "migration" / "data"
-    out_path = out_dir / "V14__insert_universities_data_rf.sql"
     out_path.write_text("\n".join(lines), encoding="utf-8", newline="\n")
     print(f"Записано {out_path.relative_to(ROOT)} ({len(included)} вузов, {len(included) * 2} INSERT)")
 
