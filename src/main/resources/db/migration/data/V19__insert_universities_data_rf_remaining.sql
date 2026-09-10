@@ -1,7 +1,7 @@
 -- Добавление оставшихся вузов России (см. issue #73) в public.address / public.universities --
--- продолжение V14__insert_universities_data_rf.sql для тех, у кого в explore/*.md на момент
--- генерации V14 не было проверенного сайта вуза (и, соответственно, взять email было неоткуда).
--- Стало возможным после V15__make_address_email_nullable.sql: адрес сохраняется с email = NULL
+-- продолжение V17__insert_universities_data_rf.sql для тех, у кого в explore/*.md на момент
+-- генерации V17 не было проверенного сайта вуза (и, соответственно, взять email было неоткуда).
+-- Стало возможным после V18__make_address_email_nullable.sql: адрес сохраняется с email = NULL
 -- (и, где сайт неизвестен, website = NULL) вместо того, чтобы пропускать такой вуз.
 -- Источник данных, справочник регионов и другие допущения -- см.
 -- scripts/generate_universities_migration.py и scripts/README.md.

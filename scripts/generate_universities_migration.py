@@ -357,14 +357,14 @@ def main():
     skipped = [r for r in records if not r["email"]]
 
     print(f"Всего файлов: {len(records)}")
-    print(f"С проверенным сайтом -> email (это и есть содержимое V14): {len(included)}")
+    print(f"С проверенным сайтом -> email (это и есть содержимое V17): {len(included)}")
     print(
-        f"Без сайта на момент генерации V14 (добавлены отдельно в V16 -- см. "
+        f"Без сайта на момент генерации V17 (добавлены отдельно в V19 -- см. "
         f"generate_remaining_universities_migration.py, email/website там NULL): {len(skipped)}"
     )
 
     out_dir = ROOT / "src" / "main" / "resources" / "db" / "migration" / "data"
-    out_path = out_dir / "V14__insert_universities_data_rf.sql"
+    out_path = out_dir / "V17__insert_universities_data_rf.sql"
     if out_path.exists() and "--force" not in sys.argv:
         print(
             f"\n{out_path.relative_to(ROOT)} уже существует и, скорее всего, уже закоммичен и "
@@ -386,7 +386,7 @@ def main():
         "-- info@<домен сайта вуза>, когда точный email неизвестен).",
         "--",
         "-- Вузы без проверенного сайта в explore/*.md (215 из 700 на момент генерации) сюда не",
-        "-- попадают -- см. V16__insert_universities_data_rf_remaining.sql, куда их добавляет",
+        "-- попадают -- см. V19__insert_universities_data_rf_remaining.sql, куда их добавляет",
         "-- generate_remaining_universities_migration.py с email/website = NULL.",
         "",
     ]

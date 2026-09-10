@@ -2,7 +2,7 @@
 -- команды, задокументирован в README.md: логин student1, пароль student123, роль ROLE_STUDENT в
 -- Keycloak (univer-realm). students.id ниже равен реальному Keycloak user id этого аккаунта, как и
 -- проставляет StudentServiceImpl при настоящей регистрации (см. CLAUDE.md) — привязан к группе
--- «У533 РПиС» 1 курса (V11__insert_ktie_full_week_schedule.sql, dgtu/2026) ДГТУ.
+-- «У533 РПиС» 1 курса (V14__insert_ktie_full_week_schedule.sql, dgtu/2026) ДГТУ.
 INSERT INTO public.persons (id, username, email, firstname, lastname, fullname, phone) VALUES
     ('de532b59-8577-4279-92d9-7dbdeeb2fb72', 'student1', 'student1@dstu.ru', 'Тест', 'Тестов', 'Тестов Тест Тестович', NULL);
 

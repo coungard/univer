@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Генерирует вторую data-миграцию Flyway (V16), добавляющую в public.address /
+Генерирует вторую data-миграцию Flyway (V19), добавляющую в public.address /
 public.universities оставшиеся вузы из explore/*.md, для которых в момент
-генерации V14 (см. generate_universities_migration.py) не было проверенного
+генерации V17 (см. generate_universities_migration.py) не было проверенного
 сайта -- а значит, и email по шаблону info@<домен> вывести было не из чего.
 
 После того как address.email в схеме стал NULLABLE (см. миграцию
-V15__make_address_email_nullable.sql), выдумывать эти вузы больше не нужно
+V18__make_address_email_nullable.sql), выдумывать эти вузы больше не нужно
 пропускать: строка адреса просто сохраняется с email = NULL (и website =
 NULL, если сайт неизвестен) вместо того, чтобы либо пропускать вуз, либо
 подставлять непроверенный email.
 
 Переиспользует справочник городов (CITY_REGION) и парсер explore/*.md
 (parse_file) из generate_universities_migration.py -- см. его же для
-описания источника данных и допущений; ничего в самом V14 (и, значит, в уже
+описания источника данных и допущений; ничего в самом V17 (и, значит, в уже
 однажды сгенерированном UUID для тех 485 вузов) этот скрипт не меняет.
 
 Запуск: py scripts/generate_remaining_universities_migration.py
@@ -43,15 +43,15 @@ def main():
             print(f"  {e}", file=sys.stderr)
         sys.exit(1)
 
-    # Те, у кого email уже выведен (сайт был известен) -- уже в V14, здесь не трогаем.
+    # Те, у кого email уже выведен (сайт был известен) -- уже в V17, здесь не трогаем.
     remaining = [r for r in records if not r["email"]]
 
     print(f"Всего файлов: {len(records)}")
-    print(f"Уже в V14 (пропускаем здесь): {len(records) - len(remaining)}")
-    print(f"Добавляется в V16 (сайт/email неизвестны -> email/website NULL): {len(remaining)}")
+    print(f"Уже в V17 (пропускаем здесь): {len(records) - len(remaining)}")
+    print(f"Добавляется в V19 (сайт/email неизвестны -> email/website NULL): {len(remaining)}")
 
     out_dir = base.ROOT / "src" / "main" / "resources" / "db" / "migration" / "data"
-    out_path = out_dir / "V16__insert_universities_data_rf_remaining.sql"
+    out_path = out_dir / "V19__insert_universities_data_rf_remaining.sql"
     if out_path.exists() and "--force" not in sys.argv:
         print(
             f"\n{out_path.relative_to(base.ROOT)} уже существует и, скорее всего, уже закоммичен и "
@@ -63,9 +63,9 @@ def main():
 
     lines = [
         "-- Добавление оставшихся вузов России (см. issue #73) в public.address / public.universities --",
-        "-- продолжение V14__insert_universities_data_rf.sql для тех, у кого в explore/*.md на момент",
-        "-- генерации V14 не было проверенного сайта вуза (и, соответственно, взять email было неоткуда).",
-        "-- Стало возможным после V15__make_address_email_nullable.sql: адрес сохраняется с email = NULL",
+        "-- продолжение V17__insert_universities_data_rf.sql для тех, у кого в explore/*.md на момент",
+        "-- генерации V17 не было проверенного сайта вуза (и, соответственно, взять email было неоткуда).",
+        "-- Стало возможным после V18__make_address_email_nullable.sql: адрес сохраняется с email = NULL",
         "-- (и, где сайт неизвестен, website = NULL) вместо того, чтобы пропускать такой вуз.",
         "-- Источник данных, справочник регионов и другие допущения -- см.",
         "-- scripts/generate_universities_migration.py и scripts/README.md.",
