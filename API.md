@@ -170,7 +170,7 @@
 
 | Метод | Путь | Auth | Тело запроса | Тело ответа |
 |---|---|---|---|---|
-| GET | `/` | публично | — (`?page&size`) | `Page<UniversityDto>` |
+| GET | `/` | публично | — (`?search&page&size`) | `Page<UniversityDto>` |
 | GET | `/{id}` | публично | — | `UniversityDto` |
 | POST | `/` | `ADMIN` | `UniversityDto` | `201` + `UniversityDto` |
 | PUT | `/{id}` | `ADMIN` | `UniversityDto` | `UniversityDto` |
@@ -178,6 +178,9 @@
 
 > `GET`-эндпоинты сделаны публичными намеренно: экран регистрации студента ещё не имеет токена,
 > но должен дать выбрать университет (`RegisterStudentRequest.universityId`) до входа в систему.
+>
+> `search` — необязательный, регистронезависимый поиск по подстроке в `name`; без него — все
+> университеты постранично, как раньше.
 
 ## Faculties — `/api/v1/faculties`
 
