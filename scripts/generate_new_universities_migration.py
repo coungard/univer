@@ -9,7 +9,7 @@ generate_new_universities_from_vuzopedia.py) -- продолжение issue #73
   - у этих записей почти никогда нет ни сайта (email всегда NULL), ни точного города --
     профильная страница vuzopedia.ru прячет адрес/сайт за кнопками "посмотреть" (см.
     scripts/README.md);
-  - раньше (до V21__make_university_address_id_nullable.sql) вуз без адреса нельзя было
+  - раньше (до V18__make_university_address_id_nullable.sql) вуз без адреса нельзя было
     вставить вовсе -- universities.address_id был NOT NULL. Теперь можно: там, где город
     определился (см. generate_new_universities_from_vuzopedia.py, CITY_REGION), пишем
     адрес как "г. Город, Регион" (по аналогии с fallback в generate_universities_migration.py);
@@ -115,7 +115,7 @@ def main() -> None:
         "-- см. scripts/generate_new_universities_from_vuzopedia.py и scripts/README.md.",
         "-- У большинства нет ни сайта (email/website = NULL), ни точного города: там, где город",
         "-- определился по названию -- есть address (город/регион, без точной улицы); где нет --",
-        "-- address_id = NULL (см. V21__make_university_address_id_nullable.sql). Ректор/год",
+        "-- address_id = NULL (см. V18__make_university_address_id_nullable.sql). Ректор/год",
         "-- основания/число студентов -- NULL везде, кроме единичных случаев, где были в тексте",
         "-- названия (в подавляющем большинстве эти поля скрыты источником, не выдумываем).",
         "",

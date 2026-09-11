@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+ИСТОРИЧЕСКИЙ СКРИПТ: изначально генерировал V17__insert_universities_data_rf.sql, но этот
+файл впоследствии вручную объединён в V2__insert_universities_data.sql, а номер V17 отдан
+другой миграции (V17__insert_faculties_bulk.sql). См. предупреждение в main() и
+scripts/README.md. Оставлен как источник CITY_REGION/parse_file (используются другими
+скриптами) и как документация исходного процесса генерации -- не для повторного запуска.
+
 Генерирует Flyway data-миграцию, наполняющую public.address и public.universities
 данными по вузам России, собранными вручную (с проверкой по Википедии и открытым
 источникам вузов) в explore/*.md -- см. issue #73.
@@ -338,6 +344,19 @@ def parse_file(path: Path):
 
 
 def main():
+    print(
+        "ВНИМАНИЕ: результат этого скрипта (изначально V17__insert_universities_data_rf.sql) "
+        "объединён вручную в V2__insert_universities_data.sql, а сам файл V17 удалён -- этот "
+        "номер миграции теперь занят другим содержимым (V17__insert_faculties_bulk.sql). "
+        "Повторный запуск ничего не запишет в V17 и, скорее всего, упадёт с ошибками "
+        "'неизвестный город' на новых вузах из explore/701+.md (vuzopedia.ru, у них город часто "
+        "не определён) -- это не баг, см. scripts/README.md. Скрипт оставлен только как источник "
+        "CITY_REGION (импортируется другими скриптами) и как документация исходного процесса.",
+        file=sys.stderr,
+    )
+    if "--force" not in sys.argv:
+        sys.exit(1)
+
     files = sorted(EXPLORE_DIR.glob("*.md"))
     records = []
     errors = []

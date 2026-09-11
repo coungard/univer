@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+ИСТОРИЧЕСКИЙ СКРИПТ: изначально генерировал V19__insert_universities_data_rf_remaining.sql, но
+этот файл впоследствии вручную объединён в V2__insert_universities_data.sql, а номер V19 отдан
+другой миграции (V19__insert_new_universities_from_vuzopedia.sql). См. предупреждение в main()
+и scripts/README.md. Оставлен как документация исходного процесса -- не для повторного запуска.
+
 Генерирует вторую data-миграцию Flyway (V19), добавляющую в public.address /
 public.universities оставшиеся вузы из explore/*.md, для которых в момент
 генерации V17 (см. generate_universities_migration.py) не было проверенного
@@ -28,6 +33,18 @@ import generate_universities_migration as base  # noqa: E402
 
 
 def main():
+    print(
+        "ВНИМАНИЕ: результат этого скрипта (изначально V19__insert_universities_data_rf_remaining.sql) "
+        "объединён вручную в V2__insert_universities_data.sql, а сам файл V19 удалён -- этот "
+        "номер миграции теперь занят другим содержимым (V19__insert_new_universities_from_vuzopedia.sql). "
+        "Повторный запуск ничего не запишет в V19 и, скорее всего, упадёт с ошибками "
+        "'неизвестный город' на новых вузах из explore/701+.md (vuzopedia.ru) -- это не баг, см. "
+        "scripts/README.md. Скрипт оставлен только как документация исходного процесса.",
+        file=sys.stderr,
+    )
+    if "--force" not in sys.argv:
+        sys.exit(1)
+
     files = sorted(base.EXPLORE_DIR.glob("*.md"))
     records = []
     errors = []

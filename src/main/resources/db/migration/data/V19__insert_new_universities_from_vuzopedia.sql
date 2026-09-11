@@ -2,7 +2,7 @@
 -- см. scripts/generate_new_universities_from_vuzopedia.py и scripts/README.md.
 -- У большинства нет ни сайта (email/website = NULL), ни точного города: там, где город
 -- определился по названию -- есть address (город/регион, без точной улицы); где нет --
--- address_id = NULL (см. V21__make_university_address_id_nullable.sql). Ректор/год
+-- address_id = NULL (см. V18__make_university_address_id_nullable.sql). Ректор/год
 -- основания/число студентов -- NULL везде, кроме единичных случаев, где были в тексте
 -- названия (в подавляющем большинстве эти поля скрыты источником, не выдумываем).
 
