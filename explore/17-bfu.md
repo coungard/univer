@@ -10,6 +10,22 @@
 - **Сайт:** https://kantiana.ru
 - **Число студентов:** около 13 000
 
+## Факультеты и институты
+
+Список собран через агрегатор postupi.online (страница подразделений):
+
+- **Институт высоких технологий**
+- **Институт образования и гуманитарных наук**
+- **Институт медицины и наук о жизни**
+- **Институт управления и территориального развития**
+
+## Расписание
+
+Официальная система — `https://schedule.kantiana.ru/` (поиск по группе или преподавателю),
+продублирована в разделе `https://kantiana.ru/students/servisy/raspisanie-zanyatiy/`.
+
 ## Источники
 - https://ru.wikipedia.org/wiki/Балтийский_федеральный_университет_имени_Иммануила_Канта
 - https://www.newkaliningrad.ru/news/briefs/community/24152998-rektor-bfu-im-kanta-poobeshchal-zapustit-neokampus-kantiana-v-2026-godu.html
+- https://kaliningrad.postupi.online/vuz/bfu-im-i-kanta/podrazdeleniya/ (факультеты/институты)
+- https://schedule.kantiana.ru/ (расписание)
