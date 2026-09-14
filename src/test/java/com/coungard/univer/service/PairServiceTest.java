@@ -246,11 +246,19 @@ class PairServiceTest {
   }
 
   @Test
-  void shouldThrowExceptionWhenDayOfWeekIsWeekend() {
-    PairDto dto = createDto(Set.of(group1Id)).toBuilder().dayOfWeek(DayOfWeek.SATURDAY).build();
+  void shouldAllowCreatingPairOnWeekend() {
+    // Given: у некоторых вузов по субботам/воскресеньям идут дополнительные/подготовительные
+    // занятия (см. explore/*.md, например ЮФУ) — раньше день недели ограничивался буднями
+    PairDto saturdayDto = createDto(Set.of(group1Id)).toBuilder().dayOfWeek(DayOfWeek.SATURDAY).build();
+    PairDto sundayDto = createDto(Set.of(group2Id)).toBuilder().dayOfWeek(DayOfWeek.SUNDAY).build();
 
-    assertThatThrownBy(() -> pairService.createPair(dto, null))
-        .isInstanceOf(ValidationException.class);
+    // When
+    PairDto createdSaturday = pairService.createPair(saturdayDto, null);
+    PairDto createdSunday = pairService.createPair(sundayDto, null);
+
+    // Then
+    assertThat(createdSaturday.dayOfWeek()).isEqualTo(DayOfWeek.SATURDAY);
+    assertThat(createdSunday.dayOfWeek()).isEqualTo(DayOfWeek.SUNDAY);
   }
 
   @Test

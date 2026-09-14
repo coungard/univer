@@ -57,12 +57,12 @@ University — это веб-приложение для управления д
 **Тестовый студент** для ручного прогона сценариев (`SCENARIOS.md`, Swagger UI, curl) на локальном
 Keycloak из `docker-compose.yml`: логин `student1`, пароль `student123`. Заведён с ролью `STUDENT` —
 не пересоздавайте и не сбрасывайте ему пароль впустую, это общий dev-фикстур для команды. Привязан к
-группе «У533 РПиС» 1 курса (`db/migration/data/V13__insert_test_student.sql`).
+группе «У533 РПиС» 1 курса (`db/migration/data/V16__insert_test_student.sql`).
 
 **Тестовый преподаватель** — Ирзаев Г.Х., логин `gamid_teacher_dgtu`, пароль `irzaev123`, роль
 `TEACHER`. В отличие от остальных преподавателей в seed-данных (`registered = false`, без Keycloak-
 аккаунта — заведены только для привязки к парам/лекциям), у этого аккаунта `registered = true` и
-`teachers.id` равен его настоящему Keycloak user id (`db/migration/data/V3__insert_teachers_data.sql`)
+`teachers.id` равен его настоящему Keycloak user id (`db/migration/data/V6__insert_teachers_data.sql`)
 — тот же общий dev-фикстур, что и `student1`, не пересоздавайте и не сбрасывайте ему пароль впустую.
 
 ---
