@@ -22,6 +22,7 @@
     <java.version>17</java.version>
     <keycloak.version>22.0.1</keycloak.version>
     <docker-compose.plugin.version>0.9.1</docker-compose.plugin.version>
+    <testcontainers.version>1.21.4</testcontainers.version>
   </properties>
 
   <dependencies>
