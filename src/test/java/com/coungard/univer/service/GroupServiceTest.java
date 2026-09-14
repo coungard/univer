@@ -76,6 +76,8 @@ class GroupServiceTest {
 
   private UUID semesterId;
 
+  private UUID universityId;
+
   @BeforeEach
   void setUp() {
     groupRepository.deleteAll();
@@ -87,7 +89,7 @@ class GroupServiceTest {
 
     University university = new University();
     university.setName("Test University");
-    UUID universityId = universityRepository.save(university).getId();
+    universityId = universityRepository.save(university).getId();
 
     Faculty faculty = Faculty.builder()
         .name("Faculty of Computer Science")
@@ -178,6 +180,35 @@ class GroupServiceTest {
     // Then
     assertThat(result.getContent()).hasSize(1);
     assertThat(result.getContent().get(0).name()).isEqualTo("У532 КСиТ");
+  }
+
+  @Test
+  void shouldGetGroupsByUniversity() {
+    // Given
+    groupService.createGroup(GroupDto.builder().semesterId(semesterId).name("У532 КСиТ").build());
+
+    Pageable pageable = PageRequest.of(0, 10);
+
+    // When
+    Page<GroupDto> result = groupService.getGroupsByUniversity(universityId, pageable);
+
+    // Then
+    assertThat(result.getContent()).hasSize(1);
+    assertThat(result.getContent().get(0).name()).isEqualTo("У532 КСиТ");
+  }
+
+  @Test
+  void shouldReturnEmptyPageForUnrelatedUniversity() {
+    // Given
+    groupService.createGroup(GroupDto.builder().semesterId(semesterId).name("У532 КСиТ").build());
+
+    Pageable pageable = PageRequest.of(0, 10);
+
+    // When
+    Page<GroupDto> result = groupService.getGroupsByUniversity(UUID.randomUUID(), pageable);
+
+    // Then
+    assertThat(result.getContent()).isEmpty();
   }
 
   @Test

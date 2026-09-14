@@ -41,6 +41,15 @@ public interface GroupService {
   Page<GroupDto> getGroupsBySemester(UUID semesterId, Pageable pageable);
 
   /**
+   * Получить страницу групп по ID университета.
+   *
+   * @param universityId идентификатор университета
+   * @param pageable параметры пагинации и сортировки
+   * @return страница GroupDto
+   */
+  Page<GroupDto> getGroupsByUniversity(UUID universityId, Pageable pageable);
+
+  /**
    * Обновить группу.
    *
    * @param id идентификатор группы

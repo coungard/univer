@@ -88,6 +88,12 @@ public class StudentServiceImpl implements StudentService {
 
       student.setPerson(person);
 
+      if (registerStudentRequest.groupId() != null) {
+        Group group = groupRepository.findById(registerStudentRequest.groupId())
+            .orElseThrow(() -> new ResourceNotFoundException("Group not found with id: " + registerStudentRequest.groupId()));
+        student.setGroup(group);
+      }
+
       Student saved = studentRepository.save(student);
       return studentMapper.toDto(saved);
     } catch (Exception ex) {

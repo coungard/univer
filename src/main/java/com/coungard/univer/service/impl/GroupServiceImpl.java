@@ -57,6 +57,12 @@ public class GroupServiceImpl implements GroupService {
   }
 
   @Override
+  @Transactional(readOnly = true)
+  public Page<GroupDto> getGroupsByUniversity(UUID universityId, Pageable pageable) {
+    return groupRepository.findByUniversityId(universityId, pageable).map(groupMapper::toDto);
+  }
+
+  @Override
   @Transactional
   public GroupDto updateGroup(UUID id, GroupDto groupDto) {
     Group existing = groupRepository.findById(id)

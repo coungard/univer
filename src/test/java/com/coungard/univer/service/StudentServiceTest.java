@@ -122,7 +122,8 @@ class StudentServiceTest {
         "ivan@example.com",
         "password123",
         LocalDate.now().minusYears(1),
-        universityId
+        universityId,
+        null
     );
 
     // When: Мокаем ответ Keycloak
@@ -139,6 +140,61 @@ class StudentServiceTest {
 
     verify(keycloakAdminService).createUser(any(RegisterData.class));
     verify(keycloakAdminService).assignRole(eq(mockKeycloakId), eq(Role.ROLE_STUDENT));
+  }
+
+  @Test
+  void shouldRegisterStudentWithGroup() {
+    // Given
+    Group group = createTestGroup("17В42");
+    String mockKeycloakId = UUID.randomUUID().toString();
+    RegisterStudentRequest registerDto = new RegisterStudentRequest(
+        "ivan",
+        "Иван",
+        "Иванов",
+        "Иванович",
+        "ivan@example.com",
+        "password123",
+        LocalDate.now().minusYears(1),
+        universityId,
+        group.getId()
+    );
+
+    // When
+    when(keycloakAdminService.createUser(any(RegisterData.class))).thenReturn(mockKeycloakId);
+    StudentDto registered = studentService.registerStudent(registerDto);
+
+    // Then
+    assertThat(registered.groupId()).isEqualTo(group.getId());
+    assertThat(studentRepository.findById(UUID.fromString(mockKeycloakId)))
+        .get()
+        .extracting(Student::getGroup)
+        .extracting(Group::getId)
+        .isEqualTo(group.getId());
+  }
+
+  @Test
+  void shouldFailToRegisterStudentWithUnknownGroup() {
+    // Given
+    String mockKeycloakId = UUID.randomUUID().toString();
+    RegisterStudentRequest registerDto = new RegisterStudentRequest(
+        "ivan",
+        "Иван",
+        "Иванов",
+        "Иванович",
+        "ivan@example.com",
+        "password123",
+        LocalDate.now().minusYears(1),
+        universityId,
+        UUID.randomUUID()
+    );
+    when(keycloakAdminService.createUser(any(RegisterData.class))).thenReturn(mockKeycloakId);
+
+    // When / Then
+    assertThatThrownBy(() -> studentService.registerStudent(registerDto))
+        .isInstanceOf(RuntimeException.class);
+    // Регистрация в Keycloak должна быть откачена, как и при любой другой ошибке после createUser
+    // (см. CLAUDE.md, флоу регистрации).
+    verify(keycloakAdminService).deleteUser(mockKeycloakId);
   }
 
   @Test

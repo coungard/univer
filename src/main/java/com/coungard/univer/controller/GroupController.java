@@ -57,6 +57,18 @@ public class GroupController {
     return ResponseEntity.ok(groups);
   }
 
+  @Operation(summary = "Получить группы по ID университета с пагинацией")
+  @GetMapping("/university/{universityId}")
+  public ResponseEntity<Page<GroupDto>> getGroupsByUniversity(
+      @PathVariable UUID universityId,
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "10") int size) {
+
+    Pageable pageable = PageRequest.of(page, size);
+    Page<GroupDto> groups = groupService.getGroupsByUniversity(universityId, pageable);
+    return ResponseEntity.ok(groups);
+  }
+
   @Operation(summary = "Получить группу по ID")
   @GetMapping("/{id}")
   public ResponseEntity<GroupDto> getGroupById(@PathVariable UUID id) {
