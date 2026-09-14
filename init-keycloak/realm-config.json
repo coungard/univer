@@ -109,6 +109,23 @@
         }
       ],
       "realmRoles": ["ROLE_ADMIN"]
+    },
+    {
+      "id": "e31d7355-7257-4795-8aa7-9232e014f932",
+      "username": "student1",
+      "email": "student1@dstu.ru",
+      "firstName": "Тест",
+      "lastName": "Тестов",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "student123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["ROLE_STUDENT"]
     }
   ]
 }

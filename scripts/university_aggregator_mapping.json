@@ -1,0 +1,4890 @@
+{
+  "01-msu": {
+    "ucheba_id": "1153",
+    "matched_title": "МГУ имени М.В. Ломоносова, Московский государственный университет имени М.В. Ломоносова",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "02-spbu": {
+    "ucheba_id": "12513",
+    "matched_title": "ГГУ, Гжельский государственный университет",
+    "score": 0.786,
+    "confidence": "fuzzy",
+    "postupi_url": "https://spb.postupi.online/vuz/spbgu/",
+    "postupi_confidence": "exact"
+  },
+  "03-mipt": {
+    "ucheba_id": "5923",
+    "matched_title": "МФТИ, Московский физико-технический институт (национальный исследовательский университет)",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "04-mephi": {
+    "ucheba_id": "5889",
+    "matched_title": "НИЯУ МИФИ, Национальный исследовательский ядерный университет «МИФИ»",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "05-hse": {
+    "ucheba_id": "5723",
+    "matched_title": "НИУ ВШЭ, Национальный исследовательский университет «Высшая школа экономики»",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "06-bmstu": {
+    "ucheba_id": "6324",
+    "matched_title": "МГТУ им. Н.Э. Баумана, Московский государственный технический университет им. Н.Э. Баумана (национальный исследовательский университет)",
+    "score": 0.982,
+    "confidence": "fuzzy",
+    "postupi_url": "https://msk.postupi.online/vuz/mgtu-im-n-e-baumana/",
+    "postupi_confidence": "exact"
+  },
+  "07-itmo": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "08-nsu": {
+    "ucheba_id": "12513",
+    "matched_title": "ГГУ, Гжельский государственный университет",
+    "score": 0.821,
+    "confidence": "fuzzy"
+  },
+  "09-kfu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://kazan.postupi.online/vuz/kfu/",
+    "postupi_confidence": "exact"
+  },
+  "10-urfu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://ekaterinburg.postupi.online/vuz/urfu-im-b-n-elcina/",
+    "postupi_confidence": "exact"
+  },
+  "100-novgu": {
+    "ucheba_id": "1153",
+    "matched_title": "МГУ имени М.В. Ломоносова, Московский государственный университет имени М.В. Ломоносова",
+    "score": 0.732,
+    "confidence": "fuzzy",
+    "postupi_url": "https://velikiy-novgorod.postupi.online/vuz/novgu/",
+    "postupi_confidence": "exact"
+  },
+  "101-msu-sevastopol": {
+    "ucheba_id": "108486",
+    "matched_title": "Филиал МГУ имени М.В. Ломоносова в Ереване, Филиал Московского государственного университета имени М.В. Ломоносова в г. Ереване",
+    "score": 0.742,
+    "confidence": "fuzzy"
+  },
+  "102-sziu-ranepa": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "103-siu-ranepa": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "104-uiu-ranepa": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "105-piu-ranepa": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "106-finuni-barnaul": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "107-plekhanov-smolensk": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "108-bmstu-kaluga": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "109-bmstu-mytishchi": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "11-tpu": {
+    "ucheba_id": "5889",
+    "matched_title": "НИЯУ МИФИ, Национальный исследовательский ядерный университет «МИФИ»",
+    "score": 0.76,
+    "confidence": "fuzzy",
+    "postupi_url": "https://tomsk.postupi.online/vuz/tpu/",
+    "postupi_confidence": "exact"
+  },
+  "110-mgimo-odintsovo": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "111-uti-tpu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "112-misis": {
+    "ucheba_id": "5889",
+    "matched_title": "НИЯУ МИФИ, Национальный исследовательский ядерный университет «МИФИ»",
+    "score": 0.84,
+    "confidence": "fuzzy"
+  },
+  "113-mirea": {
+    "ucheba_id": "5857",
+    "matched_title": "РТУ МИРЭА, МИРЭА — Российский технологический университет",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "114-mospolytech": {
+    "ucheba_id": "5868",
+    "matched_title": "Московский Политех, Московский политехнический университет",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "115-madi": {
+    "ucheba_id": "5839",
+    "matched_title": "МАДИ, Московский автомобильно-дорожный государственный технический университет (МАДИ)",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "116-marhi": {
+    "ucheba_id": "5840",
+    "matched_title": "МАРХИ, Московский архитектурный институт (Государственная академия)",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "117-stankin": {
+    "ucheba_id": "5871",
+    "matched_title": "МГТУ «СТАНКИН», Московский государственный технологический университет «СТАНКИН»",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "118-miigaik": {
+    "ucheba_id": "5872",
+    "matched_title": "МИИГАиК, Московский государственный университет геодезии и картографии",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "119-kosygin": {
+    "ucheba_id": "5873",
+    "matched_title": "РГУ им. А.Н. Косыгина, Российский государственный университет имени А.Н. Косыгина (Технологии. Дизайн. Искусство)",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "12-dvfu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://vladivostok.postupi.online/vuz/dvfu/",
+    "postupi_confidence": "exact"
+  },
+  "120-guu": {
+    "ucheba_id": "13477",
+    "matched_title": "ГУУ, Государственный университет управления",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "121-rgsu": {
+    "ucheba_id": "13744",
+    "matched_title": "РГСУ, Российский государственный социальный университет",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "122-mgpu": {
+    "ucheba_id": "5843",
+    "matched_title": "МГПУ, Московский городской педагогический университет",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "123-mgppu": {
+    "ucheba_id": "5844",
+    "matched_title": "МГППУ, Московский государственный психолого-педагогический университет",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "124-herzen": {
+    "ucheba_id": "5832",
+    "matched_title": "МГЮА им. О.Е. Кутафина, Московский государственный юридический университет имени О.Е. Кутафина",
+    "score": 0.775,
+    "confidence": "fuzzy"
+  },
+  "125-leti": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "126-gorny": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://spb.postupi.online/vuz/gornyj-universitet/",
+    "postupi_confidence": "exact"
+  },
+  "127-spbgeu": {
+    "ucheba_id": "5861",
+    "matched_title": "МГЛУ, Московский государственный лингвистический университет",
+    "score": 0.748,
+    "confidence": "fuzzy",
+    "postupi_url": "https://spb.postupi.online/vuz/spbgeu/",
+    "postupi_confidence": "exact"
+  },
+  "128-spbgasu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://spb.postupi.online/vuz/spbgasu/",
+    "postupi_confidence": "exact"
+  },
+  "129-guap": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://spb.postupi.online/vuz/guap/",
+    "postupi_confidence": "exact"
+  },
+  "13-sfu": {
+    "ucheba_id": "105530",
+    "matched_title": "Сибирский корпоративный университет, Сибирский корпоративный университет",
+    "score": 0.794,
+    "confidence": "fuzzy",
+    "postupi_url": "https://krasnoyarsk.postupi.online/vuz/sfu/",
+    "postupi_confidence": "exact"
+  },
+  "130-smtu": {
+    "ucheba_id": "98012",
+    "matched_title": "КарГТУ, Карагандинский государственный технический университет",
+    "score": 0.76,
+    "confidence": "fuzzy",
+    "postupi_url": "https://spb.postupi.online/vuz/spbgmtu/",
+    "postupi_confidence": "exact"
+  },
+  "131-gumrf": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://spb.postupi.online/vuz/gumrf-imeni-admirala-s-o-makarova/",
+    "postupi_confidence": "exact"
+  },
+  "132-sutd": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://spb.postupi.online/vuz/spbguptd/",
+    "postupi_confidence": "exact"
+  },
+  "133-conservatory-spb": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "134-vaganova": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://spb.postupi.online/vuz/akademiya-russkogo-baleta-im-a-ya-vaganovoj/",
+    "postupi_confidence": "exact"
+  },
+  "135-spbgik": {
+    "ucheba_id": "5876",
+    "matched_title": "МГИК, Московский государственный институт культуры",
+    "score": 0.825,
+    "confidence": "fuzzy",
+    "postupi_url": "https://spb.postupi.online/vuz/spbgik/",
+    "postupi_confidence": "exact"
+  },
+  "136-spcpu": {
+    "ucheba_id": "5861",
+    "matched_title": "МГЛУ, Московский государственный лингвистический университет",
+    "score": 0.72,
+    "confidence": "fuzzy",
+    "postupi_url": "https://spb.postupi.online/vuz/sankt-peterburgskij-gosudarstvennyj-himiko-farmacevticheskij-universitet/",
+    "postupi_confidence": "exact"
+  },
+  "137-pavlov-spb": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "138-szgmu-mechnikov": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://spb.postupi.online/vuz/szgmu-im-mechnikova/",
+    "postupi_confidence": "exact"
+  },
+  "139-kazan-gmu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "14-yufu": {
+    "ucheba_id": "109135",
+    "matched_title": "ЦУ, Центральный университет",
+    "score": 0.769,
+    "confidence": "fuzzy"
+  },
+  "140-bashgmu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "141-usma": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "142-ssmu-tomsk": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "143-krasgmu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "144-ngmu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "145-omgmu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "146-kemgmu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "147-ismu-irkutsk": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "148-agmu-barnaul": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "149-fesmu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "15-skfu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://stavropol.postupi.online/vuz/skfu/",
+    "postupi_confidence": "exact"
+  },
+  "150-tgmu-vladivostok": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "151-chgma": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "152-kubgmu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "153-rostgmu": {
+    "ucheba_id": "5869",
+    "matched_title": "МГТУГА, Московский государственный технический университет гражданской авиации",
+    "score": 0.73,
+    "confidence": "fuzzy"
+  },
+  "154-volggmu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "155-sgmu-saratov": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "156-vgmu-burdenko": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "157-rzgmu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "158-ysmu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "159-tvgmu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "16-safu": {
+    "ucheba_id": "1153",
+    "matched_title": "МГУ имени М.В. Ломоносова, Московский государственный университет имени М.В. Ломоносова",
+    "score": 0.714,
+    "confidence": "fuzzy"
+  },
+  "160-ivgmu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "161-smolgmu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "162-kgmu-kursk": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "163-psma-perm": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "164-samgmu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "165-orgmu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "166-stgmu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "167-nsmu-arkhangelsk": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "168-tyumsmu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "169-kirovgmu": {
+    "ucheba_id": "5869",
+    "matched_title": "МГТУГА, Московский государственный технический университет гражданской авиации",
+    "score": 0.721,
+    "confidence": "fuzzy"
+  },
+  "17-bfu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://kaliningrad.postupi.online/vuz/bfu-im-i-kanta/",
+    "postupi_confidence": "exact"
+  },
+  "170-astgmu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "171-yuugmu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "172-igma-izhevsk": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "173-susu": {
+    "ucheba_id": "6324",
+    "matched_title": "МГТУ им. Н.Э. Баумана, Московский государственный технический университет им. Н.Э. Баумана (национальный исследовательский университет)",
+    "score": 0.779,
+    "confidence": "fuzzy"
+  },
+  "174-chelgu": {
+    "ucheba_id": "12513",
+    "matched_title": "ГГУ, Гжельский государственный университет",
+    "score": 0.895,
+    "confidence": "fuzzy",
+    "postupi_url": "https://chelyabinsk.postupi.online/vuz/chelgu/",
+    "postupi_confidence": "exact"
+  },
+  "175-magtu": {
+    "ucheba_id": "1153",
+    "matched_title": "МГУ имени М.В. Ломоносова, Московский государственный университет имени М.В. Ломоносова",
+    "score": 0.773,
+    "confidence": "fuzzy"
+  },
+  "176-kgu-kurgan": {
+    "ucheba_id": "12513",
+    "matched_title": "ГГУ, Гжельский государственный университет",
+    "score": 0.88,
+    "confidence": "fuzzy",
+    "postupi_url": "https://kurgan.postupi.online/vuz/kgu-kurgan/",
+    "postupi_confidence": "exact"
+  },
+  "177-surgu": {
+    "ucheba_id": "12513",
+    "matched_title": "ГГУ, Гжельский государственный университет",
+    "score": 0.88,
+    "confidence": "fuzzy",
+    "postupi_url": "https://surgut.postupi.online/vuz/surgu/",
+    "postupi_confidence": "exact"
+  },
+  "178-yugu": {
+    "ucheba_id": "12513",
+    "matched_title": "ГГУ, Гжельский государственный университет",
+    "score": 0.904,
+    "confidence": "fuzzy",
+    "postupi_url": "https://hanty-mansiysk.postupi.online/vuz/yugu/",
+    "postupi_confidence": "exact"
+  },
+  "179-vlgu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://vladimir.postupi.online/vuz/vlgu/",
+    "postupi_confidence": "exact"
+  },
+  "18-svfu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://yakutsk.postupi.online/vuz/svfu/",
+    "postupi_confidence": "exact"
+  },
+  "180-ispu": {
+    "ucheba_id": "5832",
+    "matched_title": "МГЮА им. О.Е. Кутафина, Московский государственный юридический университет имени О.Е. Кутафина",
+    "score": 0.794,
+    "confidence": "fuzzy",
+    "postupi_url": "https://ivanovo.postupi.online/vuz/igeu/",
+    "postupi_confidence": "exact"
+  },
+  "181-isuct": {
+    "ucheba_id": "5871",
+    "matched_title": "МГТУ «СТАНКИН», Московский государственный технологический университет «СТАНКИН»",
+    "score": 0.813,
+    "confidence": "fuzzy",
+    "postupi_url": "https://ivanovo.postupi.online/vuz/ightu/",
+    "postupi_confidence": "exact"
+  },
+  "182-vogu": {
+    "ucheba_id": "12513",
+    "matched_title": "ГГУ, Гжельский государственный университет",
+    "score": 0.868,
+    "confidence": "fuzzy",
+    "postupi_url": "https://vologda.postupi.online/vuz/vogu/",
+    "postupi_confidence": "exact"
+  },
+  "183-chsu": {
+    "ucheba_id": "12513",
+    "matched_title": "ГГУ, Гжельский государственный университет",
+    "score": 0.831,
+    "confidence": "fuzzy",
+    "postupi_url": "https://cherepovec.postupi.online/vuz/chgu-cherepovets/",
+    "postupi_confidence": "exact"
+  },
+  "184-syktsu": {
+    "ucheba_id": "1153",
+    "matched_title": "МГУ имени М.В. Ломоносова, Московский государственный университет имени М.В. Ломоносова",
+    "score": 0.752,
+    "confidence": "fuzzy",
+    "postupi_url": "https://syktyvkar.postupi.online/vuz/sgu-im-pitirima-sorokina/",
+    "postupi_confidence": "exact"
+  },
+  "185-ugtu": {
+    "ucheba_id": "98012",
+    "matched_title": "КарГТУ, Карагандинский государственный технический университет",
+    "score": 0.893,
+    "confidence": "fuzzy",
+    "postupi_url": "https://uhta.postupi.online/vuz/ugtu/",
+    "postupi_confidence": "exact"
+  },
+  "186-khsu": {
+    "ucheba_id": "1153",
+    "matched_title": "МГУ имени М.В. Ломоносова, Московский государственный университет имени М.В. Ломоносова",
+    "score": 0.803,
+    "confidence": "fuzzy"
+  },
+  "187-tuvsu": {
+    "ucheba_id": "12513",
+    "matched_title": "ГГУ, Гжельский государственный университет",
+    "score": 0.865,
+    "confidence": "fuzzy",
+    "postupi_url": "https://kyzyl.postupi.online/vuz/tuvgu/",
+    "postupi_confidence": "exact"
+  },
+  "188-gasu": {
+    "ucheba_id": "12513",
+    "matched_title": "ГГУ, Гжельский государственный университет",
+    "score": 0.85,
+    "confidence": "fuzzy",
+    "postupi_url": "https://gorno-altaysk.postupi.online/vuz/gagu/",
+    "postupi_confidence": "exact"
+  },
+  "189-kuzstu": {
+    "ucheba_id": "5832",
+    "matched_title": "МГЮА им. О.Е. Кутафина, Московский государственный юридический университет имени О.Е. Кутафина",
+    "score": 0.752,
+    "confidence": "fuzzy",
+    "postupi_url": "https://kemerovo.postupi.online/vuz/kuzgtu/",
+    "postupi_confidence": "exact"
+  },
+  "19-kfu-vernadsky": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://simferopol.postupi.online/vuz/kfu-im-v-i-vernadskogo/",
+    "postupi_confidence": "exact"
+  },
+  "190-urgpu": {
+    "ucheba_id": "5844",
+    "matched_title": "МГППУ, Московский государственный психолого-педагогический университет",
+    "score": 0.817,
+    "confidence": "fuzzy",
+    "postupi_url": "https://ekaterinburg.postupi.online/vuz/urgpu/",
+    "postupi_confidence": "exact"
+  },
+  "191-nspu": {
+    "ucheba_id": "5844",
+    "matched_title": "МГППУ, Московский государственный психолого-педагогический университет",
+    "score": 0.824,
+    "confidence": "fuzzy",
+    "postupi_url": "https://nsk.postupi.online/vuz/ngpu/",
+    "postupi_confidence": "exact"
+  },
+  "192-kspu": {
+    "ucheba_id": "5832",
+    "matched_title": "МГЮА им. О.Е. Кутафина, Московский государственный юридический университет имени О.Е. Кутафина",
+    "score": 0.781,
+    "confidence": "fuzzy"
+  },
+  "193-vgspu": {
+    "ucheba_id": "5844",
+    "matched_title": "МГППУ, Московский государственный психолого-педагогический университет",
+    "score": 0.822,
+    "confidence": "fuzzy",
+    "postupi_url": "https://volgograd.postupi.online/vuz/vgspu/",
+    "postupi_confidence": "exact"
+  },
+  "194-vavt": {
+    "ucheba_id": "5705",
+    "matched_title": "ВАВТ Минэкономразвития России, Всероссийская академия внешней торговли Министерства экономического развития Российской Федерации",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "195-dipacademy": {
+    "ucheba_id": "451",
+    "matched_title": "Колледж МИД России, Колледж Министерства иностранных дел Российской Федерации",
+    "score": 0.779,
+    "confidence": "fuzzy"
+  },
+  "196-customs-academy": {
+    "ucheba_id": "11911",
+    "matched_title": "РТА, Российская таможенная академия",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "197-mosu-mvd": {
+    "ucheba_id": "5921",
+    "matched_title": "МосУ МВД РФ им. В.Я. Кикотя, Московский университет Министерства внутренних дел Российской Федерации им. В.Я. Кикотя",
+    "score": 0.905,
+    "confidence": "fuzzy"
+  },
+  "198-vka-mozhaisky": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "199-ntgspi": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "20-spbpu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://spb.postupi.online/vuz/spbpu/",
+    "postupi_confidence": "exact"
+  },
+  "200-bashgu-sterlitamak": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "201-rhtu": {
+    "ucheba_id": "1155",
+    "matched_title": "РХТУ им. Д.И. Менделеева, Российский химико-технологический университет имени Д.И. Менделеева",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "202-rut-miit": {
+    "ucheba_id": "5882",
+    "matched_title": "РУТ (МИИТ), Российский университет транспорта",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "203-pgups": {
+    "ucheba_id": "107682",
+    "matched_title": "Ожерельевский ж. д. колледж филиал ПГУПС, Ожерельевский железнодорожный колледж филиал Петербургского государственного университета путей сообщения императора Александра I",
+    "score": 0.733,
+    "confidence": "fuzzy",
+    "postupi_url": "https://spb.postupi.online/vuz/pgups-liizht/",
+    "postupi_confidence": "exact"
+  },
+  "204-sgups": {
+    "ucheba_id": "5862",
+    "matched_title": "Просвет, Государственный университет просвещения",
+    "score": 0.761,
+    "confidence": "fuzzy",
+    "postupi_url": "https://nsk.postupi.online/vuz/sgups/",
+    "postupi_confidence": "exact"
+  },
+  "205-dvgups": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://habarovsk.postupi.online/vuz/dvgups/",
+    "postupi_confidence": "exact"
+  },
+  "206-urgups": {
+    "ucheba_id": "5862",
+    "matched_title": "Просвет, Государственный университет просвещения",
+    "score": 0.761,
+    "confidence": "fuzzy",
+    "postupi_url": "https://ekaterinburg.postupi.online/vuz/urgups/",
+    "postupi_confidence": "exact"
+  },
+  "207-rgups": {
+    "ucheba_id": "5862",
+    "matched_title": "Просвет, Государственный университет просвещения",
+    "score": 0.753,
+    "confidence": "fuzzy",
+    "postupi_url": "https://rostov.postupi.online/vuz/rgups/",
+    "postupi_confidence": "exact"
+  },
+  "208-omgups": {
+    "ucheba_id": "5862",
+    "matched_title": "Просвет, Государственный университет просвещения",
+    "score": 0.787,
+    "confidence": "fuzzy",
+    "postupi_url": "https://omsk.postupi.online/vuz/omgups/",
+    "postupi_confidence": "exact"
+  },
+  "209-irgups": {
+    "ucheba_id": "5862",
+    "matched_title": "Просвет, Государственный университет просвещения",
+    "score": 0.761,
+    "confidence": "fuzzy",
+    "postupi_url": "https://irkutsk.postupi.online/vuz/irgups/",
+    "postupi_confidence": "exact"
+  },
+  "21-mai": {
+    "ucheba_id": "5838",
+    "matched_title": "МАИ, Московский авиационный институт (национальный исследовательский университет) (МАИ)",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "210-samgups": {
+    "ucheba_id": "5862",
+    "matched_title": "Просвет, Государственный университет просвещения",
+    "score": 0.761,
+    "confidence": "fuzzy"
+  },
+  "211-mgtuga": {
+    "ucheba_id": "5869",
+    "matched_title": "МГТУГА, Московский государственный технический университет гражданской авиации",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "212-spbguga": {
+    "ucheba_id": "5869",
+    "matched_title": "МГТУГА, Московский государственный технический университет гражданской авиации",
+    "score": 0.788,
+    "confidence": "fuzzy"
+  },
+  "213-sglu-forest": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://spb.postupi.online/vuz/spbgltu-im-kirova/",
+    "postupi_confidence": "exact"
+  },
+  "214-vglta": {
+    "ucheba_id": "1153",
+    "matched_title": "МГУ имени М.В. Ломоносова, Московский государственный университет имени М.В. Ломоносова",
+    "score": 0.726,
+    "confidence": "fuzzy",
+    "postupi_url": "https://voronezh.postupi.online/vuz/vgltu/",
+    "postupi_confidence": "exact"
+  },
+  "215-uglu": {
+    "ucheba_id": "98012",
+    "matched_title": "КарГТУ, Карагандинский государственный технический университет",
+    "score": 0.86,
+    "confidence": "fuzzy",
+    "postupi_url": "https://ekaterinburg.postupi.online/vuz/ugltu/",
+    "postupi_confidence": "exact"
+  },
+  "216-sibsu-reshetnev": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "217-gtsolifk": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "218-lesgaft": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "219-vgafk": {
+    "ucheba_id": "5829",
+    "matched_title": "МГАФК, Московская государственная академия физической культуры",
+    "score": 0.885,
+    "confidence": "fuzzy",
+    "postupi_url": "https://volgograd.postupi.online/vuz/vgafk/",
+    "postupi_confidence": "exact"
+  },
+  "22-mei": {
+    "ucheba_id": "5932",
+    "matched_title": "НИУ «МЭИ», Национальный исследовательский университет «МЭИ»",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "220-kgufkst": {
+    "ucheba_id": "13730",
+    "matched_title": "МГУСиТ, Московский государственный университет спорта и туризма",
+    "score": 0.769,
+    "confidence": "fuzzy",
+    "postupi_url": "https://krasnodar.postupi.online/vuz/kgufkst/",
+    "postupi_confidence": "exact"
+  },
+  "221-uralgufk": {
+    "ucheba_id": "97213",
+    "matched_title": "Юридический колледж, Белорусский государственный университет, юридический колледж",
+    "score": 0.752,
+    "confidence": "fuzzy",
+    "postupi_url": "https://chelyabinsk.postupi.online/vuz/uralgufk/",
+    "postupi_confidence": "exact"
+  },
+  "222-sibgufk": {
+    "ucheba_id": "10619",
+    "matched_title": "РГУТИС, Российский государственный университет туризма и сервиса",
+    "score": 0.721,
+    "confidence": "fuzzy",
+    "postupi_url": "https://omsk.postupi.online/vuz/sibgufk/",
+    "postupi_confidence": "exact"
+  },
+  "223-dvgafk": {
+    "ucheba_id": "5829",
+    "matched_title": "МГАФК, Московская государственная академия физической культуры",
+    "score": 0.87,
+    "confidence": "fuzzy",
+    "postupi_url": "https://habarovsk.postupi.online/vuz/dvgafk/",
+    "postupi_confidence": "exact"
+  },
+  "224-rgup": {
+    "ucheba_id": "5947",
+    "matched_title": "РГУП им. В.М. Лебедева, Российский государственный университет правосудия имени В.М. Лебедева",
+    "score": 0.831,
+    "confidence": "fuzzy"
+  },
+  "225-urgyu": {
+    "ucheba_id": "5832",
+    "matched_title": "МГЮА им. О.Е. Кутафина, Московский государственный юридический университет имени О.Е. Кутафина",
+    "score": 0.806,
+    "confidence": "fuzzy",
+    "postupi_url": "https://ekaterinburg.postupi.online/vuz/urgyuu/",
+    "postupi_confidence": "exact"
+  },
+  "226-sgua": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://saratov.postupi.online/vuz/sgyua/",
+    "postupi_confidence": "exact"
+  },
+  "227-baikal-gu": {
+    "ucheba_id": "12513",
+    "matched_title": "ГГУ, Гжельский государственный университет",
+    "score": 0.895,
+    "confidence": "fuzzy",
+    "postupi_url": "https://irkutsk.postupi.online/vuz/bgu/",
+    "postupi_confidence": "exact"
+  },
+  "228-krasnodar-gik": {
+    "ucheba_id": "5876",
+    "matched_title": "МГИК, Московский государственный институт культуры",
+    "score": 0.879,
+    "confidence": "fuzzy",
+    "postupi_url": "https://krasnodar.postupi.online/vuz/kgik/",
+    "postupi_confidence": "exact"
+  },
+  "229-kemgik": {
+    "ucheba_id": "5876",
+    "matched_title": "МГИК, Московский государственный институт культуры",
+    "score": 0.921,
+    "confidence": "fuzzy",
+    "postupi_url": "https://kemerovo.postupi.online/vuz/kemgik/",
+    "postupi_confidence": "exact"
+  },
+  "23-gubkin": {
+    "ucheba_id": "5961",
+    "matched_title": "РГУ нефти и газа (НИУ) имени И.М. Губкина, Российский государственный университет нефти и газа (национальный исследовательский университет) имени И.М. Губкина",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "230-chelgik": {
+    "ucheba_id": "5876",
+    "matched_title": "МГИК, Московский государственный институт культуры",
+    "score": 0.854,
+    "confidence": "fuzzy",
+    "postupi_url": "https://chelyabinsk.postupi.online/vuz/chgik/",
+    "postupi_confidence": "exact"
+  },
+  "231-tyumgik": {
+    "ucheba_id": "5876",
+    "matched_title": "МГИК, Московский государственный институт культуры",
+    "score": 0.897,
+    "confidence": "fuzzy",
+    "postupi_url": "https://tyumen.postupi.online/vuz/tgik/",
+    "postupi_confidence": "exact"
+  },
+  "232-khabgik": {
+    "ucheba_id": "5876",
+    "matched_title": "МГИК, Московский государственный институт культуры",
+    "score": 0.899,
+    "confidence": "fuzzy",
+    "postupi_url": "https://habarovsk.postupi.online/vuz/hgik/",
+    "postupi_confidence": "exact"
+  },
+  "233-vsgik": {
+    "ucheba_id": "5876",
+    "matched_title": "МГИК, Московский государственный институт культуры",
+    "score": 0.854,
+    "confidence": "fuzzy",
+    "postupi_url": "https://ulan-ude.postupi.online/vuz/vsgik/",
+    "postupi_confidence": "exact"
+  },
+  "234-altgik": {
+    "ucheba_id": "5876",
+    "matched_title": "МГИК, Московский государственный институт культуры",
+    "score": 0.874,
+    "confidence": "fuzzy",
+    "postupi_url": "https://barnaul.postupi.online/vuz/agik/",
+    "postupi_confidence": "exact"
+  },
+  "235-permgik": {
+    "ucheba_id": "5876",
+    "matched_title": "МГИК, Московский государственный институт культуры",
+    "score": 0.907,
+    "confidence": "fuzzy",
+    "postupi_url": "https://perm.postupi.online/vuz/pgik/",
+    "postupi_confidence": "exact"
+  },
+  "236-kazgik": {
+    "ucheba_id": "5876",
+    "matched_title": "МГИК, Московский государственный институт культуры",
+    "score": 0.897,
+    "confidence": "fuzzy",
+    "postupi_url": "https://kazan.postupi.online/vuz/kazgik/",
+    "postupi_confidence": "exact"
+  },
+  "237-orelgik": {
+    "ucheba_id": "5876",
+    "matched_title": "МГИК, Московский государственный институт культуры",
+    "score": 0.943,
+    "confidence": "fuzzy",
+    "postupi_url": "https://orel.postupi.online/vuz/ogik/",
+    "postupi_confidence": "exact"
+  },
+  "238-bgiik": {
+    "ucheba_id": "5876",
+    "matched_title": "МГИК, Московский государственный институт культуры",
+    "score": 0.792,
+    "confidence": "fuzzy",
+    "postupi_url": "https://belgorod.postupi.online/vuz/bgiik/",
+    "postupi_confidence": "exact"
+  },
+  "239-samgik": {
+    "ucheba_id": "5876",
+    "matched_title": "МГИК, Московский государственный институт культуры",
+    "score": 0.897,
+    "confidence": "fuzzy",
+    "postupi_url": "https://samara.postupi.online/vuz/sgik/",
+    "postupi_confidence": "exact"
+  },
+  "24-mgimo": {
+    "ucheba_id": "5855",
+    "matched_title": "МГИМО, Московский государственный институт международных отношений (Университет) МИД России",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "240-vgiik": {
+    "ucheba_id": "5876",
+    "matched_title": "МГИК, Московский государственный институт культуры",
+    "score": 0.765,
+    "confidence": "fuzzy",
+    "postupi_url": "https://volgograd.postupi.online/vuz/vgiik/",
+    "postupi_confidence": "exact"
+  },
+  "241-vgik": {
+    "ucheba_id": "5707",
+    "matched_title": "ВГИК, Всероссийский государственный университет кинематографии имени С. А. Герасимова",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "242-schukin": {
+    "ucheba_id": "12942",
+    "matched_title": "ТИ им. Б. Щукина, Театральный институт им. Бориса Щукина при Государственном академическом театре им. Евгения Вахтангова",
+    "score": 0.937,
+    "confidence": "fuzzy"
+  },
+  "243-mkhat-school": {
+    "ucheba_id": "5991",
+    "matched_title": "Школа-студия МХАТ, Школа-студия (институт) им. Вл. И. Немировича-Данченко при МХАТ им. А. П. Чехова",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "244-mga-horeo": {
+    "ucheba_id": "10985",
+    "matched_title": "МГАХ, Московская государственная академия хореографии",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "245-gnesin": {
+    "ucheba_id": "5946",
+    "matched_title": "РАМ имени Гнесиных, Российская академия музыки имени Гнесиных",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "246-rgsai": {
+    "ucheba_id": "5722",
+    "matched_title": "РГСАИ, Российская государственная специализированная академия искусств",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "247-sut-bonch": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "248-mtusi": {
+    "ucheba_id": "5919",
+    "matched_title": "МТУСИ, Московский технический университет связи и информатики",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "249-pguti": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://samara.postupi.online/vuz/pguti/",
+    "postupi_confidence": "exact"
+  },
+  "25-plekhanov": {
+    "ucheba_id": "6044",
+    "matched_title": "РЭУ им. Г.В. Плеханова, Российский экономический университет имени Г.В. Плеханова",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "250-sibguti": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://nsk.postupi.online/vuz/sibguti/",
+    "postupi_confidence": "exact"
+  },
+  "251-kubgau": {
+    "ucheba_id": "5836",
+    "matched_title": "РГАУ-МСХА имени К.А. Тимирязева, Российский государственный аграрный университет - МСХА имени К.А. Тимирязева",
+    "score": 0.755,
+    "confidence": "fuzzy",
+    "postupi_url": "https://krasnodar.postupi.online/vuz/kubanskij-gau/",
+    "postupi_confidence": "exact"
+  },
+  "252-donau": {
+    "ucheba_id": "5955",
+    "matched_title": "РГГУ, Российский государственный гуманитарный университет",
+    "score": 0.821,
+    "confidence": "fuzzy",
+    "postupi_url": "https://rostov.postupi.online/vuz/dongau/",
+    "postupi_confidence": "exact"
+  },
+  "253-vgau-petra1": {
+    "ucheba_id": "5836",
+    "matched_title": "РГАУ-МСХА имени К.А. Тимирязева, Российский государственный аграрный университет - МСХА имени К.А. Тимирязева",
+    "score": 0.725,
+    "confidence": "fuzzy",
+    "postupi_url": "https://voronezh.postupi.online/vuz/voronezhskij-gau/",
+    "postupi_confidence": "exact"
+  },
+  "254-michgau": {
+    "ucheba_id": "5955",
+    "matched_title": "РГГУ, Российский государственный гуманитарный университет",
+    "score": 0.808,
+    "confidence": "fuzzy",
+    "postupi_url": "https://michurinsk.postupi.online/vuz/mgau/",
+    "postupi_confidence": "exact"
+  },
+  "255-sgau-vavilov": {
+    "ucheba_id": "1153",
+    "matched_title": "МГУ имени М.В. Ломоносова, Московский государственный университет имени М.В. Ломоносова",
+    "score": 0.766,
+    "confidence": "fuzzy"
+  },
+  "256-volggau": {
+    "ucheba_id": "5955",
+    "matched_title": "РГГУ, Российский государственный гуманитарный университет",
+    "score": 0.792,
+    "confidence": "fuzzy",
+    "postupi_url": "https://volgograd.postupi.online/vuz/volgogradskij-gau/",
+    "postupi_confidence": "exact"
+  },
+  "257-orengau": {
+    "ucheba_id": "5955",
+    "matched_title": "РГГУ, Российский государственный гуманитарный университет",
+    "score": 0.8,
+    "confidence": "fuzzy",
+    "postupi_url": "https://orenburg.postupi.online/vuz/ogau/",
+    "postupi_confidence": "exact"
+  },
+  "258-bashgau": {
+    "ucheba_id": "5955",
+    "matched_title": "РГГУ, Российский государственный гуманитарный университет",
+    "score": 0.816,
+    "confidence": "fuzzy",
+    "postupi_url": "https://ufa.postupi.online/vuz/bashkirskij-gau/",
+    "postupi_confidence": "exact"
+  },
+  "259-permgatu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "26-finuniversity": {
+    "ucheba_id": "5988",
+    "matched_title": "Финансовый университет, Финансовый университет при Правительстве Российской Федерации",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "260-izhgsha": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "261-uralgau": {
+    "ucheba_id": "5955",
+    "matched_title": "РГГУ, Российский государственный гуманитарный университет",
+    "score": 0.825,
+    "confidence": "fuzzy",
+    "postupi_url": "https://ekaterinburg.postupi.online/vuz/urgau/",
+    "postupi_confidence": "exact"
+  },
+  "262-omgau": {
+    "ucheba_id": "5836",
+    "matched_title": "РГАУ-МСХА имени К.А. Тимирязева, Российский государственный аграрный университет - МСХА имени К.А. Тимирязева",
+    "score": 0.8,
+    "confidence": "fuzzy",
+    "postupi_url": "https://omsk.postupi.online/vuz/omskij-gau/",
+    "postupi_confidence": "exact"
+  },
+  "263-nsau": {
+    "ucheba_id": "5955",
+    "matched_title": "РГГУ, Российский государственный гуманитарный университет",
+    "score": 0.832,
+    "confidence": "fuzzy"
+  },
+  "264-krasgau": {
+    "ucheba_id": "5955",
+    "matched_title": "РГГУ, Российский государственный гуманитарный университет",
+    "score": 0.82,
+    "confidence": "fuzzy",
+    "postupi_url": "https://krasnoyarsk.postupi.online/vuz/krasnoyarskij-gau/",
+    "postupi_confidence": "exact"
+  },
+  "265-irgau": {
+    "ucheba_id": "5836",
+    "matched_title": "РГАУ-МСХА имени К.А. Тимирязева, Российский государственный аграрный университет - МСХА имени К.А. Тимирязева",
+    "score": 0.769,
+    "confidence": "fuzzy",
+    "postupi_url": "https://irkutsk.postupi.online/vuz/igau/",
+    "postupi_confidence": "exact"
+  },
+  "266-altgau": {
+    "ucheba_id": "5955",
+    "matched_title": "РГГУ, Российский государственный гуманитарный университет",
+    "score": 0.825,
+    "confidence": "fuzzy",
+    "postupi_url": "https://barnaul.postupi.online/vuz/agau/",
+    "postupi_confidence": "exact"
+  },
+  "267-buryat-gsha": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://ulan-ude.postupi.online/vuz/buryatskaya-gsha/",
+    "postupi_confidence": "exact"
+  },
+  "268-dalgau": {
+    "ucheba_id": "5955",
+    "matched_title": "РГГУ, Российский государственный гуманитарный университет",
+    "score": 0.738,
+    "confidence": "fuzzy",
+    "postupi_url": "https://blagoveshhensk.postupi.online/vuz/dalgau/",
+    "postupi_confidence": "exact"
+  },
+  "269-sakhgu": {
+    "ucheba_id": "12513",
+    "matched_title": "ГГУ, Гжельский государственный университет",
+    "score": 0.868,
+    "confidence": "fuzzy",
+    "postupi_url": "https://yuzhno-sahalinsk.postupi.online/vuz/sahgu/",
+    "postupi_confidence": "exact"
+  },
+  "27-ranepa": {
+    "ucheba_id": "5692",
+    "matched_title": "РАНХиГС, Российская академия народного хозяйства и государственной службы при Президенте Российской Федерации",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "270-kamgu": {
+    "ucheba_id": "1153",
+    "matched_title": "МГУ имени М.В. Ломоносова, Московский государственный университет имени М.В. Ломоносова",
+    "score": 0.723,
+    "confidence": "fuzzy",
+    "postupi_url": "https://petropavlovsk-kamchatskij.postupi.online/vuz/kamgu/",
+    "postupi_confidence": "exact"
+  },
+  "271-dstu-dagestan": {
+    "ucheba_id": "98012",
+    "matched_title": "КарГТУ, Карагандинский государственный технический университет",
+    "score": 0.906,
+    "confidence": "fuzzy",
+    "postupi_url": "https://mahachkala.postupi.online/vuz/dgtu-mahachkala/",
+    "postupi_confidence": "exact"
+  },
+  "272-dgmu": {
+    "ucheba_id": "98012",
+    "matched_title": "КарГТУ, Карагандинский государственный технический университет",
+    "score": 0.811,
+    "confidence": "fuzzy",
+    "postupi_url": "https://mahachkala.postupi.online/vuz/dgmu/",
+    "postupi_confidence": "exact"
+  },
+  "273-ggntu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://groznij-checnya.postupi.online/vuz/ggntu/",
+    "postupi_confidence": "exact"
+  },
+  "274-inggu": {
+    "ucheba_id": "12513",
+    "matched_title": "ГГУ, Гжельский государственный университет",
+    "score": 0.892,
+    "confidence": "fuzzy",
+    "postupi_url": "https://nazran.postupi.online/vuz/inggu/",
+    "postupi_confidence": "exact"
+  },
+  "275-kchgu": {
+    "ucheba_id": "1153",
+    "matched_title": "МГУ имени М.В. Ломоносова, Московский государственный университет имени М.В. Ломоносова",
+    "score": 0.746,
+    "confidence": "fuzzy",
+    "postupi_url": "https://karachaevsk.postupi.online/vuz/kchgu/",
+    "postupi_confidence": "exact"
+  },
+  "276-kbgau": {
+    "ucheba_id": "5836",
+    "matched_title": "РГАУ-МСХА имени К.А. Тимирязева, Российский государственный аграрный университет - МСХА имени К.А. Тимирязева",
+    "score": 0.728,
+    "confidence": "fuzzy"
+  },
+  "277-gorskiy-gau": {
+    "ucheba_id": "5955",
+    "matched_title": "РГГУ, Российский государственный гуманитарный университет",
+    "score": 0.842,
+    "confidence": "fuzzy",
+    "postupi_url": "https://vladikavkaz.postupi.online/vuz/ggau/",
+    "postupi_confidence": "exact"
+  },
+  "278-skgmi": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "279-stgau": {
+    "ucheba_id": "5955",
+    "matched_title": "РГГУ, Российский государственный гуманитарный университет",
+    "score": 0.804,
+    "confidence": "fuzzy",
+    "postupi_url": "https://stavropol.postupi.online/vuz/stavropolskij-gau/",
+    "postupi_confidence": "exact"
+  },
+  "28-kutafin": {
+    "ucheba_id": "5832",
+    "matched_title": "МГЮА им. О.Е. Кутафина, Московский государственный юридический университет имени О.Е. Кутафина",
+    "score": 0.966,
+    "confidence": "fuzzy",
+    "postupi_url": "https://msk.postupi.online/vuz/mgyua-im-o-e-kutafina/",
+    "postupi_confidence": "exact"
+  },
+  "280-maykop-gtu": {
+    "ucheba_id": "5871",
+    "matched_title": "МГТУ «СТАНКИН», Московский государственный технологический университет «СТАНКИН»",
+    "score": 0.879,
+    "confidence": "fuzzy",
+    "postupi_url": "https://majkop.postupi.online/vuz/mgtu/",
+    "postupi_confidence": "exact"
+  },
+  "281-pgtu-yoshkar-ola": {
+    "ucheba_id": "5871",
+    "matched_title": "МГТУ «СТАНКИН», Московский государственный технологический университет «СТАНКИН»",
+    "score": 0.862,
+    "confidence": "fuzzy",
+    "postupi_url": "https://joshkar-ola.postupi.online/vuz/volgateh/",
+    "postupi_confidence": "exact"
+  },
+  "282-mordgpu": {
+    "ucheba_id": "5832",
+    "matched_title": "МГЮА им. О.Е. Кутафина, Московский государственный юридический университет имени О.Е. Кутафина",
+    "score": 0.792,
+    "confidence": "fuzzy",
+    "postupi_url": "https://saransk.postupi.online/vuz/mgpi/",
+    "postupi_confidence": "exact"
+  },
+  "283-chuvgpu": {
+    "ucheba_id": "5832",
+    "matched_title": "МГЮА им. О.Е. Кутафина, Московский государственный юридический университет имени О.Е. Кутафина",
+    "score": 0.761,
+    "confidence": "fuzzy"
+  },
+  "284-chuvgau": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "285-pnzgu": {
+    "ucheba_id": "12513",
+    "matched_title": "ГГУ, Гжельский государственный университет",
+    "score": 0.88,
+    "confidence": "fuzzy",
+    "postupi_url": "https://penza.postupi.online/vuz/pgu/",
+    "postupi_confidence": "exact"
+  },
+  "286-penzgtu": {
+    "ucheba_id": "98012",
+    "matched_title": "КарГТУ, Карагандинский государственный технический университет",
+    "score": 0.852,
+    "confidence": "fuzzy",
+    "postupi_url": "https://penza.postupi.online/vuz/penzgtu/",
+    "postupi_confidence": "exact"
+  },
+  "287-ulgu": {
+    "ucheba_id": "12513",
+    "matched_title": "ГГУ, Гжельский государственный университет",
+    "score": 0.895,
+    "confidence": "fuzzy",
+    "postupi_url": "https://ulyanovsk.postupi.online/vuz/ulgu/",
+    "postupi_confidence": "exact"
+  },
+  "288-ulgtu": {
+    "ucheba_id": "98012",
+    "matched_title": "КарГТУ, Карагандинский государственный технический университет",
+    "score": 0.857,
+    "confidence": "fuzzy",
+    "postupi_url": "https://ulyanovsk.postupi.online/vuz/ulgtu/",
+    "postupi_confidence": "exact"
+  },
+  "289-ulgpu": {
+    "ucheba_id": "5832",
+    "matched_title": "МГЮА им. О.Е. Кутафина, Московский государственный юридический университет имени О.Е. Кутафина",
+    "score": 0.778,
+    "confidence": "fuzzy",
+    "postupi_url": "https://ulyanovsk.postupi.online/vuz/ulspu/",
+    "postupi_confidence": "exact"
+  },
+  "29-mglu": {
+    "ucheba_id": "5861",
+    "matched_title": "МГЛУ, Московский государственный лингвистический университет",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "290-ulgau": {
+    "ucheba_id": "5836",
+    "matched_title": "РГАУ-МСХА имени К.А. Тимирязева, Российский государственный аграрный университет - МСХА имени К.А. Тимирязева",
+    "score": 0.772,
+    "confidence": "fuzzy",
+    "postupi_url": "https://ulyanovsk.postupi.online/vuz/ulgau/",
+    "postupi_confidence": "exact"
+  },
+  "291-sgspu": {
+    "ucheba_id": "5844",
+    "matched_title": "МГППУ, Московский государственный психолого-педагогический университет",
+    "score": 0.848,
+    "confidence": "fuzzy",
+    "postupi_url": "https://samara.postupi.online/vuz/sgspu/",
+    "postupi_confidence": "exact"
+  },
+  "292-sgeu": {
+    "ucheba_id": "98012",
+    "matched_title": "КарГТУ, Карагандинский государственный технический университет",
+    "score": 0.819,
+    "confidence": "fuzzy",
+    "postupi_url": "https://samara.postupi.online/vuz/sgeu/",
+    "postupi_confidence": "exact"
+  },
+  "293-sgtu-gagarina": {
+    "ucheba_id": "5871",
+    "matched_title": "МГТУ «СТАНКИН», Московский государственный технологический университет «СТАНКИН»",
+    "score": 0.773,
+    "confidence": "fuzzy",
+    "postupi_url": "https://saratov.postupi.online/vuz/sgtu/",
+    "postupi_confidence": "exact"
+  },
+  "294-saratov-conservatory": {
+    "ucheba_id": "5831",
+    "matched_title": "МГК им. П.И. Чайковского, Московская государственная консерватория имени П.И. Чайковского (университет)",
+    "score": 0.721,
+    "confidence": "fuzzy",
+    "postupi_url": "https://saratov.postupi.online/vuz/sgk-im-l-v-sobinova/",
+    "postupi_confidence": "exact"
+  },
+  "295-yagpu": {
+    "ucheba_id": "5832",
+    "matched_title": "МГЮА им. О.Е. Кутафина, Московский государственный юридический университет имени О.Е. Кутафина",
+    "score": 0.786,
+    "confidence": "fuzzy"
+  },
+  "296-rgrtu": {
+    "ucheba_id": "5832",
+    "matched_title": "МГЮА им. О.Е. Кутафина, Московский государственный юридический университет имени О.Е. Кутафина",
+    "score": 0.803,
+    "confidence": "fuzzy"
+  },
+  "297-tgpu-tolstogo": {
+    "ucheba_id": "5832",
+    "matched_title": "МГЮА им. О.Е. Кутафина, Московский государственный юридический университет имени О.Е. Кутафина",
+    "score": 0.738,
+    "confidence": "fuzzy"
+  },
+  "298-lgpu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "299-vgpu": {
+    "ucheba_id": "5844",
+    "matched_title": "МГППУ, Московский государственный психолого-педагогический университет",
+    "score": 0.821,
+    "confidence": "fuzzy",
+    "postupi_url": "https://voronezh.postupi.online/vuz/voronezhskij-gosudarstvennyj-pedagogicheskij-universitet/",
+    "postupi_confidence": "exact"
+  },
+  "30-mpgu": {
+    "ucheba_id": "5912",
+    "matched_title": "МПГУ, Московский педагогический государственный университет",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "300-daggau": {
+    "ucheba_id": "5836",
+    "matched_title": "РГАУ-МСХА имени К.А. Тимирязева, Российский государственный аграрный университет - МСХА имени К.А. Тимирязева",
+    "score": 0.738,
+    "confidence": "fuzzy",
+    "postupi_url": "https://mahachkala.postupi.online/vuz/daggau/",
+    "postupi_confidence": "exact"
+  },
+  "301-sevgu": {
+    "ucheba_id": "12513",
+    "matched_title": "ГГУ, Гжельский государственный университет",
+    "score": 0.875,
+    "confidence": "fuzzy",
+    "postupi_url": "https://sevastopol.postupi.online/vuz/sevgu/",
+    "postupi_confidence": "exact"
+  },
+  "302-kgmtu": {
+    "ucheba_id": "98012",
+    "matched_title": "КарГТУ, Карагандинский государственный технический университет",
+    "score": 0.81,
+    "confidence": "fuzzy",
+    "postupi_url": "https://kerch.postupi.online/vuz/kgmtu/",
+    "postupi_confidence": "exact"
+  },
+  "303-kipu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://simferopol.postupi.online/vuz/kipu/",
+    "postupi_confidence": "exact"
+  },
+  "304-gpa-yalta": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "305-astu": {
+    "ucheba_id": "98012",
+    "matched_title": "КарГТУ, Карагандинский государственный технический университет",
+    "score": 0.925,
+    "confidence": "fuzzy",
+    "postupi_url": "https://astrahan.postupi.online/vuz/agtu/",
+    "postupi_confidence": "exact"
+  },
+  "306-kgtu-kaliningrad": {
+    "ucheba_id": "98012",
+    "matched_title": "КарГТУ, Карагандинский государственный технический университет",
+    "score": 0.881,
+    "confidence": "fuzzy",
+    "postupi_url": "https://kaliningrad.postupi.online/vuz/kgtu/",
+    "postupi_confidence": "exact"
+  },
+  "307-dalrybvtuz": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://vladivostok.postupi.online/vuz/dalrybvtuz/",
+    "postupi_confidence": "exact"
+  },
+  "308-mgtu-murmansk": {
+    "ucheba_id": "98012",
+    "matched_title": "КарГТУ, Карагандинский государственный технический университет",
+    "score": 0.904,
+    "confidence": "fuzzy"
+  },
+  "309-msu-nevelskogo": {
+    "ucheba_id": "1153",
+    "matched_title": "МГУ имени М.В. Ломоносова, Московский государственный университет имени М.В. Ломоносова",
+    "score": 0.74,
+    "confidence": "fuzzy",
+    "postupi_url": "https://vladivostok.postupi.online/vuz/mgu-im-adm-g-i-nevelskogo/",
+    "postupi_confidence": "exact"
+  },
+  "31-rggu": {
+    "ucheba_id": "5955",
+    "matched_title": "РГГУ, Российский государственный гуманитарный университет",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "310-vvsu": {
+    "ucheba_id": "12513",
+    "matched_title": "ГГУ, Гжельский государственный университет",
+    "score": 0.825,
+    "confidence": "fuzzy",
+    "postupi_url": "https://vladivostok.postupi.online/vuz/vgues/",
+    "postupi_confidence": "exact"
+  },
+  "311-pgusha": {
+    "ucheba_id": "1153",
+    "matched_title": "МГУ имени М.В. Ломоносова, Московский государственный университет имени М.В. Ломоносова",
+    "score": 0.733,
+    "confidence": "fuzzy",
+    "postupi_url": "https://birobidzhan.postupi.online/vuz/pgu-im-sholom-alejhema/",
+    "postupi_confidence": "exact"
+  },
+  "312-mgupp": {
+    "ucheba_id": "1153",
+    "matched_title": "МГУ имени М.В. Ломоносова, Московский государственный университет имени М.В. Ломоносова",
+    "score": 0.763,
+    "confidence": "fuzzy"
+  },
+  "313-mgou": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "314-guz": {
+    "ucheba_id": "5725",
+    "matched_title": "ГУЗ, Государственный университет по землеустройству",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "315-mgik": {
+    "ucheba_id": "5876",
+    "matched_title": "МГИК, Московский государственный институт культуры",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "316-stroganovka": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "317-glazunov-academy": {
+    "ucheba_id": "5945",
+    "matched_title": "РАЖВиЗ, Российская академия живописи, ваяния и зодчества Ильи Глазунова",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "318-shchepkin": {
+    "ucheba_id": "5715",
+    "matched_title": "ВТУ им. М.С. Щепкина, Высшее театральное училище (институт) им. М.С.Щепкина при Государственном академическом Малом театре России",
+    "score": 0.977,
+    "confidence": "fuzzy"
+  },
+  "319-miet": {
+    "ucheba_id": "5723",
+    "matched_title": "НИУ ВШЭ, Национальный исследовательский университет «Высшая школа экономики»",
+    "score": 0.748,
+    "confidence": "fuzzy",
+    "postupi_url": "https://msk.postupi.online/vuz/miet/",
+    "postupi_confidence": "exact"
+  },
+  "32-rudn": {
+    "ucheba_id": "5965",
+    "matched_title": "РУДН им. Патриса Лумумбы, Российский университет дружбы народов имени Патриса Лумумбы",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "320-rgazu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "321-stieglitz": {
+    "ucheba_id": "5885",
+    "matched_title": "МГХПА им. С. Г. Строганова, Московская государственная художественно-промышленная академия им. С. Г. Строганова",
+    "score": 0.759,
+    "confidence": "fuzzy",
+    "postupi_url": "https://spb.postupi.online/vuz/spghpa-im-a-l-shtiglica/",
+    "postupi_confidence": "exact"
+  },
+  "322-repin-academy": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://spb.postupi.online/vuz/institut-imeni-repina-spb-gaizhsa-im-i-e-repina/",
+    "postupi_confidence": "exact"
+  },
+  "323-gikit": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://spb.postupi.online/vuz/spbgikit/",
+    "postupi_confidence": "exact"
+  },
+  "324-spbguvm": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "325-spbgau": {
+    "ucheba_id": "5955",
+    "matched_title": "РГГУ, Российский государственный гуманитарный университет",
+    "score": 0.748,
+    "confidence": "fuzzy",
+    "postupi_url": "https://spb.postupi.online/vuz/spbgau/",
+    "postupi_confidence": "exact"
+  },
+  "326-vmeda": {
+    "ucheba_id": "104876",
+    "matched_title": "Московский филиал ВМедА имени С.М. Кирова, Московский филиал Военно-медицинской академии имени С.М. Кирова",
+    "score": 0.778,
+    "confidence": "fuzzy"
+  },
+  "327-rgisi": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "328-viu-ranepa": {
+    "ucheba_id": "110907",
+    "matched_title": "Институт управления РАНХиГС, Институт управления Российской академии народного хозяйства и государственной службы при Президенте Российской Федерации",
+    "score": 0.913,
+    "confidence": "fuzzy"
+  },
+  "329-ski-ranepa": {
+    "ucheba_id": "110907",
+    "matched_title": "Институт управления РАНХиГС, Институт управления Российской академии народного хозяйства и государственной службы при Президенте Российской Федерации",
+    "score": 0.867,
+    "confidence": "fuzzy"
+  },
+  "33-sechenov": {
+    "ucheba_id": "5833",
+    "matched_title": "Сеченовский Университет, Первый МГМУ им. И.М. Сеченова Минздрава России (Сеченовский Университет)",
+    "score": 0.723,
+    "confidence": "fuzzy",
+    "postupi_url": "https://msk.postupi.online/vuz/pmgmu-im-i-m-sechenova/",
+    "postupi_confidence": "exact"
+  },
+  "330-bryansk-ranepa": {
+    "ucheba_id": "104748",
+    "matched_title": "Лицей РАНХиГС, Лицей Российской академии народного хозяйства и государственной службы при Президенте Российской Федерации",
+    "score": 0.928,
+    "confidence": "fuzzy",
+    "postupi_url": "https://bryansk.postupi.online/vuz/bryanskij-filial-ranhigs/",
+    "postupi_confidence": "exact"
+  },
+  "331-vladimir-ranepa": {
+    "ucheba_id": "104748",
+    "matched_title": "Лицей РАНХиГС, Лицей Российской академии народного хозяйства и государственной службы при Президенте Российской Федерации",
+    "score": 0.912,
+    "confidence": "fuzzy",
+    "postupi_url": "https://vladimir.postupi.online/vuz/vladimirskij-filial-ranhigs/",
+    "postupi_confidence": "exact"
+  },
+  "332-lipetsk-ranepa": {
+    "ucheba_id": "104748",
+    "matched_title": "Лицей РАНХиГС, Лицей Российской академии народного хозяйства и государственной службы при Президенте Российской Федерации",
+    "score": 0.946,
+    "confidence": "fuzzy",
+    "postupi_url": "https://lipeck.postupi.online/vuz/lipeckij-filial-ranhigs/",
+    "postupi_confidence": "exact"
+  },
+  "333-pskov-ranepa": {
+    "ucheba_id": "104748",
+    "matched_title": "Лицей РАНХиГС, Лицей Российской академии народного хозяйства и государственной службы при Президенте Российской Федерации",
+    "score": 0.924,
+    "confidence": "fuzzy"
+  },
+  "334-vologda-ranepa": {
+    "ucheba_id": "104748",
+    "matched_title": "Лицей РАНХиГС, Лицей Российской академии народного хозяйства и государственной службы при Президенте Российской Федерации",
+    "score": 0.916,
+    "confidence": "fuzzy",
+    "postupi_url": "https://vologda.postupi.online/vuz/vologodskij-filial-ranxigs/",
+    "postupi_confidence": "exact"
+  },
+  "335-karelia-ranepa": {
+    "ucheba_id": "104748",
+    "matched_title": "Лицей РАНХиГС, Лицей Российской академии народного хозяйства и государственной службы при Президенте Российской Федерации",
+    "score": 0.92,
+    "confidence": "fuzzy",
+    "postupi_url": "https://petrozavodsk.postupi.online/vuz/karelskij-filial-ranhigs/",
+    "postupi_confidence": "exact"
+  },
+  "336-murmansk-ranepa": {
+    "ucheba_id": "104748",
+    "matched_title": "Лицей РАНХиГС, Лицей Российской академии народного хозяйства и государственной службы при Президенте Российской Федерации",
+    "score": 0.92,
+    "confidence": "fuzzy"
+  },
+  "337-chelyabinsk-ranepa": {
+    "ucheba_id": "104748",
+    "matched_title": "Лицей РАНХиГС, Лицей Российской академии народного хозяйства и государственной службы при Президенте Российской Федерации",
+    "score": 0.916,
+    "confidence": "fuzzy",
+    "postupi_url": "https://chelyabinsk.postupi.online/vuz/chelyabinskij-filial-ranhigs/",
+    "postupi_confidence": "exact"
+  },
+  "338-chita-ranepa": {
+    "ucheba_id": "104748",
+    "matched_title": "Лицей РАНХиГС, Лицей Российской академии народного хозяйства и государственной службы при Президенте Российской Федерации",
+    "score": 0.907,
+    "confidence": "fuzzy"
+  },
+  "339-tambov-ranepa": {
+    "ucheba_id": "104748",
+    "matched_title": "Лицей РАНХиГС, Лицей Российской академии народного хозяйства и государственной службы при Президенте Российской Федерации",
+    "score": 0.92,
+    "confidence": "fuzzy",
+    "postupi_url": "https://tambov.postupi.online/vuz/tambovskij-filial-ranhigs/",
+    "postupi_confidence": "exact"
+  },
+  "34-pirogov": {
+    "ucheba_id": "5957",
+    "matched_title": "РНИМУ им. Н.И. Пирогова, Российский национальный исследовательский медицинский университет имени Н.И. Пирогова",
+    "score": 0.806,
+    "confidence": "fuzzy"
+  },
+  "340-pyatigorsk-rea": {
+    "ucheba_id": "102954",
+    "matched_title": "Минский филиал, Минский филиал Российского экономического университета имени Г.В. Плеханова",
+    "score": 0.848,
+    "confidence": "fuzzy",
+    "postupi_url": "https://pyatigorsk.postupi.online/vuz/filial-reu-plehanova-pyatigorsk/",
+    "postupi_confidence": "exact"
+  },
+  "341-ivanovo-rea": {
+    "ucheba_id": "102954",
+    "matched_title": "Минский филиал, Минский филиал Российского экономического университета имени Г.В. Плеханова",
+    "score": 0.967,
+    "confidence": "fuzzy",
+    "vuzopedia_id": "3933",
+    "vuzopedia_name": "Ивановский филиал Российского экономического университета имени Г.В. Плеханова"
+  },
+  "342-vladikavkaz-finuniver": {
+    "ucheba_id": "51493",
+    "matched_title": "Юридический факультет Финансового университета, Юридический факультет Финансового университета при Правительстве Российской Федерации",
+    "score": 0.854,
+    "confidence": "fuzzy",
+    "postupi_url": "https://vladikavkaz.postupi.online/vuz/vladikavkazskij-filial-finuniversiteta/",
+    "postupi_confidence": "exact"
+  },
+  "343-omsk-finuniver": {
+    "ucheba_id": "51493",
+    "matched_title": "Юридический факультет Финансового университета, Юридический факультет Финансового университета при Правительстве Российской Федерации",
+    "score": 0.877,
+    "confidence": "fuzzy",
+    "postupi_url": "https://omsk.postupi.online/vuz/omskiy-filial-finansovogo-universiteta/",
+    "postupi_confidence": "exact"
+  },
+  "344-kaluga-finuniver": {
+    "ucheba_id": "51493",
+    "matched_title": "Юридический факультет Финансового университета, Юридический факультет Финансового университета при Правительстве Российской Федерации",
+    "score": 0.861,
+    "confidence": "fuzzy",
+    "postupi_url": "https://kaluga.postupi.online/vuz/kaluzhskij-filial-finuniversiteta/",
+    "postupi_confidence": "exact"
+  },
+  "345-ogpu": {
+    "ucheba_id": "5844",
+    "matched_title": "МГППУ, Московский государственный психолого-педагогический университет",
+    "score": 0.814,
+    "confidence": "fuzzy",
+    "postupi_url": "https://orenburg.postupi.online/vuz/ogpu/",
+    "postupi_confidence": "exact"
+  },
+  "346-yuurggpu": {
+    "ucheba_id": "16182",
+    "matched_title": "ГГТУ, Государственный гуманитарно-технологический университет",
+    "score": 0.806,
+    "confidence": "fuzzy",
+    "postupi_url": "https://chelyabinsk.postupi.online/vuz/yuurggpu/",
+    "postupi_confidence": "exact"
+  },
+  "347-pggpu": {
+    "ucheba_id": "16182",
+    "matched_title": "ГГТУ, Государственный гуманитарно-технологический университет",
+    "score": 0.847,
+    "confidence": "fuzzy",
+    "postupi_url": "https://perm.postupi.online/vuz/pggpu/",
+    "postupi_confidence": "exact"
+  },
+  "348-altgpu": {
+    "ucheba_id": "5844",
+    "matched_title": "МГППУ, Московский государственный психолого-педагогический университет",
+    "score": 0.817,
+    "confidence": "fuzzy",
+    "postupi_url": "https://barnaul.postupi.online/vuz/altajskij-gosudarstvennyj-pedagogicheskij-universitet/",
+    "postupi_confidence": "exact"
+  },
+  "349-bgpu": {
+    "ucheba_id": "5844",
+    "matched_title": "МГППУ, Московский государственный психолого-педагогический университет",
+    "score": 0.817,
+    "confidence": "fuzzy",
+    "postupi_url": "https://blagoveshhensk.postupi.online/vuz/bgpu/",
+    "postupi_confidence": "exact"
+  },
+  "35-mgsu": {
+    "ucheba_id": "5866",
+    "matched_title": "НИУ МГСУ, Национальный исследовательский Московский государственный строительный университет",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "350-povolzhsky-sport": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "351-smolensk-sport": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "352-velikie-luki-sport": {
+    "ucheba_id": "5829",
+    "matched_title": "МГАФК, Московская государственная академия физической культуры",
+    "score": 0.836,
+    "confidence": "fuzzy",
+    "postupi_url": "https://velikie-luki.postupi.online/vuz/vlgafk/",
+    "postupi_confidence": "exact"
+  },
+  "353-mgafk-malakhovka": {
+    "ucheba_id": "5829",
+    "matched_title": "МГАФК, Московская государственная академия физической культуры",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "354-skgii": {
+    "ucheba_id": "5876",
+    "matched_title": "МГИК, Московский государственный институт культуры",
+    "score": 0.737,
+    "confidence": "fuzzy",
+    "postupi_url": "https://nalchik.postupi.online/vuz/skgii/",
+    "postupi_confidence": "exact"
+  },
+  "355-dgunh": {
+    "ucheba_id": "5954",
+    "matched_title": "РГУНХ, Российский государственный университет народного хозяйства имени В.И. Вернадского",
+    "score": 0.752,
+    "confidence": "fuzzy",
+    "postupi_url": "https://mahachkala.postupi.online/vuz/dgunx/",
+    "postupi_confidence": "exact"
+  },
+  "356-chspu": {
+    "ucheba_id": "5844",
+    "matched_title": "МГППУ, Московский государственный психолого-педагогический университет",
+    "score": 0.817,
+    "confidence": "fuzzy",
+    "postupi_url": "https://groznij-checnya.postupi.online/vuz/chgpu-groznyj/",
+    "postupi_confidence": "exact"
+  },
+  "357-vguu-justice": {
+    "ucheba_id": "5951",
+    "matched_title": "ВГУЮ (РПА Минюста России), Всероссийский государственный университет юстиции (РПА Минюста России)",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "358-zabizht": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "359-vgatu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "36-timiryazevka": {
+    "ucheba_id": "5836",
+    "matched_title": "РГАУ-МСХА имени К.А. Тимирязева, Российский государственный аграрный университет - МСХА имени К.А. Тимирязева",
+    "score": 0.987,
+    "confidence": "fuzzy"
+  },
+  "360-kurgan-gsha": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "361-kostroma-gsha": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://kostroma.postupi.online/vuz/kgsha/",
+    "postupi_confidence": "exact"
+  },
+  "362-yaroslavl-gsha": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "363-smolensk-gsha": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://smolensk.postupi.online/vuz/sgsha/",
+    "postupi_confidence": "exact"
+  },
+  "364-rgatu-kostycheva": {
+    "ucheba_id": "5871",
+    "matched_title": "МГТУ «СТАНКИН», Московский государственный технологический университет «СТАНКИН»",
+    "score": 0.743,
+    "confidence": "fuzzy"
+  },
+  "365-tver-gsha": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://tver.postupi.online/vuz/tgsxa/",
+    "postupi_confidence": "exact"
+  },
+  "366-bryansk-gau": {
+    "ucheba_id": "5955",
+    "matched_title": "РГГУ, Российский государственный гуманитарный университет",
+    "score": 0.833,
+    "confidence": "fuzzy",
+    "postupi_url": "https://bryansk.postupi.online/vuz/bgau/",
+    "postupi_confidence": "exact"
+  },
+  "367-belgorod-gau": {
+    "ucheba_id": "5836",
+    "matched_title": "РГАУ-МСХА имени К.А. Тимирязева, Российский государственный аграрный университет - МСХА имени К.А. Тимирязева",
+    "score": 0.769,
+    "confidence": "fuzzy",
+    "postupi_url": "https://belgorod.postupi.online/vuz/belgorodskij-gau/",
+    "postupi_confidence": "exact"
+  },
+  "368-kursk-gsha": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "369-tstu": {
+    "ucheba_id": "98012",
+    "matched_title": "КарГТУ, Карагандинский государственный технический университет",
+    "score": 0.865,
+    "confidence": "fuzzy",
+    "postupi_url": "https://tambov.postupi.online/vuz/tgtu/",
+    "postupi_confidence": "exact"
+  },
+  "37-gitis": {
+    "ucheba_id": "5949",
+    "matched_title": "ГИТИС-РАТИ, Российский институт театрального искусства – ГИТИС",
+    "score": 0.98,
+    "confidence": "fuzzy"
+  },
+  "370-bstu-bryansk": {
+    "ucheba_id": "98012",
+    "matched_title": "КарГТУ, Карагандинский государственный технический университет",
+    "score": 0.902,
+    "confidence": "fuzzy",
+    "postupi_url": "https://bryansk.postupi.online/vuz/bryanskij-gosudarstvennyj-tehnicheskij-universitet/",
+    "postupi_confidence": "exact"
+  },
+  "371-bstu-shukhov": {
+    "ucheba_id": "5871",
+    "matched_title": "МГТУ «СТАНКИН», Московский государственный технологический университет «СТАНКИН»",
+    "score": 0.779,
+    "confidence": "fuzzy"
+  },
+  "372-ivgpu": {
+    "ucheba_id": "98012",
+    "matched_title": "КарГТУ, Карагандинский государственный технический университет",
+    "score": 0.852,
+    "confidence": "fuzzy",
+    "postupi_url": "https://ivanovo.postupi.online/vuz/ivgpu/",
+    "postupi_confidence": "exact"
+  },
+  "373-agiki": {
+    "ucheba_id": "5876",
+    "matched_title": "МГИК, Московский государственный институт культуры",
+    "score": 0.78,
+    "confidence": "fuzzy"
+  },
+  "374-pmfi": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "375-sibgii": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "376-ural-conservatory": {
+    "ucheba_id": "5831",
+    "matched_title": "МГК им. П.И. Чайковского, Московская государственная консерватория имени П.И. Чайковского (университет)",
+    "score": 0.73,
+    "confidence": "fuzzy",
+    "postupi_url": "https://ekaterinburg.postupi.online/vuz/ugk-im-musorgskogo/",
+    "postupi_confidence": "exact"
+  },
+  "377-novosibirsk-conservatory": {
+    "ucheba_id": "5831",
+    "matched_title": "МГК им. П.И. Чайковского, Московская государственная консерватория имени П.И. Чайковского (университет)",
+    "score": 0.735,
+    "confidence": "fuzzy"
+  },
+  "378-kazan-conservatory": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://kazan.postupi.online/vuz/kazanskaya-gosudarstvennaya-konservatoriya-akademiya-imeni-n-g-zhiganova/",
+    "postupi_confidence": "exact"
+  },
+  "379-nnov-conservatory": {
+    "ucheba_id": "5831",
+    "matched_title": "МГК им. П.И. Чайковского, Московская государственная консерватория имени П.И. Чайковского (университет)",
+    "score": 0.735,
+    "confidence": "fuzzy"
+  },
+  "38-litinstitut": {
+    "ucheba_id": "5804",
+    "matched_title": "Литинститут, Литературный институт имени А.М. Горького",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "380-rostov-conservatory": {
+    "ucheba_id": "5831",
+    "matched_title": "МГК им. П.И. Чайковского, Московская государственная консерватория имени П.И. Чайковского (университет)",
+    "score": 0.754,
+    "confidence": "fuzzy"
+  },
+  "381-astrakhan-conservatory": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://astrahan.postupi.online/vuz/agk/",
+    "postupi_confidence": "exact"
+  },
+  "382-petrozavodsk-conservatory": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://petrozavodsk.postupi.online/vuz/pgk-im-a-k-glazunova/",
+    "postupi_confidence": "exact"
+  },
+  "383-nw-rgup": {
+    "ucheba_id": "5947",
+    "matched_title": "РГУП им. В.М. Лебедева, Российский государственный университет правосудия имени В.М. Лебедева",
+    "score": 0.793,
+    "confidence": "fuzzy"
+  },
+  "384-glazov-gipi": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "385-elabuga-kfu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://elabuga.postupi.online/vuz/ei-kfu/",
+    "postupi_confidence": "exact"
+  },
+  "386-ngpu-chelny": {
+    "ucheba_id": "98012",
+    "matched_title": "КарГТУ, Карагандинский государственный технический университет",
+    "score": 0.759,
+    "confidence": "fuzzy",
+    "postupi_url": "https://naberezhnye-chelny.postupi.online/vuz/ngpu-naberezhnye-chelny/",
+    "postupi_confidence": "exact"
+  },
+  "387-nvsu": {
+    "ucheba_id": "12513",
+    "matched_title": "ГГУ, Гжельский государственный университет",
+    "score": 0.85,
+    "confidence": "fuzzy",
+    "postupi_url": "https://nizhnevartovsk.postupi.online/vuz/nvgu/",
+    "postupi_confidence": "exact"
+  },
+  "388-surgpu": {
+    "ucheba_id": "5844",
+    "matched_title": "МГППУ, Московский государственный психолого-педагогический университет",
+    "score": 0.828,
+    "confidence": "fuzzy",
+    "postupi_url": "https://surgut.postupi.online/vuz/sgpu/",
+    "postupi_confidence": "exact"
+  },
+  "389-tobolsk-pi": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://tobolsk.postupi.online/vuz/tpi-mendeleeva-tyumgu/",
+    "postupi_confidence": "exact"
+  },
+  "39-conservatory": {
+    "ucheba_id": "5831",
+    "matched_title": "МГК им. П.И. Чайковского, Московская государственная консерватория имени П.И. Чайковского (университет)",
+    "score": 0.913,
+    "confidence": "fuzzy",
+    "postupi_url": "https://msk.postupi.online/vuz/mgk-im-p-i-chajkovskogo/",
+    "postupi_confidence": "exact"
+  },
+  "390-tolstu": {
+    "ucheba_id": "12513",
+    "matched_title": "ГГУ, Гжельский государственный университет",
+    "score": 0.872,
+    "confidence": "fuzzy",
+    "postupi_url": "https://tolyatti.postupi.online/vuz/tgu/",
+    "postupi_confidence": "exact"
+  },
+  "391-sochi-su": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "392-agni": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "393-norilsk-institute": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "394-nhti": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://nizhnekamsk.postupi.online/vuz/nhti-knitu/",
+    "postupi_confidence": "exact"
+  },
+  "395-pgu-pyatigorsk": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "396-mininsky": {
+    "ucheba_id": "5832",
+    "matched_title": "МГЮА им. О.Е. Кутафина, Московский государственный юридический университет имени О.Е. Кутафина",
+    "score": 0.74,
+    "confidence": "fuzzy"
+  },
+  "397-sibgiu": {
+    "ucheba_id": "13744",
+    "matched_title": "РГСУ, Российский государственный социальный университет",
+    "score": 0.851,
+    "confidence": "fuzzy",
+    "postupi_url": "https://novokuzneck.postupi.online/vuz/sibgiu/",
+    "postupi_confidence": "exact"
+  },
+  "398-kgpi-novokuznetsk": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "399-nngasu": {
+    "ucheba_id": "13744",
+    "matched_title": "РГСУ, Российский государственный социальный университет",
+    "score": 0.707,
+    "confidence": "fuzzy",
+    "postupi_url": "https://nn.postupi.online/vuz/nizhegorodskij-gosudarstvennyj-arhitekturno-stroitelnyj-universitet/",
+    "postupi_confidence": "exact"
+  },
+  "40-vsu": {
+    "ucheba_id": "12513",
+    "matched_title": "ГГУ, Гжельский государственный университет",
+    "score": 0.868,
+    "confidence": "fuzzy",
+    "postupi_url": "https://voronezh.postupi.online/vuz/vgu/",
+    "postupi_confidence": "exact"
+  },
+  "400-ngieu": {
+    "ucheba_id": "5861",
+    "matched_title": "МГЛУ, Московский государственный лингвистический университет",
+    "score": 0.739,
+    "confidence": "fuzzy",
+    "postupi_url": "https://nn.postupi.online/vuz/ngiau/",
+    "postupi_confidence": "exact"
+  },
+  "401-altai-ranepa": {
+    "ucheba_id": "104748",
+    "matched_title": "Лицей РАНХиГС, Лицей Российской академии народного хозяйства и государственной службы при Президенте Российской Федерации",
+    "score": 0.924,
+    "confidence": "fuzzy",
+    "postupi_url": "https://barnaul.postupi.online/vuz/altajskij-filial-rossijskoj-akademii-narodnogo-hozyajstva-i-gosudarstvennoj-sluzhby-pri-prezidente-rossijskoj-federacii/",
+    "postupi_confidence": "exact"
+  },
+  "402-astrakhan-ranepa": {
+    "ucheba_id": "104748",
+    "matched_title": "Лицей РАНХиГС, Лицей Российской академии народного хозяйства и государственной службы при Президенте Российской Федерации",
+    "score": 0.912,
+    "confidence": "fuzzy"
+  },
+  "403-voronezh-ranepa": {
+    "ucheba_id": "104748",
+    "matched_title": "Лицей РАНХиГС, Лицей Российской академии народного хозяйства и государственной службы при Президенте Российской Федерации",
+    "score": 0.916,
+    "confidence": "fuzzy"
+  },
+  "404-vyborg-ranepa": {
+    "ucheba_id": "104748",
+    "matched_title": "Лицей РАНХиГС, Лицей Российской академии народного хозяйства и государственной службы при Президенте Российской Федерации",
+    "score": 0.92,
+    "confidence": "fuzzy",
+    "postupi_url": "https://vyborg.postupi.online/vuz/vyborgskij-filial-ranhigs/",
+    "postupi_confidence": "exact"
+  },
+  "405-dviu-ranepa": {
+    "ucheba_id": "110907",
+    "matched_title": "Институт управления РАНХиГС, Институт управления Российской академии народного хозяйства и государственной службы при Президенте Российской Федерации",
+    "score": 0.906,
+    "confidence": "fuzzy"
+  },
+  "406-west-ranepa": {
+    "ucheba_id": "104748",
+    "matched_title": "Лицей РАНХиГС, Лицей Российской академии народного хозяйства и государственной службы при Президенте Российской Федерации",
+    "score": 0.928,
+    "confidence": "fuzzy",
+    "postupi_url": "https://kaliningrad.postupi.online/vuz/zapadnyj-filial-ranhigs/",
+    "postupi_confidence": "exact"
+  },
+  "407-ivanovo-ranepa": {
+    "ucheba_id": "104748",
+    "matched_title": "Лицей РАНХиГС, Лицей Российской академии народного хозяйства и государственной службы при Президенте Российской Федерации",
+    "score": 0.92,
+    "confidence": "fuzzy",
+    "postupi_url": "https://ivanovo.postupi.online/vuz/ivanovskij-filial-ranhigs/",
+    "postupi_confidence": "exact"
+  },
+  "408-kazan-ranepa": {
+    "ucheba_id": "104748",
+    "matched_title": "Лицей РАНХиГС, Лицей Российской академии народного хозяйства и государственной службы при Президенте Российской Федерации",
+    "score": 0.924,
+    "confidence": "fuzzy"
+  },
+  "409-kaluga-ranepa": {
+    "ucheba_id": "104748",
+    "matched_title": "Лицей РАНХиГС, Лицей Российской академии народного хозяйства и государственной службы при Президенте Российской Федерации",
+    "score": 0.924,
+    "confidence": "fuzzy"
+  },
+  "41-vstu": {
+    "ucheba_id": "98012",
+    "matched_title": "КарГТУ, Карагандинский государственный технический университет",
+    "score": 0.876,
+    "confidence": "fuzzy",
+    "postupi_url": "https://voronezh.postupi.online/vuz/vgtu/",
+    "postupi_confidence": "exact"
+  },
+  "410-kirov-ranepa": {
+    "ucheba_id": "104748",
+    "matched_title": "Лицей РАНХиГС, Лицей Российской академии народного хозяйства и государственной службы при Президенте Российской Федерации",
+    "score": 0.924,
+    "confidence": "fuzzy",
+    "postupi_url": "https://kirov.postupi.online/vuz/kirovskij-filial-ranxigs/",
+    "postupi_confidence": "exact"
+  },
+  "411-kurgan-ranepa": {
+    "ucheba_id": "104748",
+    "matched_title": "Лицей РАНХиГС, Лицей Российской академии народного хозяйства и государственной службы при Президенте Российской Федерации",
+    "score": 0.92,
+    "confidence": "fuzzy",
+    "postupi_url": "https://kurgan.postupi.online/vuz/kurganskij-filial-ranhigs/",
+    "postupi_confidence": "exact"
+  },
+  "412-niu-ranepa": {
+    "ucheba_id": "110907",
+    "matched_title": "Институт управления РАНХиГС, Институт управления Российской академии народного хозяйства и государственной службы при Президенте Российской Федерации",
+    "score": 0.913,
+    "confidence": "fuzzy"
+  },
+  "413-novgorod-ranepa": {
+    "ucheba_id": "104748",
+    "matched_title": "Лицей РАНХиГС, Лицей Российской академии народного хозяйства и государственной службы при Президенте Российской Федерации",
+    "score": 0.912,
+    "confidence": "fuzzy",
+    "postupi_url": "https://velikiy-novgorod.postupi.online/vuz/novgorodskij-filial-ranhigs/",
+    "postupi_confidence": "exact"
+  },
+  "414-omsk-ranepa": {
+    "ucheba_id": "104748",
+    "matched_title": "Лицей РАНХиГС, Лицей Российской академии народного хозяйства и государственной службы при Президенте Российской Федерации",
+    "score": 0.936,
+    "confidence": "fuzzy"
+  },
+  "415-orenburg-ranepa": {
+    "ucheba_id": "104748",
+    "matched_title": "Лицей РАНХиГС, Лицей Российской академии народного хозяйства и государственной службы при Президенте Российской Федерации",
+    "score": 0.912,
+    "confidence": "fuzzy",
+    "postupi_url": "https://orenburg.postupi.online/vuz/orenburgskij-filial-ranhigs/",
+    "postupi_confidence": "exact"
+  },
+  "416-perm-ranepa": {
+    "ucheba_id": "104748",
+    "matched_title": "Лицей РАНХиГС, Лицей Российской академии народного хозяйства и государственной службы при Президенте Российской Федерации",
+    "score": 0.928,
+    "confidence": "fuzzy",
+    "postupi_url": "https://perm.postupi.online/vuz/permskyj-filial-ranhigs/",
+    "postupi_confidence": "exact"
+  },
+  "417-primorye-ranepa": {
+    "ucheba_id": "104748",
+    "matched_title": "Лицей РАНХиГС, Лицей Российской академии народного хозяйства и государственной службы при Президенте Российской Федерации",
+    "score": 0.92,
+    "confidence": "fuzzy"
+  },
+  "418-samara-ranepa": {
+    "ucheba_id": "104748",
+    "matched_title": "Лицей РАНХиГС, Лицей Российской академии народного хозяйства и государственной службы при Президенте Российской Федерации",
+    "score": 0.924,
+    "confidence": "fuzzy"
+  },
+  "419-smolensk-ranepa": {
+    "ucheba_id": "104748",
+    "matched_title": "Лицей РАНХиГС, Лицей Российской академии народного хозяйства и государственной службы при Президенте Российской Федерации",
+    "score": 0.92,
+    "confidence": "fuzzy"
+  },
+  "42-sgu-saratov": {
+    "ucheba_id": "5957",
+    "matched_title": "РНИМУ им. Н.И. Пирогова, Российский национальный исследовательский медицинский университет имени Н.И. Пирогова",
+    "score": 0.733,
+    "confidence": "fuzzy",
+    "postupi_url": "https://saratov.postupi.online/vuz/sgu-imeni-n-g-chernyshevskogo/",
+    "postupi_confidence": "exact"
+  },
+  "420-sredneruss-ranepa": {
+    "ucheba_id": "110907",
+    "matched_title": "Институт управления РАНХиГС, Институт управления Российской академии народного хозяйства и государственной службы при Президенте Российской Федерации",
+    "score": 0.913,
+    "confidence": "fuzzy"
+  },
+  "421-stavropol-ranepa": {
+    "ucheba_id": "104748",
+    "matched_title": "Лицей РАНХиГС, Лицей Российской академии народного хозяйства и государственной службы при Президенте Российской Федерации",
+    "score": 0.904,
+    "confidence": "fuzzy",
+    "postupi_url": "https://stavropol.postupi.online/vuz/stavropolskyj-filial-ranhigs/",
+    "postupi_confidence": "exact"
+  },
+  "422-tver-ranepa": {
+    "ucheba_id": "104748",
+    "matched_title": "Лицей РАНХиГС, Лицей Российской академии народного хозяйства и государственной службы при Президенте Российской Федерации",
+    "score": 0.928,
+    "confidence": "fuzzy",
+    "postupi_url": "https://tver.postupi.online/vuz/tverskoj-filial-ranhigs/",
+    "postupi_confidence": "exact"
+  },
+  "423-tula-ranepa": {
+    "ucheba_id": "104748",
+    "matched_title": "Лицей РАНХиГС, Лицей Российской академии народного хозяйства и государственной службы при Президенте Российской Федерации",
+    "score": 0.928,
+    "confidence": "fuzzy"
+  },
+  "424-ulyanovsk-ranepa": {
+    "ucheba_id": "104748",
+    "matched_title": "Лицей РАНХиГС, Лицей Российской академии народного хозяйства и государственной службы при Президенте Российской Федерации",
+    "score": 0.916,
+    "confidence": "fuzzy",
+    "postupi_url": "https://ulyanovsk.postupi.online/vuz/ulyanovskij-filial-ranhigs/",
+    "postupi_confidence": "exact"
+  },
+  "425-cheboksary-ranepa": {
+    "ucheba_id": "104748",
+    "matched_title": "Лицей РАНХиГС, Лицей Российской академии народного хозяйства и государственной службы при Президенте Российской Федерации",
+    "score": 0.912,
+    "confidence": "fuzzy",
+    "postupi_url": "https://cheboksary.postupi.online/vuz/chf-ranhigs/",
+    "postupi_confidence": "exact"
+  },
+  "426-uriu-ranepa": {
+    "ucheba_id": "110907",
+    "matched_title": "Институт управления РАНХиГС, Институт управления Российской академии народного хозяйства и государственной службы при Президенте Российской Федерации",
+    "score": 0.906,
+    "confidence": "fuzzy"
+  },
+  "427-orenburg-reu": {
+    "ucheba_id": "102950",
+    "matched_title": "Ереванский филиал, Ереванский филиал Российского экономического университета имени Г.В. Плеханова",
+    "score": 0.949,
+    "confidence": "fuzzy",
+    "postupi_url": "https://orenburg.postupi.online/vuz/orenburgskij-filial-reu-plehanova/",
+    "postupi_confidence": "exact"
+  },
+  "428-sevastopol-reu": {
+    "ucheba_id": "102950",
+    "matched_title": "Ереванский филиал, Ереванский филиал Российского экономического университета имени Г.В. Плеханова",
+    "score": 0.932,
+    "confidence": "fuzzy",
+    "postupi_url": "https://sevastopol.postupi.online/vuz/sevastopolskij-filial-reu-im-g-v-plehanova/",
+    "postupi_confidence": "exact"
+  },
+  "429-kaliningrad-reu": {
+    "ucheba_id": "102954",
+    "matched_title": "Минский филиал, Минский филиал Российского экономического университета имени Г.В. Плеханова",
+    "score": 0.937,
+    "confidence": "fuzzy"
+  },
+  "43-samara-korolev": {
+    "ucheba_id": "5957",
+    "matched_title": "РНИМУ им. Н.И. Пирогова, Российский национальный исследовательский медицинский университет имени Н.И. Пирогова",
+    "score": 0.743,
+    "confidence": "fuzzy"
+  },
+  "430-bryansk-reu": {
+    "ucheba_id": "102954",
+    "matched_title": "Минский филиал, Минский филиал Российского экономического университета имени Г.В. Плеханова",
+    "score": 0.967,
+    "confidence": "fuzzy",
+    "postupi_url": "https://bryansk.postupi.online/vuz/bryanskij-filial-reu-plehanova/",
+    "postupi_confidence": "exact"
+  },
+  "431-volgograd-reu": {
+    "ucheba_id": "102950",
+    "matched_title": "Ереванский филиал, Ереванский филиал Российского экономического университета имени Г.В. Плеханова",
+    "score": 0.931,
+    "confidence": "fuzzy",
+    "postupi_url": "https://volgograd.postupi.online/vuz/volgogradskij-filial-reu-im-g-v-plehanova/",
+    "postupi_confidence": "exact"
+  },
+  "432-voronezh-reu": {
+    "ucheba_id": "102954",
+    "matched_title": "Минский филиал, Минский филиал Российского экономического университета имени Г.В. Плеханова",
+    "score": 0.948,
+    "confidence": "fuzzy",
+    "postupi_url": "https://voronezh.postupi.online/vuz/voronezhskij-filial-reu-im-g-v-plehanova/",
+    "postupi_confidence": "exact"
+  },
+  "433-vladimir-finuniv": {
+    "ucheba_id": "51493",
+    "matched_title": "Юридический факультет Финансового университета, Юридический факультет Финансового университета при Правительстве Российской Федерации",
+    "score": 0.869,
+    "confidence": "fuzzy",
+    "vuzopedia_id": "4071",
+    "vuzopedia_name": "Владимирский филиал Финансового университета при Правительстве Российской Федерации"
+  },
+  "434-spb-finuniv": {
+    "ucheba_id": "51493",
+    "matched_title": "Юридический факультет Финансового университета, Юридический факультет Финансового университета при Правительстве Российской Федерации",
+    "score": 0.823,
+    "confidence": "fuzzy",
+    "postupi_url": "https://spb.postupi.online/vuz/sankt-peterburgskiy-filial-finansovogo-universiteta/",
+    "postupi_confidence": "exact"
+  },
+  "435-lipetsk-finuniv": {
+    "ucheba_id": "51493",
+    "matched_title": "Юридический факультет Финансового университета, Юридический факультет Финансового университета при Правительстве Российской Федерации",
+    "score": 0.878,
+    "confidence": "fuzzy",
+    "vuzopedia_id": "4080",
+    "vuzopedia_name": "Липецкий филиал Финансового университета при Правительстве Российской Федерации"
+  },
+  "436-orel-finuniv": {
+    "ucheba_id": "51493",
+    "matched_title": "Юридический факультет Финансового университета, Юридический факультет Финансового университета при Правительстве Российской Федерации",
+    "score": 0.873,
+    "confidence": "fuzzy",
+    "vuzopedia_id": "4086",
+    "vuzopedia_name": "Орловский филиал Финансового университета при Правительстве Российской Федерации"
+  },
+  "437-au-mvd": {
+    "ucheba_id": "451",
+    "matched_title": "Колледж МИД России, Колледж Министерства иностранных дел Российской Федерации",
+    "score": 0.768,
+    "confidence": "fuzzy"
+  },
+  "438-spb-mvd": {
+    "ucheba_id": "5921",
+    "matched_title": "МосУ МВД РФ им. В.Я. Кикотя, Московский университет Министерства внутренних дел Российской Федерации им. В.Я. Кикотя",
+    "score": 0.802,
+    "confidence": "fuzzy"
+  },
+  "439-vsi-mvd": {
+    "ucheba_id": "5921",
+    "matched_title": "МосУ МВД РФ им. В.Я. Кикотя, Московский университет Министерства внутренних дел Российской Федерации им. В.Я. Кикотя",
+    "score": 0.761,
+    "confidence": "fuzzy"
+  },
+  "44-samgtu": {
+    "ucheba_id": "98012",
+    "matched_title": "КарГТУ, Карагандинский государственный технический университет",
+    "score": 0.893,
+    "confidence": "fuzzy",
+    "postupi_url": "https://samara.postupi.online/vuz/samgtu/",
+    "postupi_confidence": "exact"
+  },
+  "440-krasnodar-mvd": {
+    "ucheba_id": "5921",
+    "matched_title": "МосУ МВД РФ им. В.Я. Кикотя, Московский университет Министерства внутренних дел Российской Федерации им. В.Я. Кикотя",
+    "score": 0.832,
+    "confidence": "fuzzy"
+  },
+  "441-rostov-mvd": {
+    "ucheba_id": "5921",
+    "matched_title": "МосУ МВД РФ им. В.Я. Кикотя, Московский университет Министерства внутренних дел Российской Федерации им. В.Я. Кикотя",
+    "score": 0.754,
+    "confidence": "fuzzy"
+  },
+  "442-dvui-mvd": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "443-uryui-mvd": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "444-sibui-mvd": {
+    "ucheba_id": "5921",
+    "matched_title": "МосУ МВД РФ им. В.Я. Кикотя, Московский университет Министерства внутренних дел Российской Федерации им. В.Я. Кикотя",
+    "score": 0.723,
+    "confidence": "fuzzy"
+  },
+  "445-barnaul-mvd": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "446-omsk-mvd": {
+    "ucheba_id": "451",
+    "matched_title": "Колледж МИД России, Колледж Министерства иностранных дел Российской Федерации",
+    "score": 0.777,
+    "confidence": "fuzzy"
+  },
+  "447-volgograd-mvd": {
+    "ucheba_id": "451",
+    "matched_title": "Колледж МИД России, Колледж Министерства иностранных дел Российской Федерации",
+    "score": 0.75,
+    "confidence": "fuzzy"
+  },
+  "448-nn-mvd": {
+    "ucheba_id": "451",
+    "matched_title": "Колледж МИД России, Колледж Министерства иностранных дел Российской Федерации",
+    "score": 0.719,
+    "confidence": "fuzzy"
+  },
+  "449-kazan-mvd": {
+    "ucheba_id": "5921",
+    "matched_title": "МосУ МВД РФ им. В.Я. Кикотя, Московский университет Министерства внутренних дел Российской Федерации им. В.Я. Кикотя",
+    "score": 0.723,
+    "confidence": "fuzzy"
+  },
+  "45-volsu": {
+    "ucheba_id": "12513",
+    "matched_title": "ГГУ, Гжельский государственный университет",
+    "score": 0.846,
+    "confidence": "fuzzy",
+    "postupi_url": "https://volgograd.postupi.online/vuz/volgu/",
+    "postupi_confidence": "exact"
+  },
+  "450-fsin-academy": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://ryazan.postupi.online/vuz/akademiya-fsin/",
+    "postupi_confidence": "exact"
+  },
+  "451-up-rf": {
+    "ucheba_id": "106974",
+    "matched_title": "Университет прокуратуры Российской Федерации, Университет прокуратуры Российской Федерации",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "452-synergy": {
+    "ucheba_id": "5908",
+    "matched_title": "Университет «Синергия», Московский университет «Синергия»",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "453-rosnou": {
+    "ucheba_id": "5963",
+    "matched_title": "РосНОУ, Российский новый университет",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "454-mfua": {
+    "ucheba_id": "5837",
+    "matched_title": "МФЮА, Московский финансово-юридический университет МФЮА",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "455-pstgu": {
+    "ucheba_id": "5942",
+    "matched_title": "ПСТГУ, Православный Свято-Тихоновский гуманитарный университет",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "456-rmat": {
+    "ucheba_id": "5950",
+    "matched_title": "РМАТ, Российская международная академия туризма",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "457-vitte": {
+    "ucheba_id": "5904",
+    "matched_title": "МУ им. С.Ю. Витте, Московский университет имени С.Ю. Витте",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "458-psychoanalysis": {
+    "ucheba_id": "5938",
+    "matched_title": "МИП, Московский институт психоанализа",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "459-mmu": {
+    "ucheba_id": "5814",
+    "matched_title": "ММУ, Московский Международный Университет",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "46-volggtu": {
+    "ucheba_id": "98012",
+    "matched_title": "КарГТУ, Карагандинский государственный технический университет",
+    "score": 0.879,
+    "confidence": "fuzzy",
+    "postupi_url": "https://volgograd.postupi.online/vuz/volggtuvolg/",
+    "postupi_confidence": "exact"
+  },
+  "460-urgeu": {
+    "ucheba_id": "98012",
+    "matched_title": "КарГТУ, Карагандинский государственный технический университет",
+    "score": 0.819,
+    "confidence": "fuzzy",
+    "postupi_url": "https://ekaterinburg.postupi.online/vuz/urgeu/",
+    "postupi_confidence": "exact"
+  },
+  "461-vsgutu": {
+    "ucheba_id": "1510",
+    "matched_title": "МГУТУ, Московский гуманитарный университет технологий и управления",
+    "score": 0.791,
+    "confidence": "fuzzy",
+    "postupi_url": "https://ulan-ude.postupi.online/vuz/vsgutu/",
+    "postupi_confidence": "exact"
+  },
+  "462-razumovsky": {
+    "ucheba_id": "5870",
+    "matched_title": "МГУТУ им. К.Г. Разумовского (ПКУ), Московский государственный университет технологий и управления им. К.Г. Разумовского (ПКУ)",
+    "score": 0.866,
+    "confidence": "fuzzy"
+  },
+  "463-ushakov-msu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://novorossijsk.postupi.online/vuz/gmu-im-f-f-ushakova/",
+    "postupi_confidence": "exact"
+  },
+  "464-spbgti": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://spb.postupi.online/vuz/spbgti-tu/",
+    "postupi_confidence": "exact"
+  },
+  "465-pushkin-institute": {
+    "ucheba_id": "5720",
+    "matched_title": "Институт Пушкина, Государственный институт русского языка им. А.С. Пушкина",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "466-urgahu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "467-sibstrin": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://nsk.postupi.online/vuz/ngasu-sibstrin/",
+    "postupi_confidence": "exact"
+  },
+  "468-nglu": {
+    "ucheba_id": "5861",
+    "matched_title": "МГЛУ, Московский государственный лингвистический университет",
+    "score": 0.746,
+    "confidence": "fuzzy"
+  },
+  "469-pguas": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://penza.postupi.online/vuz/pguas/",
+    "postupi_confidence": "exact"
+  },
+  "47-psu-perm": {
+    "ucheba_id": "5838",
+    "matched_title": "МАИ, Московский авиационный институт (национальный исследовательский университет) (МАИ)",
+    "score": 0.745,
+    "confidence": "fuzzy",
+    "postupi_url": "https://perm.postupi.online/vuz/pgniu/",
+    "postupi_confidence": "exact"
+  },
+  "470-kgasu": {
+    "ucheba_id": "98012",
+    "matched_title": "КарГТУ, Карагандинский государственный технический университет",
+    "score": 0.718,
+    "confidence": "fuzzy",
+    "postupi_url": "https://kazan.postupi.online/vuz/kgasu/",
+    "postupi_confidence": "exact"
+  },
+  "471-mgri": {
+    "ucheba_id": "5850",
+    "matched_title": "МГРИ, Российский государственный геологоразведочный университет имени Серго Орджоникидзе",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "472-innopolis": {
+    "ucheba_id": "107296",
+    "matched_title": "Университет РНСО, Университет РНСО",
+    "score": 0.757,
+    "confidence": "fuzzy",
+    "postupi_url": "https://kazan.postupi.online/vuz/universitet-innopolis/",
+    "postupi_confidence": "exact"
+  },
+  "473-skoltech": {
+    "ucheba_id": "106750",
+    "matched_title": "Сколтех, Сколковский институт науки и технологий",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "474-ulyanovsk-aviation": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://ulyanovsk.postupi.online/vuz/ulyanovskij-institut-grazhdanskoj-aviacii-imeni-glavnogo-marshala-aviacii-b-p-bugaeva/",
+    "postupi_confidence": "exact"
+  },
+  "475-chaikovsky-sport": {
+    "ucheba_id": "5829",
+    "matched_title": "МГАФК, Московская государственная академия физической культуры",
+    "score": 0.874,
+    "confidence": "fuzzy",
+    "postupi_url": "https://chajkovskij.postupi.online/vuz/chgifk/",
+    "postupi_confidence": "exact"
+  },
+  "476-vologda-gmha": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://vologda.postupi.online/vuz/vgmha/",
+    "postupi_confidence": "exact"
+  },
+  "477-velikieluki-gsha": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://velikie-luki.postupi.online/vuz/vgsha/",
+    "postupi_confidence": "exact"
+  },
+  "478-bgitu": {
+    "ucheba_id": "16182",
+    "matched_title": "ГГТУ, Государственный гуманитарно-технологический университет",
+    "score": 0.821,
+    "confidence": "fuzzy",
+    "postupi_url": "https://bryansk.postupi.online/vuz/bryanskij-gosudarstvennyj-inzhenerno-tehnologicheskij-universitet/",
+    "postupi_confidence": "exact"
+  },
+  "479-primorye-agri": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "48-pnipu": {
+    "ucheba_id": "5889",
+    "matched_title": "НИЯУ МИФИ, Национальный исследовательский ядерный университет «МИФИ»",
+    "score": 0.754,
+    "confidence": "fuzzy",
+    "postupi_url": "https://perm.postupi.online/vuz/pnipu/",
+    "postupi_confidence": "exact"
+  },
+  "480-yakutsk-agri": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "481-armavir-pedagogical": {
+    "ucheba_id": "5844",
+    "matched_title": "МГППУ, Московский государственный психолого-педагогический университет",
+    "score": 0.838,
+    "confidence": "fuzzy",
+    "postupi_url": "https://armavir.postupi.online/vuz/agpu/",
+    "postupi_confidence": "exact"
+  },
+  "482-shadrinsk-pedagogical": {
+    "ucheba_id": "98012",
+    "matched_title": "КарГТУ, Карагандинский государственный технический университет",
+    "score": 0.841,
+    "confidence": "fuzzy",
+    "postupi_url": "https://shadrinsk.postupi.online/vuz/shgpu/",
+    "postupi_confidence": "exact"
+  },
+  "483-elets": {
+    "ucheba_id": "1153",
+    "matched_title": "МГУ имени М.В. Ломоносова, Московский государственный университет имени М.В. Ломоносова",
+    "score": 0.761,
+    "confidence": "fuzzy"
+  },
+  "484-borisoglebsk-vsu": {
+    "ucheba_id": "111690",
+    "matched_title": "Костанайский филиал ЧелГУ, Костанайский филиал Челябинского государственного университета",
+    "score": 0.794,
+    "confidence": "fuzzy",
+    "postupi_url": "https://borisoglebsk.postupi.online/vuz/bf-vgu/",
+    "postupi_confidence": "exact"
+  },
+  "485-arzamas-nngu": {
+    "ucheba_id": "6353",
+    "matched_title": "Мытищинский филиал НИУ МГСУ, Мытищинский филиал Национального исследовательского Московского государственного строительного университета",
+    "score": 0.731,
+    "confidence": "fuzzy"
+  },
+  "486-solikamsk-pedagogical": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://solikamsk.postupi.online/vuz/sgpi-filial-pgniu/",
+    "postupi_confidence": "exact"
+  },
+  "487-lesosibirsk-pedagogical": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "488-taganrog-chekhov": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://taganrog.postupi.online/vuz/ti-chehova-rgeu-rinh/",
+    "postupi_confidence": "exact"
+  },
+  "489-slavyansk-kuban": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "49-tyumgu": {
+    "ucheba_id": "12513",
+    "matched_title": "ГГУ, Гжельский государственный университет",
+    "score": 0.892,
+    "confidence": "fuzzy",
+    "postupi_url": "https://tyumen.postupi.online/vuz/tyumgu/",
+    "postupi_confidence": "exact"
+  },
+  "490-volzhsky-volgu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "491-dvgii": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://vladivostok.postupi.online/vuz/dalnevostochnyj-gosudarstvennyj-institut-iskusstv/",
+    "postupi_confidence": "exact"
+  },
+  "492-tambov-rachmaninov": {
+    "ucheba_id": "5721",
+    "matched_title": "ГМПИ им М.М. Ипполитова-Иванова, Государственный музыкально-педагогический институт им. М.М. Ипполитова-Иванова",
+    "score": 0.753,
+    "confidence": "fuzzy"
+  },
+  "493-magnitogorsk-conservatory": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://magnitogorsk.postupi.online/vuz/magk-im-m-i-glinki/",
+    "postupi_confidence": "exact"
+  },
+  "494-ufa-art-institute": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://ufa.postupi.online/vuz/ugii-im-zagira-ismagilova/",
+    "postupi_confidence": "exact"
+  },
+  "495-dgpu": {
+    "ucheba_id": "5832",
+    "matched_title": "МГЮА им. О.Е. Кутафина, Московский государственный юридический университет имени О.Е. Кутафина",
+    "score": 0.736,
+    "confidence": "fuzzy"
+  },
+  "496-chgiki": {
+    "ucheba_id": "5876",
+    "matched_title": "МГИК, Московский государственный институт культуры",
+    "score": 0.796,
+    "confidence": "fuzzy",
+    "postupi_url": "https://cheboksary.postupi.online/vuz/chgiki/",
+    "postupi_confidence": "exact"
+  },
+  "497-ippolitov-ivanov": {
+    "ucheba_id": "5721",
+    "matched_title": "ГМПИ им М.М. Ипполитова-Иванова, Государственный музыкально-педагогический институт им. М.М. Ипполитова-Иванова",
+    "score": 0.975,
+    "confidence": "fuzzy",
+    "postupi_url": "https://msk.postupi.online/vuz/gmpi-im-m-m-ippolitova-ivanova/",
+    "postupi_confidence": "exact"
+  },
+  "498-sochi-rudn": {
+    "ucheba_id": "51460",
+    "matched_title": "Медицинский институт РУДН им. Патриса Лумумбы, Медицинский институт Российского университета дружбы народов имени Патриса Лумумбы",
+    "score": 0.911,
+    "confidence": "fuzzy",
+    "postupi_url": "https://sochi.postupi.online/vuz/sochi-rudn/",
+    "postupi_confidence": "exact"
+  },
+  "499-georgievsky-medical": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "50-tiu": {
+    "ucheba_id": "109135",
+    "matched_title": "ЦУ, Центральный университет",
+    "score": 0.746,
+    "confidence": "fuzzy",
+    "postupi_url": "https://tyumen.postupi.online/vuz/tiu/",
+    "postupi_confidence": "exact"
+  },
+  "500-yaroslavl-theatre": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://yaroslavl.postupi.online/vuz/yagti/",
+    "postupi_confidence": "exact"
+  },
+  "501-nstu": {
+    "ucheba_id": "98012",
+    "matched_title": "КарГТУ, Карагандинский государственный технический университет",
+    "score": 0.86,
+    "confidence": "fuzzy"
+  },
+  "502-knitu": {
+    "ucheba_id": "5889",
+    "matched_title": "НИЯУ МИФИ, Национальный исследовательский ядерный университет «МИФИ»",
+    "score": 0.748,
+    "confidence": "fuzzy",
+    "postupi_url": "https://kazan.postupi.online/vuz/knitu/",
+    "postupi_confidence": "exact"
+  },
+  "503-knitu-kai": {
+    "ucheba_id": "5957",
+    "matched_title": "РНИМУ им. Н.И. Пирогова, Российский национальный исследовательский медицинский университет имени Н.И. Пирогова",
+    "score": 0.777,
+    "confidence": "fuzzy"
+  },
+  "504-ugntu": {
+    "ucheba_id": "98012",
+    "matched_title": "КарГТУ, Карагандинский государственный технический университет",
+    "score": 0.811,
+    "confidence": "fuzzy",
+    "postupi_url": "https://ufa.postupi.online/vuz/ugntu/",
+    "postupi_confidence": "exact"
+  },
+  "505-rosunimed": {
+    "ucheba_id": "9163",
+    "matched_title": "РосУниМед, Российский университет медицины Министерства здравоохранения Российской Федерации",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "506-spbgpmu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://spb.postupi.online/vuz/spbgpmu/",
+    "postupi_confidence": "exact"
+  },
+  "507-pimu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://nn.postupi.online/vuz/pimu/",
+    "postupi_confidence": "exact"
+  },
+  "508-ystu": {
+    "ucheba_id": "98012",
+    "matched_title": "КарГТУ, Карагандинский государственный технический университет",
+    "score": 0.876,
+    "confidence": "fuzzy",
+    "postupi_url": "https://yaroslavl.postupi.online/vuz/yagtu/",
+    "postupi_confidence": "exact"
+  },
+  "509-rmanpo": {
+    "ucheba_id": "108446",
+    "matched_title": "Академия непрерывного профессионального образования, Академия непрерывного профессионального образования",
+    "score": 0.816,
+    "confidence": "fuzzy"
+  },
+  "51-omsu": {
+    "ucheba_id": "1153",
+    "matched_title": "МГУ имени М.В. Ломоносова, Московский государственный университет имени М.В. Ломоносова",
+    "score": 0.797,
+    "confidence": "fuzzy"
+  },
+  "510-kazan-medical-academy": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "511-tsaa": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "512-nsuem": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://nsk.postupi.online/vuz/ngueu/",
+    "postupi_confidence": "exact"
+  },
+  "513-pgfa": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://perm.postupi.online/vuz/pgfa/",
+    "postupi_confidence": "exact"
+  },
+  "514-vyatsu": {
+    "ucheba_id": "12513",
+    "matched_title": "ГГУ, Гжельский государственный университет",
+    "score": 0.889,
+    "confidence": "fuzzy",
+    "postupi_url": "https://kirov.postupi.online/vuz/vyatgu/",
+    "postupi_confidence": "exact"
+  },
+  "515-balakovo-ranepa": {
+    "ucheba_id": "104748",
+    "matched_title": "Лицей РАНХиГС, Лицей Российской академии народного хозяйства и государственной службы при Президенте Российской Федерации",
+    "score": 0.916,
+    "confidence": "fuzzy"
+  },
+  "516-dzerzhinsk-ranepa": {
+    "ucheba_id": "104748",
+    "matched_title": "Лицей РАНХиГС, Лицей Российской академии народного хозяйства и государственной службы при Президенте Российской Федерации",
+    "score": 0.916,
+    "confidence": "fuzzy"
+  },
+  "517-krasnogorsk-ranepa": {
+    "ucheba_id": "11568",
+    "matched_title": "Московский областной филиал РАНХиГС, Московский областной филиал Российской академии народного хозяйства и государственной службы при Президенте РФ",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "518-petropavlovsk-ranepa": {
+    "ucheba_id": "104748",
+    "matched_title": "Лицей РАНХиГС, Лицей Российской академии народного хозяйства и государственной службы при Президенте Российской Федерации",
+    "score": 0.866,
+    "confidence": "fuzzy",
+    "postupi_url": "https://petropavlovsk-kamchatskij.postupi.online/vuz/petropavlovskij-filial-ranhigs/",
+    "postupi_confidence": "exact"
+  },
+  "519-crimea-mvd": {
+    "ucheba_id": "14542",
+    "matched_title": "Московский областной филиал МосУ МВД РФ им. В.Я. Кикотя, Московский областной филиал Московского университета Министерства внутренних дел Российской Федерации им. В.Я. Кикотя",
+    "score": 0.785,
+    "confidence": "fuzzy"
+  },
+  "52-omgtu": {
+    "ucheba_id": "98012",
+    "matched_title": "КарГТУ, Карагандинский государственный технический университет",
+    "score": 0.88,
+    "confidence": "fuzzy",
+    "postupi_url": "https://omsk.postupi.online/vuz/omgtu/",
+    "postupi_confidence": "exact"
+  },
+  "520-novorossiysk-mvd": {
+    "ucheba_id": "14542",
+    "matched_title": "Московский областной филиал МосУ МВД РФ им. В.Я. Кикотя, Московский областной филиал Московского университета Министерства внутренних дел Российской Федерации им. В.Я. Кикотя",
+    "score": 0.772,
+    "confidence": "fuzzy"
+  },
+  "521-nalchik-mvd": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "522-moscow-theological": {
+    "ucheba_id": "5835",
+    "matched_title": "Московская духовная академия, Московская духовная академия Русской Православной Церкви",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "523-spb-theological": {
+    "ucheba_id": "5835",
+    "matched_title": "Московская духовная академия, Московская духовная академия Русской Православной Церкви",
+    "score": 0.86,
+    "confidence": "fuzzy",
+    "postupi_url": "https://spb.postupi.online/vuz/sankt-peterburgskaya-duhovnaya-akademiya/",
+    "postupi_confidence": "exact"
+  },
+  "524-riu-kazan": {
+    "ucheba_id": "16652",
+    "matched_title": "Московский исламский институт, Московский исламский институт",
+    "score": 0.862,
+    "confidence": "fuzzy",
+    "postupi_url": "https://kazan.postupi.online/vuz/rii/",
+    "postupi_confidence": "exact"
+  },
+  "525-moscow-islamic": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "526-belgorod-seminary": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "527-kazan-seminary": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://kazan.postupi.online/vuz/kazpds/",
+    "postupi_confidence": "exact"
+  },
+  "528-ishim-tyumgu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://ishim.postupi.online/vuz/ipi-ershova-tyumgu/",
+    "postupi_confidence": "exact"
+  },
+  "529-nizhnytagil-urfu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://nizhniy-tagil.postupi.online/vuz/nti-urfu/",
+    "postupi_confidence": "exact"
+  },
+  "53-tsu-tomsk": {
+    "ucheba_id": "5866",
+    "matched_title": "НИУ МГСУ, Национальный исследовательский Московский государственный строительный университет",
+    "score": 0.865,
+    "confidence": "fuzzy",
+    "postupi_url": "https://tomsk.postupi.online/vuz/nacionalnyj-issledovatelskij-tomskij-gosudarstvennyj-universitet/",
+    "postupi_confidence": "exact"
+  },
+  "530-zlatoust-susu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://zlatoust.postupi.online/vuz/filial-yuurgu-zlatoust/",
+    "postupi_confidence": "exact"
+  },
+  "531-neryungri-svfu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://neryungri.postupi.online/vuz/ti-svfu/",
+    "postupi_confidence": "exact"
+  },
+  "532-khti-sfu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "533-sayanoshushensk-sfu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://sayanogorsk.postupi.online/vuz/sshf-sfu/",
+    "postupi_confidence": "exact"
+  },
+  "534-mosgu": {
+    "ucheba_id": "5886",
+    "matched_title": "МосГУ, Московский гуманитарный университет (МосГУ)",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "535-national-business-institute": {
+    "ucheba_id": "5933",
+    "matched_title": "Национальный институт бизнеса, Национальный институт бизнеса",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "536-ruan": {
+    "ucheba_id": "5944",
+    "matched_title": "РУАН имени Г.Б. Мирзоева, Российский университет адвокатуры и нотариата имени Г.Б. Мирзоева",
+    "score": 0.722,
+    "confidence": "fuzzy"
+  },
+  "537-griboedov": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "538-spbgup": {
+    "ucheba_id": "105419",
+    "matched_title": "Алматинский филиал СПбГУП, Алматинский филиал Санкт-Петербургского гуманитарного университета профсоюзов",
+    "score": 0.773,
+    "confidence": "fuzzy",
+    "postupi_url": "https://spb.postupi.online/vuz/spbgup/",
+    "postupi_confidence": "exact"
+  },
+  "539-world-civilizations": {
+    "ucheba_id": "5771",
+    "matched_title": "УМЦ им. В.В. Жириновского, Университет мировых цивилизаций имени В.В. Жириновского",
+    "score": 0.753,
+    "confidence": "fuzzy"
+  },
+  "54-tusur": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://tomsk.postupi.online/vuz/tusur/",
+    "postupi_confidence": "exact"
+  },
+  "540-mirbis": {
+    "ucheba_id": "5834",
+    "matched_title": "МИРБИС, Московская международная высшая школа бизнеса МИРБИС (Институт)",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "541-rvsn-academy": {
+    "ucheba_id": "24504",
+    "matched_title": "ВА РВСН МО РФ, Военная академия ракетных войск стратегического назначения им. Петра Великого",
+    "score": 0.974,
+    "confidence": "fuzzy"
+  },
+  "542-ova": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "543-vagsh": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "544-mihaylovskaya-artillery": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "545-rvvdku": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "546-vumo": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "547-svyazi-academy": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "548-vva-voronezh": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "549-vma-kuznetsov": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "55-kemsu": {
+    "ucheba_id": "12513",
+    "matched_title": "ГГУ, Гжельский государственный университет",
+    "score": 0.868,
+    "confidence": "fuzzy",
+    "postupi_url": "https://kemerovo.postupi.online/vuz/kemgu/",
+    "postupi_confidence": "exact"
+  },
+  "550-ruc-main": {
+    "ucheba_id": "5922",
+    "matched_title": "РУК, Российский университет кооперации",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "551-kazan-cooperative": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://kazan.postupi.online/vuz/kazanskij-kooperativnyj-institut/",
+    "postupi_confidence": "exact"
+  },
+  "552-volgograd-cooperative": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://volgograd.postupi.online/vuz/volgogradskij-ruk/",
+    "postupi_confidence": "exact"
+  },
+  "553-cheboksary-cooperative": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://cheboksary.postupi.online/vuz/chki-ruk/",
+    "postupi_confidence": "exact"
+  },
+  "554-krasnodar-cooperative": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://krasnodar.postupi.online/vuz/kki-ruk/",
+    "postupi_confidence": "exact"
+  },
+  "555-kaliningrad-cooperative": {
+    "ucheba_id": "68480",
+    "matched_title": "Колледж РУК, Колледж Российского университета кооперации",
+    "score": 0.772,
+    "confidence": "fuzzy",
+    "postupi_url": "https://kaliningrad.postupi.online/vuz/kaliningradskiy-filial-ruk/",
+    "postupi_confidence": "exact"
+  },
+  "556-saransk-cooperative": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://saransk.postupi.online/vuz/ski-ruk/",
+    "postupi_confidence": "exact"
+  },
+  "557-spb-prosecutor": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "558-irkutsk-prosecutor": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://irkutsk.postupi.online/vuz/iyui-up-rf/",
+    "postupi_confidence": "exact"
+  },
+  "559-crimea-prosecutor": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://simferopol.postupi.online/vuz/kyui-up-rf/",
+    "postupi_confidence": "exact"
+  },
+  "56-altsu": {
+    "ucheba_id": "12513",
+    "matched_title": "ГГУ, Гжельский государственный университет",
+    "score": 0.892,
+    "confidence": "fuzzy",
+    "postupi_url": "https://barnaul.postupi.online/vuz/altgu/",
+    "postupi_confidence": "exact"
+  },
+  "560-gaugn": {
+    "ucheba_id": "5724",
+    "matched_title": "ГАУГН, Государственный академический университет гуманитарных наук при Российской академии наук",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "561-mbi-sobchak": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://spb.postupi.online/vuz/mbi/",
+    "postupi_confidence": "exact"
+  },
+  "562-volpi": {
+    "ucheba_id": "16132",
+    "matched_title": "Егорьевский технологический институт МГТУ «СТАНКИН», Егорьевский технологический институт Московского государственного технологического университета «Станкин»",
+    "score": 0.756,
+    "confidence": "fuzzy",
+    "postupi_url": "https://volzhskij.postupi.online/vuz/vpi-volggtu/",
+    "postupi_confidence": "exact"
+  },
+  "563-kti-volggtu": {
+    "ucheba_id": "16132",
+    "matched_title": "Егорьевский технологический институт МГТУ «СТАНКИН», Егорьевский технологический институт Московского государственного технологического университета «Станкин»",
+    "score": 0.775,
+    "confidence": "fuzzy",
+    "postupi_url": "https://kamyshin.postupi.online/vuz/kti-volggtu/",
+    "postupi_confidence": "exact"
+  },
+  "564-iate-mephi": {
+    "ucheba_id": "61533",
+    "matched_title": "Институт тепловой и атомной энергетики НИУ «МЭИ», Институт тепловой и атомной энергетики Национального исследовательского университета «МЭИ»",
+    "score": 0.784,
+    "confidence": "fuzzy"
+  },
+  "565-sti-mephi": {
+    "ucheba_id": "107652",
+    "matched_title": "Инженерно-физический институт биомедицины НИЯУ МИФИ, Инженерно-физический институт биомедицины Национального исследовательского ядерного университета «МИФИ»",
+    "score": 0.824,
+    "confidence": "fuzzy"
+  },
+  "566-diti-mephi": {
+    "ucheba_id": "107652",
+    "matched_title": "Инженерно-физический институт биомедицины НИЯУ МИФИ, Инженерно-физический институт биомедицины Национального исследовательского ядерного университета «МИФИ»",
+    "score": 0.805,
+    "confidence": "fuzzy"
+  },
+  "567-viti-mephi": {
+    "ucheba_id": "107652",
+    "matched_title": "Инженерно-физический институт биомедицины НИЯУ МИФИ, Инженерно-физический институт биомедицины Национального исследовательского ядерного университета «МИФИ»",
+    "score": 0.836,
+    "confidence": "fuzzy"
+  },
+  "568-sarfti-mephi": {
+    "ucheba_id": "107652",
+    "matched_title": "Инженерно-физический институт биомедицины НИЯУ МИФИ, Инженерно-физический институт биомедицины Национального исследовательского ядерного университета «МИФИ»",
+    "score": 0.812,
+    "confidence": "fuzzy"
+  },
+  "569-tti-mephi": {
+    "ucheba_id": "107646",
+    "matched_title": "Ташкентский филиал НИЯУ МИФИ, Ташкентский филиал Национального исследовательского ядерного университета «МИФИ»",
+    "score": 0.813,
+    "confidence": "fuzzy"
+  },
+  "57-isu-irkutsk": {
+    "ucheba_id": "12513",
+    "matched_title": "ГГУ, Гжельский государственный университет",
+    "score": 0.865,
+    "confidence": "fuzzy",
+    "postupi_url": "https://irkutsk.postupi.online/vuz/irkutskij-gosudarstvennyj-universitet/",
+    "postupi_confidence": "exact"
+  },
+  "570-ti-lesnoy-mephi": {
+    "ucheba_id": "107646",
+    "matched_title": "Ташкентский филиал НИЯУ МИФИ, Ташкентский филиал Национального исследовательского ядерного университета «МИФИ»",
+    "score": 0.809,
+    "confidence": "fuzzy"
+  },
+  "571-nti-mephi": {
+    "ucheba_id": "107652",
+    "matched_title": "Инженерно-физический институт биомедицины НИЯУ МИФИ, Инженерно-физический институт биомедицины Национального исследовательского ядерного университета «МИФИ»",
+    "score": 0.788,
+    "confidence": "fuzzy"
+  },
+  "572-stavropol-pedagogical": {
+    "ucheba_id": "5844",
+    "matched_title": "МГППУ, Московский государственный психолого-педагогический университет",
+    "score": 0.735,
+    "confidence": "fuzzy",
+    "postupi_url": "https://stavropol.postupi.online/vuz/sgpi/",
+    "postupi_confidence": "exact"
+  },
+  "573-chaikovsky-izhgtu": {
+    "ucheba_id": "16132",
+    "matched_title": "Егорьевский технологический институт МГТУ «СТАНКИН», Егорьевский технологический институт Московского государственного технологического университета «Станкин»",
+    "score": 0.76,
+    "confidence": "fuzzy"
+  },
+  "574-salavat-ugntu": {
+    "ucheba_id": "13565",
+    "matched_title": "Клинский филиал РГСУ, Клинский филиал Российского государственного социального университета",
+    "score": 0.72,
+    "confidence": "fuzzy"
+  },
+  "575-oktyabrsky-ugntu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "576-berezniki-pnipu": {
+    "ucheba_id": "107646",
+    "matched_title": "Ташкентский филиал НИЯУ МИФИ, Ташкентский филиал Национального исследовательского ядерного университета «МИФИ»",
+    "score": 0.756,
+    "confidence": "fuzzy",
+    "postupi_url": "https://berezniki.postupi.online/vuz/bf-pnipu/",
+    "postupi_confidence": "exact"
+  },
+  "577-sguvt": {
+    "ucheba_id": "10619",
+    "matched_title": "РГУТИС, Российский государственный университет туризма и сервиса",
+    "score": 0.661,
+    "confidence": "fuzzy",
+    "postupi_url": "https://nsk.postupi.online/vuz/sguvt/",
+    "postupi_confidence": "exact"
+  },
+  "578-vguvt": {
+    "ucheba_id": "13730",
+    "matched_title": "МГУСиТ, Московский государственный университет спорта и туризма",
+    "score": 0.727,
+    "confidence": "fuzzy",
+    "postupi_url": "https://nn.postupi.online/vuz/vguvt/",
+    "postupi_confidence": "exact"
+  },
+  "579-vladivostok-rta": {
+    "ucheba_id": "53085",
+    "matched_title": "Юридический факультет РТА, Юридический факультет Российской таможенной академии",
+    "score": 0.762,
+    "confidence": "fuzzy",
+    "postupi_url": "https://vladivostok.postupi.online/vuz/vladivostokskij-filial-rossijskoj-tamozhennoj-akademii/",
+    "postupi_confidence": "exact"
+  },
+  "58-irnitu": {
+    "ucheba_id": "5889",
+    "matched_title": "НИЯУ МИФИ, Национальный исследовательский ядерный университет «МИФИ»",
+    "score": 0.773,
+    "confidence": "fuzzy",
+    "postupi_url": "https://irkutsk.postupi.online/vuz/irkutskij-nacionalnyj-issledovatelskij-tehnicheskij-universitet/",
+    "postupi_confidence": "exact"
+  },
+  "580-spb-rta": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://spb.postupi.online/vuz/sankt-peterburgskij-imeni-v-b-bobkova-filial/",
+    "postupi_confidence": "exact"
+  },
+  "581-rostov-rta": {
+    "ucheba_id": "53084",
+    "matched_title": "Экономический факультет РТА, Экономический факультет Российской таможенной академии",
+    "score": 0.784,
+    "confidence": "fuzzy",
+    "postupi_url": "https://rostov.postupi.online/vuz/rostovskij-filial-rta/",
+    "postupi_confidence": "exact"
+  },
+  "582-igmapo": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "583-ngiuv": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "584-spb-medsocial": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://spb.postupi.online/vuz/spbmsi/",
+    "postupi_confidence": "exact"
+  },
+  "585-mgavt": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "586-atiso": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "587-gitr": {
+    "ucheba_id": "5732",
+    "matched_title": "ГИТР, Институт кино и телевидения (ГИТР)",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "588-vuit": {
+    "ucheba_id": "6492",
+    "matched_title": "Университет Грибоедова, Московский университет имени А.С. Грибоедова",
+    "score": 0.738,
+    "confidence": "fuzzy"
+  },
+  "589-nikolo-ugreshskaya": {
+    "ucheba_id": "17831",
+    "matched_title": "Николо-Угрешская духовная семинария Русской Православной Церкви, Николо-Угрешская духовная семинария Русской Православной Церкви",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "59-bsu-buryat": {
+    "ucheba_id": "1153",
+    "matched_title": "МГУ имени М.В. Ломоносова, Московский государственный университет имени М.В. Ломоносова",
+    "score": 0.739,
+    "confidence": "fuzzy",
+    "postupi_url": "https://ulan-ude.postupi.online/vuz/bgu-ulan-ude/",
+    "postupi_confidence": "exact"
+  },
+  "590-tobolsk-seminary": {
+    "ucheba_id": "20763",
+    "matched_title": "Перервинская Православная Духовная семинария, Перервинская Православная Духовная семинария",
+    "score": 0.837,
+    "confidence": "fuzzy"
+  },
+  "591-smolensk-seminary": {
+    "ucheba_id": "20763",
+    "matched_title": "Перервинская Православная Духовная семинария, Перервинская Православная Духовная семинария",
+    "score": 0.884,
+    "confidence": "fuzzy"
+  },
+  "592-ekaterinburg-seminary": {
+    "ucheba_id": "20477",
+    "matched_title": "КДС, Коломенская Духовная Семинария",
+    "score": 0.769,
+    "confidence": "fuzzy"
+  },
+  "593-vegu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "594-bgarf": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "595-dvoku": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "596-nvvku": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "597-tyumen-military": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "598-omsk-military": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "599-cherepovets-military": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "60-zabgu": {
+    "ucheba_id": "12513",
+    "matched_title": "ГГУ, Гжельский государственный университет",
+    "score": 0.872,
+    "confidence": "fuzzy",
+    "postupi_url": "https://chita.postupi.online/vuz/zabgu/",
+    "postupi_confidence": "exact"
+  },
+  "600-yaroslavl-pvo": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "601-starooskol-misis": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "602-novotroitsk-misis": {
+    "ucheba_id": "107646",
+    "matched_title": "Ташкентский филиал НИЯУ МИФИ, Ташкентский филиал Национального исследовательского ядерного университета «МИФИ»",
+    "score": 0.819,
+    "confidence": "fuzzy",
+    "vuzopedia_id": "3990",
+    "vuzopedia_name": "Новотроицкий филиал Национального исследовательского технологического университета «МИСИС»"
+  },
+  "603-vyksa-misis": {
+    "ucheba_id": "107646",
+    "matched_title": "Ташкентский филиал НИЯУ МИФИ, Ташкентский филиал Национального исследовательского ядерного университета «МИФИ»",
+    "score": 0.841,
+    "confidence": "fuzzy",
+    "vuzopedia_id": "3988",
+    "vuzopedia_name": "Выксунский филиал Национального исследовательского технологического университета «МИСИС»"
+  },
+  "604-gubkin-misis": {
+    "ucheba_id": "107646",
+    "matched_title": "Ташкентский филиал НИЯУ МИФИ, Ташкентский филиал Национального исследовательского ядерного университета «МИФИ»",
+    "score": 0.841,
+    "confidence": "fuzzy"
+  },
+  "605-volzhsky-mei": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "606-smolensk-mei": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "607-sochi-rut": {
+    "ucheba_id": "68825",
+    "matched_title": "Юридический институт РУТ (МИИТ), Юридический институт Российского университета транспорта (МИИТ)",
+    "score": 0.786,
+    "confidence": "fuzzy"
+  },
+  "608-dmitrov-bauman": {
+    "ucheba_id": "681",
+    "matched_title": "Московский техникум космического приборостроения МГТУ им. Н.Э. Баумана, Московский техникум космического приборостроения Московского государственного технического университета им. Н.Э. Баумана",
+    "score": 0.764,
+    "confidence": "fuzzy"
+  },
+  "609-orenburg-gubkin": {
+    "ucheba_id": "5961",
+    "matched_title": "РГУ нефти и газа (НИУ) имени И.М. Губкина, Российский государственный университет нефти и газа (национальный исследовательский университет) имени И.М. Губкина",
+    "score": 0.833,
+    "confidence": "fuzzy"
+  },
+  "61-togu": {
+    "ucheba_id": "12513",
+    "matched_title": "ГГУ, Гжельский государственный университет",
+    "score": 0.846,
+    "confidence": "fuzzy",
+    "postupi_url": "https://habarovsk.postupi.online/vuz/togu/",
+    "postupi_confidence": "exact"
+  },
+  "610-sosnovybor-spbpu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://sosnoviy-bor.postupi.online/vuz/institut-yadernoy-energetiki-spbpu/",
+    "postupi_confidence": "exact"
+  },
+  "611-cherepovets-spbpu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "612-domodedovo-rggu": {
+    "ucheba_id": "11737",
+    "matched_title": "Домодедовский филиал, Домодедовский филиал Российского государственного гуманитарного университета",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "613-krasnodar-finuniv": {
+    "ucheba_id": "51493",
+    "matched_title": "Юридический факультет Финансового университета, Юридический факультет Финансового университета при Правительстве Российской Федерации",
+    "score": 0.864,
+    "confidence": "fuzzy",
+    "postupi_url": "https://krasnodar.postupi.online/vuz/krasnodarskiy-filial-finansovogo-universiteta/",
+    "postupi_confidence": "exact"
+  },
+  "614-kursk-finuniv": {
+    "ucheba_id": "51493",
+    "matched_title": "Юридический факультет Финансового университета, Юридический факультет Финансового университета при Правительстве Российской Федерации",
+    "score": 0.883,
+    "confidence": "fuzzy",
+    "vuzopedia_id": "4078",
+    "vuzopedia_name": "Курский филиал Финансового университета при Правительстве Российской Федерации"
+  },
+  "615-novorossiysk-finuniv": {
+    "ucheba_id": "51493",
+    "matched_title": "Юридический факультет Финансового университета, Юридический факультет Финансового университета при Правительстве Российской Федерации",
+    "score": 0.859,
+    "confidence": "fuzzy",
+    "postupi_url": "https://novorossijsk.postupi.online/vuz/novorossijskij-filial-finuniversiteta/",
+    "postupi_confidence": "exact"
+  },
+  "616-penza-finuniv": {
+    "ucheba_id": "51493",
+    "matched_title": "Юридический факультет Финансового университета, Юридический факультет Финансового университета при Правительстве Российской Федерации",
+    "score": 0.867,
+    "confidence": "fuzzy",
+    "postupi_url": "https://penza.postupi.online/vuz/penzenskiy-filial-finuniversiteta/",
+    "postupi_confidence": "exact"
+  },
+  "617-smolensk-finuniv": {
+    "ucheba_id": "51493",
+    "matched_title": "Юридический факультет Финансового университета, Юридический факультет Финансового университета при Правительстве Российской Федерации",
+    "score": 0.867,
+    "confidence": "fuzzy",
+    "postupi_url": "https://smolensk.postupi.online/vuz/smolenskij-filial-finuniversiteta/",
+    "postupi_confidence": "exact"
+  },
+  "618-tula-finuniv": {
+    "ucheba_id": "51493",
+    "matched_title": "Юридический факультет Финансового университета, Юридический факультет Финансового университета при Правительстве Российской Федерации",
+    "score": 0.866,
+    "confidence": "fuzzy",
+    "vuzopedia_id": "4094",
+    "vuzopedia_name": "Тульский филиал Финансового университета при Правительстве Российской Федерации"
+  },
+  "619-ural-finuniv": {
+    "ucheba_id": "51493",
+    "matched_title": "Юридический факультет Финансового университета, Юридический факультет Финансового университета при Правительстве Российской Федерации",
+    "score": 0.873,
+    "confidence": "fuzzy",
+    "postupi_url": "https://chelyabinsk.postupi.online/vuz/chelyabinskiy-filial-finansovogo-universiteta/",
+    "postupi_confidence": "exact"
+  },
+  "62-amursu": {
+    "ucheba_id": "12513",
+    "matched_title": "ГГУ, Гжельский государственный университет",
+    "score": 0.877,
+    "confidence": "fuzzy",
+    "postupi_url": "https://blagoveshhensk.postupi.online/vuz/amgu/",
+    "postupi_confidence": "exact"
+  },
+  "620-ufa-finuniv": {
+    "ucheba_id": "51493",
+    "matched_title": "Юридический факультет Финансового университета, Юридический факультет Финансового университета при Правительстве Российской Федерации",
+    "score": 0.878,
+    "confidence": "fuzzy",
+    "postupi_url": "https://ufa.postupi.online/vuz/ufimskiy-filial-finansovogo-universiteta/",
+    "postupi_confidence": "exact"
+  },
+  "621-yaroslavl-finuniv": {
+    "ucheba_id": "51493",
+    "matched_title": "Юридический факультет Финансового университета, Юридический факультет Финансового университета при Правительстве Российской Федерации",
+    "score": 0.862,
+    "confidence": "fuzzy",
+    "postupi_url": "https://yaroslavl.postupi.online/vuz/yaroslavskiy-finuniversitetyaroslavskiy-filial-finansovogo-universiteta/",
+    "postupi_confidence": "exact"
+  },
+  "622-krasnodar-reu": {
+    "ucheba_id": "102950",
+    "matched_title": "Ереванский филиал, Ереванский филиал Российского экономического университета имени Г.В. Плеханова",
+    "score": 0.943,
+    "confidence": "fuzzy",
+    "postupi_url": "https://krasnodar.postupi.online/vuz/krasnodarskij-filial-reu-im-g-v-plehanova/",
+    "postupi_confidence": "exact"
+  },
+  "623-perm-reu": {
+    "ucheba_id": "102954",
+    "matched_title": "Минский филиал, Минский филиал Российского экономического университета имени Г.В. Плеханова",
+    "score": 0.912,
+    "confidence": "fuzzy",
+    "postupi_url": "https://perm.postupi.online/vuz/permskij-institut-filial-reu-im-g-v-plehanova/",
+    "postupi_confidence": "exact"
+  },
+  "624-tula-reu": {
+    "ucheba_id": "102954",
+    "matched_title": "Минский филиал, Минский филиал Российского экономического университета имени Г.В. Плеханова",
+    "score": 0.954,
+    "confidence": "fuzzy",
+    "vuzopedia_id": "4035",
+    "vuzopedia_name": "Тульский филиал Российского экономического университета имени Г.В. Плеханова"
+  },
+  "625-arkhangelsk-ruc": {
+    "ucheba_id": "68480",
+    "matched_title": "Колледж РУК, Колледж Российского университета кооперации",
+    "score": 0.747,
+    "confidence": "fuzzy"
+  },
+  "626-arzamas-ruc": {
+    "ucheba_id": "68480",
+    "matched_title": "Колледж РУК, Колледж Российского университета кооперации",
+    "score": 0.804,
+    "confidence": "fuzzy",
+    "vuzopedia_id": "4387",
+    "vuzopedia_name": "Арзамасский филиал Российского университета кооперации"
+  },
+  "627-vladimir-ruc": {
+    "ucheba_id": "68480",
+    "matched_title": "Колледж РУК, Колледж Российского университета кооперации",
+    "score": 0.776,
+    "confidence": "fuzzy",
+    "postupi_url": "https://vladimir.postupi.online/vuz/vladimirskij-filial-ruk/",
+    "postupi_confidence": "exact"
+  },
+  "628-izhevsk-ruc": {
+    "ucheba_id": "68480",
+    "matched_title": "Колледж РУК, Колледж Российского университета кооперации",
+    "score": 0.787,
+    "confidence": "fuzzy",
+    "postupi_url": "https://izhevsk.postupi.online/vuz/izhevskij-filial-ruk/",
+    "postupi_confidence": "exact"
+  },
+  "629-murmansk-ruc": {
+    "ucheba_id": "68480",
+    "matched_title": "Колледж РУК, Колледж Российского университета кооперации",
+    "score": 0.812,
+    "confidence": "fuzzy",
+    "vuzopedia_id": "4411",
+    "vuzopedia_name": "Мурманский филиал Российского университета кооперации"
+  },
+  "63-kubsu": {
+    "ucheba_id": "12513",
+    "matched_title": "ГГУ, Гжельский государственный университет",
+    "score": 0.865,
+    "confidence": "fuzzy",
+    "postupi_url": "https://krasnodar.postupi.online/vuz/kubgu/",
+    "postupi_confidence": "exact"
+  },
+  "630-petropavlovsk-ruc": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "631-smolensk-ruc": {
+    "ucheba_id": "68480",
+    "matched_title": "Колледж РУК, Колледж Российского университета кооперации",
+    "score": 0.812,
+    "confidence": "fuzzy"
+  },
+  "632-syktyvkar-ruc": {
+    "ucheba_id": "68480",
+    "matched_title": "Колледж РУК, Колледж Российского университета кооперации",
+    "score": 0.788,
+    "confidence": "fuzzy",
+    "vuzopedia_id": "4421",
+    "vuzopedia_name": "Сыктывкарский филиал Российского Университета Кооперации"
+  },
+  "633-ufa-ruc": {
+    "ucheba_id": "68480",
+    "matched_title": "Колледж РУК, Колледж Российского университета кооперации",
+    "score": 0.83,
+    "confidence": "fuzzy"
+  },
+  "634-engels-ruc": {
+    "ucheba_id": "68480",
+    "matched_title": "Колледж РУК, Колледж Российского университета кооперации",
+    "score": 0.763,
+    "confidence": "fuzzy"
+  },
+  "635-taganrog-sfedu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "636-nabchelny-kfu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://naberezhnye-chelny.postupi.online/vuz/naberezhnochelninskij-institut-kfu/",
+    "postupi_confidence": "exact"
+  },
+  "637-chistopol-kfu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "638-rostov-mtusi": {
+    "ucheba_id": "16475",
+    "matched_title": "Колледж телекоммуникаций МТУСИ, Колледж телекоммуникаций Московского технического университета связи и информатики",
+    "score": 0.793,
+    "confidence": "fuzzy",
+    "postupi_url": "https://rostov.postupi.online/vuz/severo-kavkasskiy-filial-mtusi/",
+    "postupi_confidence": "exact"
+  },
+  "639-nn-mtusi": {
+    "ucheba_id": "16475",
+    "matched_title": "Колледж телекоммуникаций МТУСИ, Колледж телекоммуникаций Московского технического университета связи и информатики",
+    "score": 0.8,
+    "confidence": "fuzzy",
+    "postupi_url": "https://nn.postupi.online/vuz/vvf-mtusi/",
+    "postupi_confidence": "exact"
+  },
+  "64-kubgtu": {
+    "ucheba_id": "98012",
+    "matched_title": "КарГТУ, Карагандинский государственный технический университет",
+    "score": 0.879,
+    "confidence": "fuzzy",
+    "postupi_url": "https://krasnodar.postupi.online/vuz/kubgtu/",
+    "postupi_confidence": "exact"
+  },
+  "640-usolye-irnitu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "641-bronnitsy-madi": {
+    "ucheba_id": "11859",
+    "matched_title": "Подмосковный институт (филиал) МАДИ, Подмосковный институт (филиал) Московского автомобильно-дорожного государственного технического университета",
+    "score": 0.886,
+    "confidence": "fuzzy",
+    "vuzopedia_id": "4301",
+    "vuzopedia_name": "Бронницкий филиал Московского автомобильно-дорожного государственного технического университета"
+  },
+  "642-makhachkala-madi": {
+    "ucheba_id": "11859",
+    "matched_title": "Подмосковный институт (филиал) МАДИ, Подмосковный институт (филиал) Московского автомобильно-дорожного государственного технического университета",
+    "score": 0.888,
+    "confidence": "fuzzy",
+    "vuzopedia_id": "4311",
+    "vuzopedia_name": "Махачкалинский филиал Московского автомобильно-дорожного государственного технического университета"
+  },
+  "643-chelyabinsk-madi": {
+    "ucheba_id": "11859",
+    "matched_title": "Подмосковный институт (филиал) МАДИ, Подмосковный институт (филиал) Московского автомобильно-дорожного государственного технического университета",
+    "score": 0.88,
+    "confidence": "fuzzy"
+  },
+  "644-cheboksary-madi": {
+    "ucheba_id": "11859",
+    "matched_title": "Подмосковный институт (филиал) МАДИ, Подмосковный институт (филиал) Московского автомобильно-дорожного государственного технического университета",
+    "score": 0.894,
+    "confidence": "fuzzy",
+    "vuzopedia_id": "4306",
+    "vuzopedia_name": "Волжский филиал Московского автомобильно-дорожного государственного технического университета"
+  },
+  "645-lermontov-madi": {
+    "ucheba_id": "11859",
+    "matched_title": "Подмосковный институт (филиал) МАДИ, Подмосковный институт (филиал) Московского автомобильно-дорожного государственного технического университета",
+    "score": 0.856,
+    "confidence": "fuzzy",
+    "vuzopedia_id": "4317",
+    "vuzopedia_name": "Северо-Кавказский филиал Московского автомобильно-дорожного государственного технического университета"
+  },
+  "646-irkutsk-vgik": {
+    "ucheba_id": "54702",
+    "matched_title": "Актерский факультет ВГИК, Актерский факультет Всероссийского государственного университета кинематографии имени С. А. Герасимов",
+    "score": 0.847,
+    "confidence": "fuzzy"
+  },
+  "647-rostov-vgik": {
+    "ucheba_id": "12047",
+    "matched_title": "Сергиево-Посадский филиал ВГИК, Сергиево-Посадский филиал Всероссийского государственного университета кинематографии имени С. А. Герасимова",
+    "score": 0.882,
+    "confidence": "fuzzy"
+  },
+  "648-sergievposad-vgik": {
+    "ucheba_id": "12047",
+    "matched_title": "Сергиево-Посадский филиал ВГИК, Сергиево-Посадский филиал Всероссийского государственного университета кинематографии имени С. А. Герасимова",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "649-yugorsk-leti": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "65-dstu-don": {
+    "ucheba_id": "98012",
+    "matched_title": "КарГТУ, Карагандинский государственный технический университет",
+    "score": 0.891,
+    "confidence": "fuzzy",
+    "postupi_url": "https://rostov.postupi.online/vuz/dgtu/",
+    "postupi_confidence": "exact"
+  },
+  "650-novosibirsk-kosygin": {
+    "ucheba_id": "68785",
+    "matched_title": "Институт дизайна РГУ им. А.Н. Косыгина (Технологии. Дизайн. Искусство), Институт дизайна Российского государственного университета имени А.Н. Косыгина (Технологии. Дизайн. Искусство)",
+    "score": 0.841,
+    "confidence": "fuzzy"
+  },
+  "651-samara-seminary": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "652-tula-seminary": {
+    "ucheba_id": "17831",
+    "matched_title": "Николо-Угрешская духовная семинария Русской Православной Церкви, Николо-Угрешская духовная семинария Русской Православной Церкви",
+    "score": 0.77,
+    "confidence": "fuzzy"
+  },
+  "653-saransk-seminary": {
+    "ucheba_id": "17831",
+    "matched_title": "Николо-Угрешская духовная семинария Русской Православной Церкви, Николо-Угрешская духовная семинария Русской Православной Церкви",
+    "score": 0.738,
+    "confidence": "fuzzy"
+  },
+  "654-vladikavkaz-vv": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "655-kolomna-seminary": {
+    "ucheba_id": "20477",
+    "matched_title": "КДС, Коломенская Духовная Семинария",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "656-stavropol-seminary": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://stavropol.postupi.online/vuz/stds/",
+    "postupi_confidence": "exact"
+  },
+  "657-vologda-seminary": {
+    "ucheba_id": "17831",
+    "matched_title": "Николо-Угрешская духовная семинария Русской Православной Церкви, Николо-Угрешская духовная семинария Русской Православной Церкви",
+    "score": 0.78,
+    "confidence": "fuzzy",
+    "postupi_url": "https://vologda.postupi.online/vuz/vologodskaya-duhovnaya-seminariya/",
+    "postupi_confidence": "exact"
+  },
+  "658-yaroslavl-seminary": {
+    "ucheba_id": "17831",
+    "matched_title": "Николо-Угрешская духовная семинария Русской Православной Церкви, Николо-Угрешская духовная семинария Русской Православной Церкви",
+    "score": 0.738,
+    "confidence": "fuzzy"
+  },
+  "659-tambov-seminary": {
+    "ucheba_id": "17831",
+    "matched_title": "Николо-Угрешская духовная семинария Русской Православной Церкви, Николо-Угрешская духовная семинария Русской Православной Церкви",
+    "score": 0.748,
+    "confidence": "fuzzy",
+    "postupi_url": "https://tambov.postupi.online/vuz/tamds/",
+    "postupi_confidence": "exact"
+  },
+  "66-rsue-rinh": {
+    "ucheba_id": "5871",
+    "matched_title": "МГТУ «СТАНКИН», Московский государственный технологический университет «СТАНКИН»",
+    "score": 0.824,
+    "confidence": "fuzzy",
+    "postupi_url": "https://rostov.postupi.online/vuz/rgeu-rinh/",
+    "postupi_confidence": "exact"
+  },
+  "660-vladimir-seminary": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "661-perm-seminary": {
+    "ucheba_id": "17831",
+    "matched_title": "Николо-Угрешская духовная семинария Русской Православной Церкви, Николо-Угрешская духовная семинария Русской Православной Церкви",
+    "score": 0.754,
+    "confidence": "fuzzy"
+  },
+  "662-ryazan-seminary": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "663-penza-seminary": {
+    "ucheba_id": "17831",
+    "matched_title": "Николо-Угрешская духовная семинария Русской Православной Церкви, Николо-Угрешская духовная семинария Русской Православной Церкви",
+    "score": 0.748,
+    "confidence": "fuzzy",
+    "postupi_url": "https://penza.postupi.online/vuz/penzenskaya-duhovnaya-seminariya/",
+    "postupi_confidence": "exact"
+  },
+  "664-orenburg-seminary": {
+    "ucheba_id": "17831",
+    "matched_title": "Николо-Угрешская духовная семинария Русской Православной Церкви, Николо-Угрешская духовная семинария Русской Православной Церкви",
+    "score": 0.755,
+    "confidence": "fuzzy",
+    "postupi_url": "https://orenburg.postupi.online/vuz/orenburgskaya-duhovnaya-seminariya/",
+    "postupi_confidence": "exact"
+  },
+  "665-saratov-seminary": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://saratov.postupi.online/vuz/saratovskaya-duhovnaya-seminariya/",
+    "postupi_confidence": "exact"
+  },
+  "666-kaluga-seminary": {
+    "ucheba_id": "17831",
+    "matched_title": "Николо-Угрешская духовная семинария Русской Православной Церкви, Николо-Угрешская духовная семинария Русской Православной Церкви",
+    "score": 0.788,
+    "confidence": "fuzzy",
+    "postupi_url": "https://kaluga.postupi.online/vuz/kds/",
+    "postupi_confidence": "exact"
+  },
+  "667-barnaul-seminary": {
+    "ucheba_id": "17831",
+    "matched_title": "Николо-Угрешская духовная семинария Русской Православной Церкви, Николо-Угрешская духовная семинария Русской Православной Церкви",
+    "score": 0.727,
+    "confidence": "fuzzy",
+    "postupi_url": "https://barnaul.postupi.online/vuz/barnaulskaya-duhovnaya-seminariya/",
+    "postupi_confidence": "exact"
+  },
+  "668-yakutsk-seminary": {
+    "ucheba_id": "17831",
+    "matched_title": "Николо-Угрешская духовная семинария Русской Православной Церкви, Николо-Угрешская духовная семинария Русской Православной Церкви",
+    "score": 0.785,
+    "confidence": "fuzzy"
+  },
+  "669-khabarovsk-seminary": {
+    "ucheba_id": "17831",
+    "matched_title": "Николо-Угрешская духовная семинария Русской Православной Церкви, Николо-Угрешская духовная семинария Русской Православной Церкви",
+    "score": 0.738,
+    "confidence": "fuzzy"
+  },
+  "67-dgu-makhachkala": {
+    "ucheba_id": "12513",
+    "matched_title": "ГГУ, Гжельский государственный университет",
+    "score": 0.883,
+    "confidence": "fuzzy",
+    "postupi_url": "https://mahachkala.postupi.online/vuz/dgu/",
+    "postupi_confidence": "exact"
+  },
+  "670-novokuznetsk-seminary": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "671-tomsk-seminary": {
+    "ucheba_id": "17831",
+    "matched_title": "Николо-Угрешская духовная семинария Русской Православной Церкви, Николо-Угрешская духовная семинария Русской Православной Церкви",
+    "score": 0.782,
+    "confidence": "fuzzy",
+    "postupi_url": "https://tomsk.postupi.online/vuz/tds/",
+    "postupi_confidence": "exact"
+  },
+  "672-ob-seminary": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://nsk.postupi.online/vuz/npds/",
+    "postupi_confidence": "exact"
+  },
+  "673-omsk-seminary": {
+    "ucheba_id": "17831",
+    "matched_title": "Николо-Угрешская духовная семинария Русской Православной Церкви, Николо-Угрешская духовная семинария Русской Православной Церкви",
+    "score": 0.794,
+    "confidence": "fuzzy",
+    "postupi_url": "https://omsk.postupi.online/vuz/omskaya-duhovnaya-seminariya/",
+    "postupi_confidence": "exact"
+  },
+  "674-kursk-seminary": {
+    "ucheba_id": "17831",
+    "matched_title": "Николо-Угрешская духовная семинария Русской Православной Церкви, Николо-Угрешская духовная семинария Русской Православной Церкви",
+    "score": 0.812,
+    "confidence": "fuzzy"
+  },
+  "675-voronezh-seminary": {
+    "ucheba_id": "17831",
+    "matched_title": "Николо-Угрешская духовная семинария Русской Православной Церкви, Николо-Угрешская духовная семинария Русской Православной Церкви",
+    "score": 0.766,
+    "confidence": "fuzzy",
+    "postupi_url": "https://voronezh.postupi.online/vuz/vds-ve-rpc/",
+    "postupi_confidence": "exact"
+  },
+  "676-perervinskaya-seminary": {
+    "ucheba_id": "17831",
+    "matched_title": "Николо-Угрешская духовная семинария Русской Православной Церкви, Николо-Угрешская духовная семинария Русской Православной Церкви",
+    "score": 0.869,
+    "confidence": "fuzzy",
+    "postupi_url": "https://msk.postupi.online/vuz/pds/",
+    "postupi_confidence": "exact"
+  },
+  "677-sretenskaya-academy": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "678-pechory-seminary": {
+    "ucheba_id": "17831",
+    "matched_title": "Николо-Угрешская духовная семинария Русской Православной Церкви, Николо-Угрешская духовная семинария Русской Православной Церкви",
+    "score": 0.778,
+    "confidence": "fuzzy",
+    "postupi_url": "https://pskov.postupi.online/vuz/pskovo-pecherskaya-seminariya/",
+    "postupi_confidence": "exact"
+  },
+  "679-nnovgorod-seminary": {
+    "ucheba_id": "17831",
+    "matched_title": "Николо-Угрешская духовная семинария Русской Православной Церкви, Николо-Угрешская духовная семинария Русской Православной Церкви",
+    "score": 0.745,
+    "confidence": "fuzzy"
+  },
+  "68-chesu": {
+    "ucheba_id": "1153",
+    "matched_title": "МГУ имени М.В. Ломоносова, Московский государственный университет имени М.В. Ломоносова",
+    "score": 0.769,
+    "confidence": "fuzzy",
+    "postupi_url": "https://groznij-checnya.postupi.online/vuz/chgu-groznyj/",
+    "postupi_confidence": "exact"
+  },
+  "680-kostroma-seminary": {
+    "ucheba_id": "17831",
+    "matched_title": "Николо-Угрешская духовная семинария Русской Православной Церкви, Николо-Угрешская духовная семинария Русской Православной Церкви",
+    "score": 0.766,
+    "confidence": "fuzzy"
+  },
+  "681-pogranakademia-fsb": {
+    "ucheba_id": "13782",
+    "matched_title": "Академия ФСБ России, Академия федеральной службы безопасности Российской Федерации",
+    "score": 0.91,
+    "confidence": "fuzzy"
+  },
+  "682-fso-academy": {
+    "ucheba_id": "13782",
+    "matched_title": "Академия ФСБ России, Академия федеральной службы безопасности Российской Федерации",
+    "score": 0.897,
+    "confidence": "fuzzy"
+  },
+  "683-vpvo-smolensk": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "684-varhbz-kostroma": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "685-vamto-spb": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "686-vko-tver": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "687-krasnodar-serov": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "688-syzran-aviation": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "689-chelyabinsk-navigators": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "69-kbsu": {
+    "ucheba_id": "1153",
+    "matched_title": "МГУ имени М.В. Ломоносова, Московский государственный университет имени М.В. Ломоносова",
+    "score": 0.729,
+    "confidence": "fuzzy"
+  },
+  "690-vumo-moscow": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "691-golitsyno-fsb": {
+    "ucheba_id": "24522",
+    "matched_title": "ГПИ ФСБ России, Голицынский пограничный институт ФСБ России",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "692-kaliningrad-fsb": {
+    "ucheba_id": "10639",
+    "matched_title": "МПИ ФСБ РФ, Московский пограничный институт Федеральной службы безопасности Российской Федерации",
+    "score": 0.913,
+    "confidence": "fuzzy"
+  },
+  "693-saratov-rosgvardia": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "694-novocherkassk-signals": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "695-krasnodar-shtemenko": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "696-perm-rosgvardia": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "697-spb-rosgvardia": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "698-novosibirsk-rosgvardia": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "699-khabarovsk-fsb": {
+    "ucheba_id": "10639",
+    "matched_title": "МПИ ФСБ РФ, Московский пограничный институт Федеральной службы безопасности Российской Федерации",
+    "score": 0.947,
+    "confidence": "fuzzy"
+  },
+  "70-nosu": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none"
+  },
+  "700-andriaka-academy": {
+    "ucheba_id": "25948",
+    "matched_title": "Академия акварели и изящных искусств, Академия акварели и изящных искусств Сергея Андрияки",
+    "score": 1.0,
+    "confidence": "exact"
+  },
+  "71-adygsu": {
+    "ucheba_id": "12513",
+    "matched_title": "ГГУ, Гжельский государственный университет",
+    "score": 0.907,
+    "confidence": "fuzzy",
+    "postupi_url": "https://majkop.postupi.online/vuz/agu-majkop/",
+    "postupi_confidence": "exact"
+  },
+  "72-kalmsu": {
+    "ucheba_id": "1153",
+    "matched_title": "МГУ имени М.В. Ломоносова, Московский государственный университет имени М.В. Ломоносова",
+    "score": 0.793,
+    "confidence": "fuzzy",
+    "postupi_url": "https://elista.postupi.online/vuz/kalmgu/",
+    "postupi_confidence": "exact"
+  },
+  "73-astu": {
+    "ucheba_id": "1153",
+    "matched_title": "МГУ имени М.В. Ломоносова, Московский государственный университет имени М.В. Ломоносова",
+    "score": 0.75,
+    "confidence": "fuzzy"
+  },
+  "74-bashsu": {
+    "ucheba_id": "12513",
+    "matched_title": "ГГУ, Гжельский государственный университет",
+    "score": 0.853,
+    "confidence": "fuzzy"
+  },
+  "75-uust": {
+    "ucheba_id": "5858",
+    "matched_title": "Университет МИСИС, Университет науки и технологий МИСИС",
+    "score": 0.8,
+    "confidence": "fuzzy",
+    "postupi_url": "https://ufa.postupi.online/vuz/bashgu/",
+    "postupi_confidence": "exact"
+  },
+  "76-orensu": {
+    "ucheba_id": "1153",
+    "matched_title": "МГУ имени М.В. Ломоносова, Московский государственный университет имени М.В. Ломоносова",
+    "score": 0.754,
+    "confidence": "fuzzy"
+  },
+  "77-izhstu-kalashnikov": {
+    "ucheba_id": "5832",
+    "matched_title": "МГЮА им. О.Е. Кутафина, Московский государственный юридический университет имени О.Е. Кутафина",
+    "score": 0.766,
+    "confidence": "fuzzy"
+  },
+  "78-udsu": {
+    "ucheba_id": "12513",
+    "matched_title": "ГГУ, Гжельский государственный университет",
+    "score": 0.853,
+    "confidence": "fuzzy",
+    "postupi_url": "https://izhevsk.postupi.online/vuz/udgu/",
+    "postupi_confidence": "exact"
+  },
+  "79-marsu": {
+    "ucheba_id": "12513",
+    "matched_title": "ГГУ, Гжельский государственный университет",
+    "score": 0.865,
+    "confidence": "fuzzy",
+    "postupi_url": "https://joshkar-ola.postupi.online/vuz/margu/",
+    "postupi_confidence": "exact"
+  },
+  "80-chuvsu": {
+    "ucheba_id": "1153",
+    "matched_title": "МГУ имени М.В. Ломоносова, Московский государственный университет имени М.В. Ломоносова",
+    "score": 0.821,
+    "confidence": "fuzzy",
+    "postupi_url": "https://cheboksary.postupi.online/vuz/chgu/",
+    "postupi_confidence": "exact"
+  },
+  "81-mordsu-ogarev": {
+    "ucheba_id": "5866",
+    "matched_title": "НИУ МГСУ, Национальный исследовательский Московский государственный строительный университет",
+    "score": 0.788,
+    "confidence": "fuzzy"
+  },
+  "82-unn-lobachevsky": {
+    "ucheba_id": "5866",
+    "matched_title": "НИУ МГСУ, Национальный исследовательский Московский государственный строительный университет",
+    "score": 0.73,
+    "confidence": "fuzzy"
+  },
+  "83-nntu-alekseev": {
+    "ucheba_id": "5832",
+    "matched_title": "МГЮА им. О.Е. Кутафина, Московский государственный юридический университет имени О.Е. Кутафина",
+    "score": 0.764,
+    "confidence": "fuzzy"
+  },
+  "84-ivsu": {
+    "ucheba_id": "12513",
+    "matched_title": "ГГУ, Гжельский государственный университет",
+    "score": 0.853,
+    "confidence": "fuzzy",
+    "postupi_url": "https://ivanovo.postupi.online/vuz/ivgu/",
+    "postupi_confidence": "exact"
+  },
+  "85-yarsu-demidov": {
+    "ucheba_id": "1153",
+    "matched_title": "МГУ имени М.В. Ломоносова, Московский государственный университет имени М.В. Ломоносова",
+    "score": 0.824,
+    "confidence": "fuzzy"
+  },
+  "86-kosgu": {
+    "ucheba_id": "12513",
+    "matched_title": "ГГУ, Гжельский государственный университет",
+    "score": 0.816,
+    "confidence": "fuzzy",
+    "postupi_url": "https://kostroma.postupi.online/vuz/kgu/",
+    "postupi_confidence": "exact"
+  },
+  "87-tversu": {
+    "ucheba_id": "12513",
+    "matched_title": "ГГУ, Гжельский государственный университет",
+    "score": 0.877,
+    "confidence": "fuzzy",
+    "postupi_url": "https://tver.postupi.online/vuz/tvgu/",
+    "postupi_confidence": "exact"
+  },
+  "88-smolsu": {
+    "ucheba_id": "12513",
+    "matched_title": "ГГУ, Гжельский государственный университет",
+    "score": 0.88,
+    "confidence": "fuzzy",
+    "postupi_url": "https://smolensk.postupi.online/vuz/smolgu/",
+    "postupi_confidence": "exact"
+  },
+  "89-kurskgu": {
+    "ucheba_id": "12513",
+    "matched_title": "ГГУ, Гжельский государственный университет",
+    "score": 0.889,
+    "confidence": "fuzzy",
+    "postupi_url": "https://kursk.postupi.online/vuz/kgu-kursk/",
+    "postupi_confidence": "exact"
+  },
+  "90-belgu": {
+    "ucheba_id": "5838",
+    "matched_title": "МАИ, Московский авиационный институт (национальный исследовательский университет) (МАИ)",
+    "score": 0.738,
+    "confidence": "fuzzy",
+    "postupi_url": "https://belgorod.postupi.online/vuz/belgu/",
+    "postupi_confidence": "exact"
+  },
+  "91-lgtu": {
+    "ucheba_id": "98012",
+    "matched_title": "КарГТУ, Карагандинский государственный технический университет",
+    "score": 0.863,
+    "confidence": "fuzzy",
+    "postupi_url": "https://lipeck.postupi.online/vuz/lgtu/",
+    "postupi_confidence": "exact"
+  },
+  "92-tsu-derzhavin": {
+    "ucheba_id": "1153",
+    "matched_title": "МГУ имени М.В. Ломоносова, Московский государственный университет имени М.В. Ломоносова",
+    "score": 0.773,
+    "confidence": "fuzzy"
+  },
+  "93-tulsu": {
+    "ucheba_id": "12513",
+    "matched_title": "ГГУ, Гжельский государственный университет",
+    "score": 0.932,
+    "confidence": "fuzzy",
+    "postupi_url": "https://tula.postupi.online/vuz/tulgu/",
+    "postupi_confidence": "exact"
+  },
+  "94-rsu-esenin": {
+    "ucheba_id": "1153",
+    "matched_title": "МГУ имени М.В. Ломоносова, Московский государственный университет имени М.В. Ломоносова",
+    "score": 0.759,
+    "confidence": "fuzzy"
+  },
+  "95-orelsu-turgenev": {
+    "ucheba_id": "1153",
+    "matched_title": "МГУ имени М.В. Ломоносова, Московский государственный университет имени М.В. Ломоносова",
+    "score": 0.814,
+    "confidence": "fuzzy",
+    "postupi_url": "https://orel.postupi.online/vuz/ogu-im-i-s-turgeneva/",
+    "postupi_confidence": "exact"
+  },
+  "96-brgu-petrovsky": {
+    "ucheba_id": null,
+    "matched_title": null,
+    "score": 0.0,
+    "confidence": "none",
+    "postupi_url": "https://bryansk.postupi.online/vuz/bgu-petrovskogo/",
+    "postupi_confidence": "exact"
+  },
+  "97-mau-murmansk": {
+    "ucheba_id": "109289",
+    "matched_title": "Херсонский технический университет, Херсонский технический университет",
+    "score": 0.794,
+    "confidence": "fuzzy",
+    "postupi_url": "https://murmansk.postupi.online/vuz/murmanskiy-arkticheskiy-gosudarstvennyy-universitet/",
+    "postupi_confidence": "exact"
+  },
+  "98-petrsu": {
+    "ucheba_id": "12513",
+    "matched_title": "ГГУ, Гжельский государственный университет",
+    "score": 0.835,
+    "confidence": "fuzzy",
+    "postupi_url": "https://petrozavodsk.postupi.online/vuz/petrgu/",
+    "postupi_confidence": "exact"
+  },
+  "99-pskovgu": {
+    "ucheba_id": "12513",
+    "matched_title": "ГГУ, Гжельский государственный университет",
+    "score": 0.865,
+    "confidence": "fuzzy",
+    "postupi_url": "https://pskov.postupi.online/vuz/pskovgu/",
+    "postupi_confidence": "exact"
+  }
+}

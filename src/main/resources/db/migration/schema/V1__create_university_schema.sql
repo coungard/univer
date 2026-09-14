@@ -13,7 +13,9 @@ CREATE TABLE address (
     city VARCHAR(100) NOT NULL,
     street TEXT NOT NULL,
     phone_fax VARCHAR(50),
-    email VARCHAR(255) NOT NULL,
+    -- Не NOT NULL: не у каждого вуза в explore/*.md (issue #73) есть подтверждённый email --
+    -- выдумывать его нельзя, см. scripts/README.md.
+    email VARCHAR(255),
     website VARCHAR(255)
 );
 

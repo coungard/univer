@@ -21,7 +21,6 @@ import com.coungard.univer.repository.StudentRepository;
 import com.coungard.univer.repository.TeacherRepository;
 import com.coungard.univer.repository.WeekScheduleCycleRepository;
 import com.coungard.univer.service.PairService;
-import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.List;
@@ -37,9 +36,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class PairServiceImpl implements PairService {
-
-  private static final Set<DayOfWeek> WEEKDAYS = Set.of(
-      DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.FRIDAY);
 
   private final PairRepository pairRepository;
   private final WeekScheduleCycleRepository weekScheduleCycleRepository;
@@ -242,11 +238,6 @@ public class PairServiceImpl implements PairService {
    * ничего не форсирует совпадение, если время задано явно.
    */
   private ResolvedSchedule resolveSchedule(PairDto pairDto, Course course) {
-    if (!WEEKDAYS.contains(pairDto.dayOfWeek())) {
-      throw new ValidationException(
-          "День недели должен быть с понедельника по пятницу, получено: " + pairDto.dayOfWeek());
-    }
-
     LocalTime startTime = pairDto.startTime();
     LocalTime endTime = pairDto.endTime();
     if (startTime == null || endTime == null) {

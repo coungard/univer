@@ -129,13 +129,74 @@ class UniversityServiceTest {
 
     // When
     Pageable pageable = PageRequest.of(0, 10);
-    Page<UniversityDto> all = universityService.getUniversities(pageable);
+    Page<UniversityDto> all = universityService.getUniversities(null, pageable);
 
     // Then
     assertThat(all.getContent()).hasSize(2);
     assertThat(all.getContent())
         .extracting(UniversityDto::name)
         .containsExactlyInAnyOrder("Harvard", "Oxford");
+  }
+
+  @Test
+  @DisplayName("Поиск университетов по подстроке в названии, без учёта регистра")
+  void shouldSearchUniversitiesByNameSubstring() {
+    // Given
+    UniversityDto harvardDto = UniversityDto.builder()
+        .name("Harvard University")
+        .description("Harvard University")
+        .address(AddressDto.builder()
+            .country("USA")
+            .address("USA")
+            .email("usa.gmail.com")
+            .website("usa.edu")
+            .region("Texas")
+            .city("Cambridge")
+            .street("Harvard Yard")
+            .build())
+        .build();
+
+    UniversityDto oxfordDto = UniversityDto.builder()
+        .name("Oxford University")
+        .description("University of Oxford")
+        .address(AddressDto.builder()
+            .country("UK")
+            .address("USA")
+            .email("usa.gmail.com")
+            .website("usa.edu")
+            .region("Texas")
+            .city("Oxford")
+            .street("High Street")
+            .build())
+        .build();
+
+    UniversityDto mitDto = UniversityDto.builder()
+        .name("MIT")
+        .description("Massachusetts Institute of Technology")
+        .address(AddressDto.builder()
+            .country("USA")
+            .address("USA")
+            .email("usa.gmail.com")
+            .website("usa.edu")
+            .region("Massachusetts")
+            .city("Cambridge")
+            .street("MIT Street, 1")
+            .build())
+        .build();
+
+    universityService.createUniversity(harvardDto);
+    universityService.createUniversity(oxfordDto);
+    universityService.createUniversity(mitDto);
+
+    // When
+    Pageable pageable = PageRequest.of(0, 10);
+    Page<UniversityDto> found = universityService.getUniversities("UniVer", pageable);
+
+    // Then
+    assertThat(found.getContent()).hasSize(2);
+    assertThat(found.getContent())
+        .extracting(UniversityDto::name)
+        .containsExactlyInAnyOrder("Harvard University", "Oxford University");
   }
 
   @Test
