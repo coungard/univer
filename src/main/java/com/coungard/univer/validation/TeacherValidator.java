@@ -22,7 +22,7 @@ public class TeacherValidator {
   public void validateRegisterTeacher(RegisterTeacherRequest registerDto) {
 
     UUID departmentId = registerDto.getDepartmentId();
-    if (!departmentRepository.existsById(departmentId)) {
+    if (departmentId != null && !departmentRepository.existsById(departmentId)) {
       throw new ResourceNotFoundException("Кафедра с ID " + departmentId + " не найдена");
     }
 

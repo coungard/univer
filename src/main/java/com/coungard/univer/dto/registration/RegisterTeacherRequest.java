@@ -3,6 +3,8 @@ package com.coungard.univer.dto.registration;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
+import java.time.LocalDate;
 import java.util.UUID;
 import lombok.Builder;
 import lombok.Data;
@@ -29,8 +31,11 @@ public class RegisterTeacherRequest {
   @NotBlank(message = "Email обязателен")
   String email;
 
-  @NotNull(message = "ID кафедры обязателен")
   UUID departmentId;
+
+  @NotNull(message = "Дата рождения обязательна")
+  @PastOrPresent(message = "Дата рождения не может быть в будущем")
+  LocalDate birthday;
 
   @NotBlank(message = "Должность должна быть указана")
   String position;

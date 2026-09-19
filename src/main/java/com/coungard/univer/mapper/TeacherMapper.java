@@ -21,7 +21,8 @@ public class TeacherMapper {
         .lastname(teacher.getPerson().getLastname())
         .fullname(teacher.getPerson().getFullname())
         .phone(teacher.getPerson().getPhone())
-        .facultyId(teacher.getFaculty().getId())
+        .birthday(teacher.getPerson().getBirthday())
+        .facultyId(teacher.getFaculty() != null ? teacher.getFaculty().getId() : null)
         .position(teacher.getPosition())
         .registered(teacher.isRegistered())
         .createdAt(teacher.getCreatedAt())
@@ -37,6 +38,7 @@ public class TeacherMapper {
     person.setLastname(request.getLastname());
     person.setFullname(request.getFullname());
     person.setEmail(request.getEmail());
+    person.setBirthday(request.getBirthday());
 
     Teacher teacher = new Teacher();
     teacher.setPosition(request.getPosition());

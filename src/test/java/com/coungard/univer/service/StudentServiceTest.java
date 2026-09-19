@@ -122,6 +122,7 @@ class StudentServiceTest {
         "ivan@example.com",
         "password123",
         LocalDate.now().minusYears(1),
+        LocalDate.now().minusYears(20),
         universityId
     );
 

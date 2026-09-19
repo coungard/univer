@@ -53,9 +53,14 @@ public class TeacherServiceImpl implements TeacherService {
   public TeacherDto registerTeacher(RegisterTeacherRequest request) {
     teacherValidator.validateRegisterTeacher(request);
 
-    Department department = departmentRepository.findById(request.getDepartmentId())
-        .orElseThrow(() -> new ResourceNotFoundException("Department not found"));
-    Faculty faculty = department.getFaculty();
+    // Кафедра на регистрации больше не выбирается (см. issue #79) — назначается позже отдельно,
+    // через PUT /teachers/{id}.
+    Faculty faculty = null;
+    if (request.getDepartmentId() != null) {
+      Department department = departmentRepository.findById(request.getDepartmentId())
+          .orElseThrow(() -> new ResourceNotFoundException("Department not found"));
+      faculty = department.getFaculty();
+    }
 
     String keycloakId = keycloakAdminService.createUser(RegisterData.builder()
         .username(request.getUsername())
@@ -97,6 +102,7 @@ public class TeacherServiceImpl implements TeacherService {
     person.setFullname(teacherDto.fullname());
     person.setEmail(teacherDto.email());
     person.setPhone(teacherDto.phone());
+    person.setBirthday(teacherDto.birthday());
 
     teacher.setPerson(person);
 
@@ -116,6 +122,7 @@ public class TeacherServiceImpl implements TeacherService {
     teacher.getPerson().setLastname(teacherDto.lastname());
     teacher.getPerson().setFullname(teacherDto.fullname());
     teacher.getPerson().setEmail(teacherDto.email());
+    teacher.getPerson().setBirthday(teacherDto.birthday());
     teacher.setFaculty(faculty);
 
     Teacher updated = teacherRepository.save(teacher);

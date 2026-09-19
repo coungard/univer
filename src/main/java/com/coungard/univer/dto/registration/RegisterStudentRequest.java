@@ -28,9 +28,12 @@ public record RegisterStudentRequest(
         @NotNull(message = "Пароль обязателен")
         String password,
 
-        @NotNull(message = "Дата зачисления обязательна")
         @PastOrPresent(message = "Дата зачисления не может быть в будущем")
         LocalDate enrollmentDate,
+
+        @NotNull(message = "Дата рождения обязательна")
+        @PastOrPresent(message = "Дата рождения не может быть в будущем")
+        LocalDate birthday,
 
         @NotNull(message = "ID университета обязателен")
         UUID universityId

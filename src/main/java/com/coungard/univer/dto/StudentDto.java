@@ -32,9 +32,11 @@ public record StudentDto(
         @NotBlank(message = "Email обязателен")
         String email,
 
-        @NotNull(message = "Дата зачисления обязательна")
         @PastOrPresent(message = "Дата зачисления не может быть в будущем")
         LocalDate enrollmentDate,
+
+        @PastOrPresent(message = "Дата рождения не может быть в будущем")
+        LocalDate birthday,
 
         @NotNull(message = "ID университета обязателен")
         UUID universityId,

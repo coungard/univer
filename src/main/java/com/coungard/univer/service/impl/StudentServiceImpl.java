@@ -85,6 +85,7 @@ public class StudentServiceImpl implements StudentService {
       person.setLastname(registerStudentRequest.lastname());
       person.setFullname(registerStudentRequest.fullname());
       person.setEmail(registerStudentRequest.email());
+      person.setBirthday(registerStudentRequest.birthday());
 
       student.setPerson(person);
 
@@ -116,6 +117,7 @@ public class StudentServiceImpl implements StudentService {
     existing.getPerson().setLastname(studentDto.lastname());
     existing.getPerson().setFullname(studentDto.fullname());
     existing.getPerson().setEmail(studentDto.email());
+    existing.getPerson().setBirthday(studentDto.birthday());
     existing.setEnrollmentDate(studentDto.enrollmentDate());
 
     University university = universityRepository.findById(studentDto.universityId())

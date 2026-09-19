@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.UUID;
 import lombok.Builder;
 
@@ -26,6 +27,8 @@ public record TeacherDto(
     String email,
 
     String phone,
+
+    LocalDate birthday,
 
     Instant createdAt,
     Instant updatedAt,

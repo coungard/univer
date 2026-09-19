@@ -47,7 +47,7 @@ public class Student implements Auditable {
   @Column(name = "updated_at")
   private Instant updatedAt;
 
-  @Column(name = "enrollment_date", nullable = false)
+  @Column(name = "enrollment_date")
   private LocalDate enrollmentDate;
 
   @ManyToOne(fetch = FetchType.LAZY)

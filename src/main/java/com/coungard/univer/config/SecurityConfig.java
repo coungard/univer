@@ -38,10 +38,12 @@ public class SecurityConfig {
             // 🔥 Добавляем публичный доступ к регистрации
             .requestMatchers("/api/v1/students/register").permitAll()
             .requestMatchers("/api/v1/teachers/register").permitAll()
-            // Экран регистрации ещё не имеет токена, но должен дать выбрать университет
-            // (RegisterStudentRequest.universityId) / кафедру (RegisterTeacherRequest.departmentId)
-            // — без этого регистрация в принципе невозможна: курица и яйцо (нужен токен, чтобы
-            // получить список для формы, которая этот токен и выдаёт).
+            // Экран регистрации студента ещё не имеет токена, но должен дать выбрать университет
+            // (RegisterStudentRequest.universityId) — без этого регистрация в принципе невозможна:
+            // курица и яйцо (нужен токен, чтобы получить список для формы, которая этот токен и
+            // выдаёт). Факультеты/кафедры остаются публичными для чтения по той же исходной причине
+            // (раньше — выбор кафедры на регистрации преподавателя, issue #79 убрал его оттуда), а
+            // также потому что на них ссылаются списки курсов (Course.departmentId).
             .requestMatchers(HttpMethod.GET,
                 "/api/v1/universities", "/api/v1/universities/**",
                 "/api/v1/faculties/**",
