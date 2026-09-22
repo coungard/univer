@@ -40,12 +40,12 @@
     {
       "clientId": "univer-mobile",
       "name": "University Mobile Client",
-      "description": "Публичный клиент для мобильного приложения (Authorization Code + PKCE)",
+      "description": "Публичный клиент для мобильного приложения (Authorization Code + PKCE для входа; Resource Owner Password Credentials — только для автологина сразу после регистрации, с уже введённым в форме паролем)",
       "protocol": "openid-connect",
       "enabled": true,
       "publicClient": true,
       "standardFlowEnabled": true,
-      "directAccessGrantsEnabled": false,
+      "directAccessGrantsEnabled": true,
       "serviceAccountsEnabled": false,
       "authorizationServicesEnabled": false,
       "redirectUris": [
