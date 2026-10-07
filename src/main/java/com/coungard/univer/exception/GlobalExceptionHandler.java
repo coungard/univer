@@ -39,6 +39,19 @@ public class GlobalExceptionHandler {
     return new ResponseEntity<>(body, HttpStatus.UNPROCESSABLE_ENTITY);
   }
 
+  @ExceptionHandler(ConflictException.class)
+  public ResponseEntity<Object> handleConflict(ConflictException ex) {
+    Map<String, Object> body = new LinkedHashMap<>();
+    body.put("timestamp", LocalDateTime.now());
+    body.put("status", HttpStatus.CONFLICT.value());
+    body.put("error", "Conflict");
+    body.put("message", ex.getMessage());
+    body.put("field", ex.getField());
+    body.put("path", "/");
+
+    return new ResponseEntity<>(body, HttpStatus.CONFLICT);
+  }
+
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<Map<String, String>> handleValidationExceptions(
       MethodArgumentNotValidException ex) {

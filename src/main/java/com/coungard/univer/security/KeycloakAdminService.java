@@ -2,6 +2,7 @@ package com.coungard.univer.security;
 
 import com.coungard.univer.config.KeycloakConfig;
 import com.coungard.univer.dto.registration.RegisterData;
+import com.coungard.univer.exception.ConflictException;
 import java.util.List;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
@@ -36,6 +37,21 @@ public class KeycloakAdminService {
     user.setCredentials(List.of(credential));
 
     var response = keycloak.realm(keycloakConfig.getRealm()).users().create(user);
+    if (response.getStatus() == 409) {
+      // Локальная проверка занятости смотрит только свою таблицу (студенты или преподаватели), а в
+      // Keycloak логин и email общие — например, преподаватель с email уже существующего студента.
+      // Keycloak отвечает {"errorMessage":"User exists with same username"} либо "...same email".
+      String error = response.readEntity(String.class);
+      if (error != null && error.contains("username")) {
+        throw new ConflictException("username", "Пользователь с таким логином уже существует: "
+            + registerData.username());
+      }
+      if (error != null && error.contains("email")) {
+        throw new ConflictException("email", "Пользователь с таким email уже существует: "
+            + registerData.email());
+      }
+      throw new ConflictException(null, "Пользователь с таким логином или email уже существует");
+    }
     String locationHeader = response.getLocation().toString();
     return locationHeader.substring(locationHeader.lastIndexOf("/") + 1);
   }

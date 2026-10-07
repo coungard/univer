@@ -1,8 +1,8 @@
 package com.coungard.univer.validation;
 
 import com.coungard.univer.dto.registration.RegisterTeacherRequest;
+import com.coungard.univer.exception.ConflictException;
 import com.coungard.univer.exception.ResourceNotFoundException;
-import com.coungard.univer.exception.ValidationException;
 import com.coungard.univer.repository.DepartmentRepository;
 import com.coungard.univer.repository.TeacherRepository;
 import java.util.UUID;
@@ -27,11 +27,12 @@ public class TeacherValidator {
     }
 
     if (teacherRepository.existsByPersonEmail(registerDto.getEmail())) {
-      throw new ValidationException("Преподаватель с таким email уже существует: " + registerDto.getEmail());
+      throw new ConflictException("email", "Преподаватель с таким email уже существует: " + registerDto.getEmail());
     }
 
     if (teacherRepository.existsByPersonUsername(registerDto.getUsername())) {
-      throw new ValidationException("Преподаватель с таким логином уже существует: " + registerDto.getUsername());
+      throw new ConflictException("username",
+          "Преподаватель с таким логином уже существует: " + registerDto.getUsername());
     }
   }
 }

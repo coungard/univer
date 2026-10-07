@@ -1,8 +1,8 @@
 package com.coungard.univer.validation;
 
 import com.coungard.univer.dto.registration.RegisterStudentRequest;
+import com.coungard.univer.exception.ConflictException;
 import com.coungard.univer.exception.ResourceNotFoundException;
-import com.coungard.univer.exception.ValidationException;
 import com.coungard.univer.repository.StudentRepository;
 import com.coungard.univer.repository.UniversityRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,12 +26,12 @@ public class StudentValidator {
 
     // Проверка уникальности email
     if (registerDto.email() != null && studentRepository.existsByPersonEmail(registerDto.email())) {
-      throw new ValidationException("Студент с таким email уже существует: " + registerDto.email());
+      throw new ConflictException("email", "Студент с таким email уже существует: " + registerDto.email());
     }
 
     // Проверка уникальности username
     if (registerDto.username() != null && studentRepository.existsByPersonUsername(registerDto.username())) {
-      throw new ValidationException("Студент с таким логином уже существует: " + registerDto.username());
+      throw new ConflictException("username", "Студент с таким логином уже существует: " + registerDto.username());
     }
   }
 }

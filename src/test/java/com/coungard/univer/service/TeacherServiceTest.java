@@ -18,6 +18,7 @@ import com.coungard.univer.entity.Person;
 import com.coungard.univer.entity.Teacher;
 import com.coungard.univer.entity.University;
 import com.coungard.univer.exception.ResourceNotFoundException;
+import com.coungard.univer.exception.ConflictException;
 import com.coungard.univer.exception.ValidationException;
 import com.coungard.univer.repository.DepartmentRepository;
 import com.coungard.univer.repository.FacultyRepository;
@@ -319,6 +320,27 @@ class TeacherServiceTest {
 
     assertThatThrownBy(() -> teacherService.registerTeacher(request))
         .isInstanceOf(ResourceNotFoundException.class);
+  }
+
+  @Test
+  void shouldReportTakenEmailAndUsernameAsConflictWithField() {
+    createTestTeacher("ivanov", "Иван", "Иванов", "ivanov@example.com");
+
+    assertThatThrownBy(() -> teacherService.registerTeacher(registerRequest("petrov", "ivanov@example.com")))
+        .isInstanceOfSatisfying(ConflictException.class, ex -> assertThat(ex.getField()).isEqualTo("email"));
+    assertThatThrownBy(() -> teacherService.registerTeacher(registerRequest("ivanov", "petrov@example.com")))
+        .isInstanceOfSatisfying(ConflictException.class, ex -> assertThat(ex.getField()).isEqualTo("username"));
+  }
+
+  private RegisterTeacherRequest registerRequest(String username, String email) {
+    return RegisterTeacherRequest.builder()
+        .username(username)
+        .firstname("Пётр")
+        .lastname("Петров")
+        .password("password123")
+        .email(email)
+        .position("Доцент")
+        .build();
   }
 
   @Test

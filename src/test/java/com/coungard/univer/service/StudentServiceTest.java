@@ -22,6 +22,7 @@ import com.coungard.univer.entity.Semester;
 import com.coungard.univer.entity.Student;
 import com.coungard.univer.entity.StudyYear;
 import com.coungard.univer.entity.University;
+import com.coungard.univer.exception.ConflictException;
 import com.coungard.univer.exception.ResourceNotFoundException;
 import com.coungard.univer.repository.FacultyRepository;
 import com.coungard.univer.repository.GroupRepository;
@@ -190,6 +191,40 @@ class StudentServiceTest {
 
     verify(keycloakAdminService).deleteUser(mockKeycloakId);
     assertThat(studentRepository.findById(UUID.fromString(mockKeycloakId))).isEmpty();
+  }
+
+  @Test
+  void shouldReportTakenEmailAndUsernameAsConflictWithField() {
+    createTestStudent("ivan", "Иван", "Иванов", LocalDate.of(2023, 9, 1));
+
+    assertThatThrownBy(() -> studentService.registerStudent(registerRequest("petr", "иван.иванов@test.com")))
+        .isInstanceOfSatisfying(ConflictException.class, ex -> assertThat(ex.getField()).isEqualTo("email"));
+    assertThatThrownBy(() -> studentService.registerStudent(registerRequest("ivan", "petr@example.com")))
+        .isInstanceOfSatisfying(ConflictException.class, ex -> assertThat(ex.getField()).isEqualTo("username"));
+  }
+
+  @Test
+  void shouldPassThroughConflictReportedByKeycloak() {
+    // Логин свободен среди студентов, но занят в Keycloak (например, преподавателем)
+    when(keycloakAdminService.createUser(any(RegisterData.class)))
+        .thenThrow(new ConflictException("username", "Пользователь с таким логином уже существует: petr"));
+
+    assertThatThrownBy(() -> studentService.registerStudent(registerRequest("petr", "petr@example.com")))
+        .isInstanceOfSatisfying(ConflictException.class, ex -> assertThat(ex.getField()).isEqualTo("username"));
+  }
+
+  private RegisterStudentRequest registerRequest(String username, String email) {
+    return new RegisterStudentRequest(
+        username,
+        "Пётр",
+        "Петров",
+        null,
+        email,
+        "password123",
+        null,
+        LocalDate.now().minusYears(20),
+        universityId
+    );
   }
 
   @Test

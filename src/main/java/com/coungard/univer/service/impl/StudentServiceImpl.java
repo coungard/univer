@@ -8,6 +8,7 @@ import com.coungard.univer.entity.Group;
 import com.coungard.univer.entity.Person;
 import com.coungard.univer.entity.Student;
 import com.coungard.univer.entity.University;
+import com.coungard.univer.exception.ConflictException;
 import com.coungard.univer.exception.ResourceNotFoundException;
 import com.coungard.univer.repository.GroupRepository;
 import com.coungard.univer.repository.StudentRepository;
@@ -97,6 +98,9 @@ public class StudentServiceImpl implements StudentService {
       // коммита транзакции — уже за пределами этого try, и откат пользователя в Keycloak не срабатывает
       Student saved = studentRepository.saveAndFlush(student);
       return studentMapper.toDto(saved);
+    } catch (ConflictException ex) {
+      // Логин или email занят в Keycloak: пользователь не создан, откатывать нечего — отдаём 409 как есть
+      throw ex;
     } catch (Exception ex) {
       log.error(ex.getMessage(), ex);
       // Откат: если Keycloak-пользователь был создан, но БД упала
