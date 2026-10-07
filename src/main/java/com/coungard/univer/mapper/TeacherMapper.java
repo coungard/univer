@@ -5,6 +5,7 @@ import com.coungard.univer.dto.registration.RegisterTeacherRequest;
 import com.coungard.univer.entity.Person;
 import com.coungard.univer.entity.Teacher;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 @Component
 public class TeacherMapper {
@@ -36,7 +37,10 @@ public class TeacherMapper {
     person.setUsername(request.getUsername().toLowerCase());
     person.setFirstname(request.getFirstname());
     person.setLastname(request.getLastname());
-    person.setFullname(request.getFullname());
+    // fullname необязателен в запросе, но обязателен в БД (persons.fullname NOT NULL)
+    person.setFullname(StringUtils.hasText(request.getFullname())
+        ? request.getFullname()
+        : request.getLastname() + " " + request.getFirstname());
     person.setEmail(request.getEmail());
     person.setBirthday(request.getBirthday());
 

@@ -143,6 +143,50 @@ class StudentServiceTest {
   }
 
   @Test
+  void shouldBuildFullnameFromLastnameAndFirstnameWhenNotProvided() {
+    String mockKeycloakId = UUID.randomUUID().toString();
+    RegisterStudentRequest registerDto = new RegisterStudentRequest(
+        "ivan",
+        "Иван",
+        "Иванов",
+        null,
+        "ivan@example.com",
+        "password123",
+        null,
+        LocalDate.now().minusYears(20),
+        universityId
+    );
+    when(keycloakAdminService.createUser(any(RegisterData.class))).thenReturn(mockKeycloakId);
+
+    StudentDto registered = studentService.registerStudent(registerDto);
+
+    assertThat(registered.fullname()).isEqualTo("Иванов Иван");
+  }
+
+  @Test
+  void shouldDeleteKeycloakUserWhenStudentCannotBeSaved() {
+    String mockKeycloakId = UUID.randomUUID().toString();
+    RegisterStudentRequest registerDto = new RegisterStudentRequest(
+        "ivan",
+        "И".repeat(300), // не помещается в колонку — БД отклоняет INSERT
+        "Иванов",
+        "Иванов Иван",
+        "ivan@example.com",
+        "password123",
+        null,
+        LocalDate.now().minusYears(20),
+        universityId
+    );
+    when(keycloakAdminService.createUser(any(RegisterData.class))).thenReturn(mockKeycloakId);
+
+    assertThatThrownBy(() -> studentService.registerStudent(registerDto))
+        .isInstanceOf(RuntimeException.class);
+
+    verify(keycloakAdminService).deleteUser(mockKeycloakId);
+    assertThat(studentRepository.findById(UUID.fromString(mockKeycloakId))).isEmpty();
+  }
+
+  @Test
   void shouldGetStudentsWithPaginationAndFiltering() {
     // Given
     createTestStudent("anna", "Анна", "Смирнова", LocalDate.of(2023, 9, 1));

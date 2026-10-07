@@ -315,6 +315,44 @@ class TeacherServiceTest {
         .isInstanceOf(ResourceNotFoundException.class);
   }
 
+  @Test
+  void shouldBuildFullnameFromLastnameAndFirstnameWhenNotProvided() {
+    String mockKeycloakId = UUID.randomUUID().toString();
+    RegisterTeacherRequest request = RegisterTeacherRequest.builder()
+        .username("newteacher")
+        .firstname("Новый")
+        .lastname("Преподаватель")
+        .password("password123")
+        .email("newteacher@example.com")
+        .position("Доцент")
+        .build();
+    when(keycloakAdminService.createUser(any(RegisterData.class))).thenReturn(mockKeycloakId);
+
+    TeacherDto registered = teacherService.registerTeacher(request);
+
+    assertThat(registered.fullname()).isEqualTo("Преподаватель Новый");
+  }
+
+  @Test
+  void shouldDeleteKeycloakUserWhenTeacherCannotBeSaved() {
+    String mockKeycloakId = UUID.randomUUID().toString();
+    RegisterTeacherRequest request = RegisterTeacherRequest.builder()
+        .username("newteacher")
+        .firstname("Н".repeat(300)) // не помещается в колонку — БД отклоняет INSERT
+        .lastname("Преподаватель")
+        .password("password123")
+        .email("newteacher@example.com")
+        .position("Доцент")
+        .build();
+    when(keycloakAdminService.createUser(any(RegisterData.class))).thenReturn(mockKeycloakId);
+
+    assertThatThrownBy(() -> teacherService.registerTeacher(request))
+        .isInstanceOf(RuntimeException.class);
+
+    verify(keycloakAdminService).deleteUser(mockKeycloakId);
+    assertThat(teacherRepository.findById(UUID.fromString(mockKeycloakId))).isEmpty();
+  }
+
   // === Вспомогательные методы ===
 
   private TeacherDto createTestTeacher(String username, String firstName, String lastName, String email) {

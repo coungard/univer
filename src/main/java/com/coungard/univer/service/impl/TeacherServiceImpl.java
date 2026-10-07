@@ -19,11 +19,13 @@ import com.coungard.univer.service.TeacherService;
 import com.coungard.univer.validation.TeacherValidator;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -69,15 +71,30 @@ public class TeacherServiceImpl implements TeacherService {
         .firstname(request.getFirstname())
         .lastname(request.getLastname())
         .build());
-    keycloakAdminService.assignRole(keycloakId, Role.ROLE_TEACHER);
+    try {
+      keycloakAdminService.assignRole(keycloakId, Role.ROLE_TEACHER);
 
-    Teacher teacher = teacherMapper.fromRegisterToEntity(request);
-    teacher.setFaculty(faculty);
-    teacher.setRegistered(true); // Устанавливаем флаг зарегистрированности
-    teacher.setId(UUID.fromString(keycloakId)); // Используем Keycloak ID как ID студента
+      Teacher teacher = teacherMapper.fromRegisterToEntity(request);
+      teacher.setFaculty(faculty);
+      teacher.setRegistered(true); // Устанавливаем флаг зарегистрированности
+      teacher.setId(UUID.fromString(keycloakId)); // Используем Keycloak ID как ID студента
 
-    Teacher saved = teacherRepository.save(teacher);
-    return teacherMapper.toDto(saved);
+      // saveAndFlush, а не save: у преподавателя заранее заданный ID, поэтому INSERT иначе
+      // откладывается до коммита транзакции — уже за пределами этого try
+      Teacher saved = teacherRepository.saveAndFlush(teacher);
+      return teacherMapper.toDto(saved);
+    } catch (Exception ex) {
+      log.error(ex.getMessage(), ex);
+      // Откат: пользователь в Keycloak уже создан, но роль или запись в БД не удались
+      try {
+        keycloakAdminService.deleteUser(keycloakId);
+        log.info("Пользователь в Keycloak удалён после сбоя регистрации: " + keycloakId);
+      } catch (Exception cleanupEx) {
+        log.warn("Не удалось удалить пользователя в Keycloak: " + keycloakId);
+        log.error(cleanupEx.getMessage(), cleanupEx);
+      }
+      throw ex;
+    }
   }
 
   @Override

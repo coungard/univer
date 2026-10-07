@@ -23,6 +23,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 @Slf4j
 @Service
@@ -83,13 +84,18 @@ public class StudentServiceImpl implements StudentService {
       person.setUsername(registerStudentRequest.username().toLowerCase());
       person.setFirstname(registerStudentRequest.firstname());
       person.setLastname(registerStudentRequest.lastname());
-      person.setFullname(registerStudentRequest.fullname());
+      // fullname необязателен в запросе, но обязателен в БД (persons.fullname NOT NULL)
+      person.setFullname(StringUtils.hasText(registerStudentRequest.fullname())
+          ? registerStudentRequest.fullname()
+          : registerStudentRequest.lastname() + " " + registerStudentRequest.firstname());
       person.setEmail(registerStudentRequest.email());
       person.setBirthday(registerStudentRequest.birthday());
 
       student.setPerson(person);
 
-      Student saved = studentRepository.save(student);
+      // saveAndFlush, а не save: у студента заранее заданный ID, поэтому INSERT иначе откладывается до
+      // коммита транзакции — уже за пределами этого try, и откат пользователя в Keycloak не срабатывает
+      Student saved = studentRepository.saveAndFlush(student);
       return studentMapper.toDto(saved);
     } catch (Exception ex) {
       log.error(ex.getMessage(), ex);
