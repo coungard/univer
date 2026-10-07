@@ -41,15 +41,17 @@ public class UniversityController {
   private final UniversityService universityService;
 
   @GetMapping
-  @Operation(summary = "Получить университеты с пагинацией и опциональным поиском по названию")
+  @Operation(summary = "Получить университеты с пагинацией, опциональным поиском по названию и фильтром по региону")
   public ResponseEntity<Page<UniversityDto>> getUniversities(
       @Parameter(description = "Регистронезависимая подстрока для поиска по названию университета")
       @RequestParam(required = false) String search,
+      @Parameter(description = "ID региона (см. GET /api/v1/regions); без него — университеты всех регионов")
+      @RequestParam(required = false) UUID regionId,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "10") int size) {
 
     Pageable pageable = PageRequest.of(page, size);
-    Page<UniversityDto> universities = universityService.getUniversities(search, pageable);
+    Page<UniversityDto> universities = universityService.getUniversities(search, regionId, pageable);
     return ResponseEntity.ok(universities);
   }
 

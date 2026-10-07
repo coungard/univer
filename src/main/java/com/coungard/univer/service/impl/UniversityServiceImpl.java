@@ -2,10 +2,12 @@ package com.coungard.univer.service.impl;
 
 import com.coungard.univer.dto.UniversityDto;
 import com.coungard.univer.entity.Address;
+import com.coungard.univer.entity.Region;
 import com.coungard.univer.entity.University;
 import com.coungard.univer.exception.ResourceNotFoundException;
 import com.coungard.univer.mapper.UniversityMapper;
 import com.coungard.univer.repository.AddressRepository;
+import com.coungard.univer.repository.RegionRepository;
 import com.coungard.univer.repository.UniversityRepository;
 import com.coungard.univer.service.UniversityService;
 import java.util.UUID;
@@ -22,14 +24,23 @@ public class UniversityServiceImpl implements UniversityService {
 
   private final UniversityRepository universityRepository;
   private final AddressRepository addressRepository;
+  private final RegionRepository regionRepository;
   private final UniversityMapper universityMapper;
 
   @Override
   @Transactional(readOnly = true)
-  public Page<UniversityDto> getUniversities(String search, Pageable pageable) {
-    Page<University> page = StringUtils.hasText(search)
-        ? universityRepository.findByNameContainingIgnoreCase(search.trim(), pageable)
-        : universityRepository.findAll(pageable);
+  public Page<UniversityDto> getUniversities(String search, UUID regionId, Pageable pageable) {
+    boolean hasSearch = StringUtils.hasText(search);
+    Page<University> page;
+    if (regionId != null) {
+      page = hasSearch
+          ? universityRepository.findByNameContainingIgnoreCaseAndRegionId(search.trim(), regionId, pageable)
+          : universityRepository.findByRegionId(regionId, pageable);
+    } else {
+      page = hasSearch
+          ? universityRepository.findByNameContainingIgnoreCase(search.trim(), pageable)
+          : universityRepository.findAll(pageable);
+    }
     return page.map(universityMapper::toDto);
   }
 
@@ -45,6 +56,7 @@ public class UniversityServiceImpl implements UniversityService {
   @Transactional
   public UniversityDto createUniversity(UniversityDto universityDto) {
     University university = universityMapper.toEntity(universityDto);
+    university.setRegion(findRegion(universityDto.regionId()));
 
     University saved = universityRepository.save(university);
     return universityMapper.toDto(saved);
@@ -74,9 +86,18 @@ public class UniversityServiceImpl implements UniversityService {
       }
     }
     existing.setAddress(address);
+    existing.setRegion(findRegion(universityDto.regionId()));
 
     University saved = universityRepository.save(existing);
     return universityMapper.toDto(saved);
+  }
+
+  private Region findRegion(UUID regionId) {
+    if (regionId == null) {
+      return null;
+    }
+    return regionRepository.findById(regionId)
+        .orElseThrow(() -> new ResourceNotFoundException("Region not found with id: " + regionId));
   }
 
   @Override

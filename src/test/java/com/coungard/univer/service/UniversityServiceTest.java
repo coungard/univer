@@ -6,7 +6,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.coungard.univer.UniverApplication;
 import com.coungard.univer.dto.AddressDto;
 import com.coungard.univer.dto.UniversityDto;
+import com.coungard.univer.entity.Region;
 import com.coungard.univer.exception.ResourceNotFoundException;
+import com.coungard.univer.repository.RegionRepository;
 import com.coungard.univer.repository.UniversityRepository;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,9 +49,13 @@ class UniversityServiceTest {
   @Autowired
   private UniversityRepository universityRepository;
 
+  @Autowired
+  private RegionRepository regionRepository;
+
   @BeforeEach
   void setUp() {
     universityRepository.deleteAll();
+    regionRepository.deleteAll();
   }
 
   @Test
@@ -129,7 +135,7 @@ class UniversityServiceTest {
 
     // When
     Pageable pageable = PageRequest.of(0, 10);
-    Page<UniversityDto> all = universityService.getUniversities(null, pageable);
+    Page<UniversityDto> all = universityService.getUniversities(null, null, pageable);
 
     // Then
     assertThat(all.getContent()).hasSize(2);
@@ -190,13 +196,74 @@ class UniversityServiceTest {
 
     // When
     Pageable pageable = PageRequest.of(0, 10);
-    Page<UniversityDto> found = universityService.getUniversities("UniVer", pageable);
+    Page<UniversityDto> found = universityService.getUniversities("UniVer", null, pageable);
 
     // Then
     assertThat(found.getContent()).hasSize(2);
     assertThat(found.getContent())
         .extracting(UniversityDto::name)
         .containsExactlyInAnyOrder("Harvard University", "Oxford University");
+  }
+
+  @Test
+  @DisplayName("Университет привязывается к региону при создании и обновлении")
+  void shouldLinkUniversityToRegion() {
+    Region dagestan = createRegion("05", "Республика Дагестан");
+    Region moscow = createRegion("77", "Москва");
+
+    UniversityDto saved = universityService.createUniversity(UniversityDto.builder()
+        .name("ДГТУ")
+        .regionId(dagestan.getId())
+        .build());
+    assertThat(universityService.getUniversityById(saved.id()).regionId()).isEqualTo(dagestan.getId());
+
+    UniversityDto updated = universityService.updateUniversity(saved.id(), UniversityDto.builder()
+        .name("ДГТУ")
+        .regionId(moscow.getId())
+        .build());
+    assertThat(updated.regionId()).isEqualTo(moscow.getId());
+  }
+
+  @Test
+  @DisplayName("Фильтр университетов по региону, в том числе вместе с поиском по названию")
+  void shouldFilterUniversitiesByRegion() {
+    Region dagestan = createRegion("05", "Республика Дагестан");
+    Region moscow = createRegion("77", "Москва");
+
+    universityService.createUniversity(UniversityDto.builder().name("ДГТУ").regionId(dagestan.getId()).build());
+    universityService.createUniversity(UniversityDto.builder().name("ДГУ").regionId(dagestan.getId()).build());
+    universityService.createUniversity(UniversityDto.builder().name("МГУ").regionId(moscow.getId()).build());
+    universityService.createUniversity(UniversityDto.builder().name("Без региона").build());
+
+    Pageable pageable = PageRequest.of(0, 10);
+
+    assertThat(universityService.getUniversities(null, dagestan.getId(), pageable).getContent())
+        .extracting(UniversityDto::name)
+        .containsExactlyInAnyOrder("ДГТУ", "ДГУ");
+    assertThat(universityService.getUniversities("дгт", dagestan.getId(), pageable).getContent())
+        .extracting(UniversityDto::name)
+        .containsExactly("ДГТУ");
+    assertThat(universityService.getUniversities("дгт", moscow.getId(), pageable).getContent()).isEmpty();
+  }
+
+  @Test
+  @DisplayName("Исключение при создании университета с несуществующим регионом")
+  void shouldThrowExceptionWhenRegionNotFound() {
+    UniversityDto dto = UniversityDto.builder()
+        .name("ДГТУ")
+        .regionId(UUID.randomUUID())
+        .build();
+
+    assertThatThrownBy(() -> universityService.createUniversity(dto))
+        .isInstanceOf(ResourceNotFoundException.class)
+        .hasMessageContaining("Region not found with id:");
+  }
+
+  private Region createRegion(String code, String name) {
+    Region region = new Region();
+    region.setCode(code);
+    region.setName(name);
+    return regionRepository.save(region);
   }
 
   @Test

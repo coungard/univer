@@ -11,4 +11,8 @@ import java.util.UUID;
 public interface UniversityRepository extends JpaRepository<University, java.util.UUID> {
 
   Page<University> findByNameContainingIgnoreCase(String name, Pageable pageable);
+
+  Page<University> findByRegionId(UUID regionId, Pageable pageable);
+
+  Page<University> findByNameContainingIgnoreCaseAndRegionId(String name, UUID regionId, Pageable pageable);
 }

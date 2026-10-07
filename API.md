@@ -71,9 +71,16 @@
 
 ### UniversityDto
 `id`, `name`, `description`, `rector`, `foundingYear`, `studentCount`, `createdAt`, `updatedAt` (только
-в ответе), `address: AddressDto`, `faculties: FacultyDto[]` (в ответе; при создании/обновлении можно не
-передавать — по умолчанию `[]`). `rector`/`foundingYear`/`studentCount` необязательны (`foundingYear`,
-если передан, — не меньше 1000; `studentCount`, если передан, — не отрицательный).
+в ответе), `address: AddressDto`, `regionId`, `faculties: FacultyDto[]` (в ответе; при создании/обновлении
+можно не передавать — по умолчанию `[]`). `rector`/`foundingYear`/`studentCount` необязательны (`foundingYear`,
+если передан, — не меньше 1000; `studentCount`, если передан, — не отрицательный). `regionId` — ID региона
+из `GET /regions`; пока необязателен и может быть `null` в ответе: у вузов без адреса регион ещё не
+определён (issue #80). Несуществующий `regionId` при `POST`/`PUT` — `404`. `PUT` без `regionId`
+отвязывает вуз от региона. Текстовый `address.region` от `regionId` не зависит.
+
+### RegionDto (только ответ)
+`id`, `code` (двузначный код субъекта РФ, например `05`), `name` (официальное название, например
+`Республика Дагестан`).
 
 ### FacultyDto
 `id`, `name`, `description`, `universityId`, `departments: DepartmentDto[]` (по умолчанию `[]`).
@@ -177,7 +184,7 @@
 
 | Метод | Путь | Auth | Тело запроса | Тело ответа |
 |---|---|---|---|---|
-| GET | `/` | публично | — (`?search&page&size`) | `Page<UniversityDto>` |
+| GET | `/` | публично | — (`?search&regionId&page&size`) | `Page<UniversityDto>` |
 | GET | `/{id}` | публично | — | `UniversityDto` |
 | POST | `/` | `ADMIN` | `UniversityDto` | `201` + `UniversityDto` |
 | PUT | `/{id}` | `ADMIN` | `UniversityDto` | `UniversityDto` |
@@ -188,6 +195,19 @@
 >
 > `search` — необязательный, регистронезависимый поиск по подстроке в `name`; без него — все
 > университеты постранично, как раньше.
+>
+> `regionId` — необязательный фильтр по региону (ID из `GET /regions`), сочетается с `search`. Вузы
+> без региона под фильтр не попадают.
+
+## Regions — `/api/v1/regions`
+
+| Метод | Путь | Auth | Тело запроса | Тело ответа |
+|---|---|---|---|---|
+| GET | `/` | публично | — | `RegionDto[]` |
+
+> Справочник всех 89 субъектов РФ, отсортирован по названию, без пагинации. Наполняется миграцией
+> (`V24__insert_regions.sql`), эндпоинтов изменения нет. Публичный по той же причине, что и
+> `GET /universities`: нужен на экране регистрации до входа.
 
 ## Faculties — `/api/v1/faculties`
 

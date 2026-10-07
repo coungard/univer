@@ -63,6 +63,11 @@ public class University implements Auditable {
   )
   private Address address;
 
+  // Пока необязателен: у вузов без адреса регион ещё не определён (issue #80)
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "region_id", foreignKey = @ForeignKey(name = "fk_university_region"))
+  private Region region;
+
   @OneToMany(mappedBy = "university", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Faculty> faculties = new ArrayList<>();
 

@@ -29,6 +29,10 @@ public record UniversityDto(
         Instant createdAt,
         Instant updatedAt,
         AddressDto address,
+
+        @Schema(description = "ID региона (субъекта РФ), см. GET /api/v1/regions; может быть null, пока регион не определён")
+        UUID regionId,
+
         List<FacultyDto> faculties
 ) {
     public UniversityDto {

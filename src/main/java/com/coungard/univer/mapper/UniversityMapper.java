@@ -34,6 +34,7 @@ public class UniversityMapper {
         .createdAt(university.getCreatedAt())
         .updatedAt(university.getUpdatedAt())
         .address(this.toAddressDto(university.getAddress()))
+        .regionId(university.getRegion() != null ? university.getRegion().getId() : null)
         .faculties(this.toFacultyDtos(university.getFaculties()))
         .build();
   }
