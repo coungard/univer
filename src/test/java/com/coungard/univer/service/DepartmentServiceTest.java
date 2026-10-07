@@ -3,6 +3,7 @@ package com.coungard.univer.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.coungard.univer.TestRegions;
 import com.coungard.univer.UniverApplication;
 import com.coungard.univer.dto.DepartmentDto;
 import com.coungard.univer.entity.Department;
@@ -11,6 +12,7 @@ import com.coungard.univer.entity.University;
 import com.coungard.univer.exception.ResourceNotFoundException;
 import com.coungard.univer.repository.DepartmentRepository;
 import com.coungard.univer.repository.FacultyRepository;
+import com.coungard.univer.repository.RegionRepository;
 import com.coungard.univer.repository.UniversityRepository;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,6 +58,9 @@ class DepartmentServiceTest {
   @Autowired
   private UniversityRepository universityRepository;
 
+  @Autowired
+  private RegionRepository regionRepository;
+
   private UUID facultyId;
 
   @BeforeEach
@@ -66,6 +71,7 @@ class DepartmentServiceTest {
 
     University university = new University();
     university.setName("Test University");
+    university.setRegion(TestRegions.create(regionRepository));
     UUID universityId = universityRepository.save(university).getId();
 
     facultyId = createTestFaculty("Faculty of Computer Science", universityId).getId();
@@ -139,6 +145,7 @@ class DepartmentServiceTest {
     // Given
     University otherUniversity = new University();
     otherUniversity.setName("Other University");
+    otherUniversity.setRegion(TestRegions.create(regionRepository));
     UUID otherUniversityId = universityRepository.save(otherUniversity).getId();
     UUID otherFacultyId = createTestFaculty("Faculty of Law", otherUniversityId).getId();
 

@@ -3,6 +3,7 @@ package com.coungard.univer.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.coungard.univer.TestRegions;
 import com.coungard.univer.UniverApplication;
 import com.coungard.univer.dto.CourseDto;
 import com.coungard.univer.entity.Department;
@@ -15,6 +16,7 @@ import com.coungard.univer.repository.CourseRepository;
 import com.coungard.univer.repository.DepartmentRepository;
 import com.coungard.univer.repository.FacultyRepository;
 import com.coungard.univer.repository.TeacherRepository;
+import com.coungard.univer.repository.RegionRepository;
 import com.coungard.univer.repository.UniversityRepository;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -64,6 +66,9 @@ class CourseServiceTest {
   private UniversityRepository universityRepository;
 
   @Autowired
+  private RegionRepository regionRepository;
+
+  @Autowired
   private TeacherRepository teacherRepository;
 
   private UUID departmentId;
@@ -79,6 +84,7 @@ class CourseServiceTest {
 
     University university = new University();
     university.setName("Test University");
+    university.setRegion(TestRegions.create(regionRepository));
     UUID universityId = universityRepository.save(university).getId();
 
     Faculty faculty = Faculty.builder()

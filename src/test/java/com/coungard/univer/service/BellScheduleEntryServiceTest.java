@@ -3,12 +3,14 @@ package com.coungard.univer.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.coungard.univer.TestRegions;
 import com.coungard.univer.UniverApplication;
 import com.coungard.univer.dto.BellScheduleEntryDto;
 import com.coungard.univer.entity.University;
 import com.coungard.univer.exception.ResourceNotFoundException;
 import com.coungard.univer.exception.ValidationException;
 import com.coungard.univer.repository.BellScheduleEntryRepository;
+import com.coungard.univer.repository.RegionRepository;
 import com.coungard.univer.repository.UniversityRepository;
 import java.time.LocalTime;
 import java.util.UUID;
@@ -52,6 +54,9 @@ class BellScheduleEntryServiceTest {
   @Autowired
   private UniversityRepository universityRepository;
 
+  @Autowired
+  private RegionRepository regionRepository;
+
   private UUID universityId;
 
   @BeforeEach
@@ -61,6 +66,7 @@ class BellScheduleEntryServiceTest {
 
     University university = new University();
     university.setName("Test University");
+    university.setRegion(TestRegions.create(regionRepository));
     universityId = universityRepository.save(university).getId();
   }
 

@@ -3,6 +3,7 @@ package com.coungard.univer.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.coungard.univer.TestRegions;
 import com.coungard.univer.UniverApplication;
 import com.coungard.univer.dto.EducationForm;
 import com.coungard.univer.dto.LectureDto;
@@ -33,6 +34,7 @@ import com.coungard.univer.repository.ProgramRepository;
 import com.coungard.univer.repository.SemesterRepository;
 import com.coungard.univer.repository.StudentRepository;
 import com.coungard.univer.repository.StudyYearRepository;
+import com.coungard.univer.repository.RegionRepository;
 import com.coungard.univer.repository.UniversityRepository;
 import com.coungard.univer.repository.WeekScheduleCycleRepository;
 import java.time.DayOfWeek;
@@ -112,6 +114,9 @@ class LectureServiceTest {
   private UniversityRepository universityRepository;
 
   @Autowired
+  private RegionRepository regionRepository;
+
+  @Autowired
   private StudentRepository studentRepository;
 
   // Семестр начинается во вторник 2026-09-01. Неделя считается 7-дневными блоками от этой даты:
@@ -149,6 +154,7 @@ class LectureServiceTest {
 
     University university = new University();
     university.setName("Test University");
+    university.setRegion(TestRegions.create(regionRepository));
     universityId = universityRepository.save(university).getId();
 
     Faculty faculty = Faculty.builder()

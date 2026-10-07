@@ -5,6 +5,7 @@ import com.coungard.univer.entity.Address;
 import com.coungard.univer.entity.Region;
 import com.coungard.univer.entity.University;
 import com.coungard.univer.exception.ResourceNotFoundException;
+import com.coungard.univer.exception.ValidationException;
 import com.coungard.univer.mapper.UniversityMapper;
 import com.coungard.univer.repository.AddressRepository;
 import com.coungard.univer.repository.RegionRepository;
@@ -94,7 +95,7 @@ public class UniversityServiceImpl implements UniversityService {
 
   private Region findRegion(UUID regionId) {
     if (regionId == null) {
-      return null;
+      throw new ValidationException("Регион обязателен");
     }
     return regionRepository.findById(regionId)
         .orElseThrow(() -> new ResourceNotFoundException("Region not found with id: " + regionId));

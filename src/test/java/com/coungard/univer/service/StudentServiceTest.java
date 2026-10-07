@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.coungard.univer.TestRegions;
 import com.coungard.univer.UniverApplication;
 import com.coungard.univer.dto.EducationForm;
 import com.coungard.univer.dto.SemesterType;
@@ -28,6 +29,7 @@ import com.coungard.univer.repository.ProgramRepository;
 import com.coungard.univer.repository.SemesterRepository;
 import com.coungard.univer.repository.StudentRepository;
 import com.coungard.univer.repository.StudyYearRepository;
+import com.coungard.univer.repository.RegionRepository;
 import com.coungard.univer.repository.UniversityRepository;
 import com.coungard.univer.security.KeycloakAdminService;
 import com.coungard.univer.security.Role;
@@ -76,6 +78,9 @@ class StudentServiceTest {
   private UniversityRepository universityRepository;
 
   @Autowired
+  private RegionRepository regionRepository;
+
+  @Autowired
   private FacultyRepository facultyRepository;
 
   @Autowired
@@ -107,6 +112,7 @@ class StudentServiceTest {
 
     University university = new University();
     university.setName("Test University");
+    university.setRegion(TestRegions.create(regionRepository));
     universityId = universityRepository.save(university).getId();
   }
 
@@ -342,6 +348,7 @@ class StudentServiceTest {
   private University createOtherUniversity() {
     University university = new University();
     university.setName("Other University");
+    university.setRegion(TestRegions.create(regionRepository));
     return universityRepository.save(university);
   }
 

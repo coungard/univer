@@ -71,12 +71,11 @@
 
 ### UniversityDto
 `id`, `name`, `description`, `rector`, `foundingYear`, `studentCount`, `createdAt`, `updatedAt` (только
-в ответе), `address: AddressDto`, `regionId`, `faculties: FacultyDto[]` (в ответе; при создании/обновлении
+в ответе), `address: AddressDto`, `regionId`★, `faculties: FacultyDto[]` (в ответе; при создании/обновлении
 можно не передавать — по умолчанию `[]`). `rector`/`foundingYear`/`studentCount` необязательны (`foundingYear`,
 если передан, — не меньше 1000; `studentCount`, если передан, — не отрицательный). `regionId` — ID региона
-из `GET /regions`; пока необязателен и может быть `null` в ответе: у вузов без адреса регион ещё не
-определён (issue #80). Несуществующий `regionId` при `POST`/`PUT` — `404`. `PUT` без `regionId`
-отвязывает вуз от региона. Текстовый `address.region` от `regionId` не зависит.
+из `GET /regions`, обязателен: регион есть у каждого вуза (issue #80). Без `regionId` `POST`/`PUT`
+вернут `400`, с несуществующим — `404`. Текстовый `address.region` от `regionId` не зависит.
 
 ### RegionDto (только ответ)
 `id`, `code` (двузначный код субъекта РФ, например `05`), `name` (официальное название, например
@@ -196,8 +195,7 @@
 > `search` — необязательный, регистронезависимый поиск по подстроке в `name`; без него — все
 > университеты постранично, как раньше.
 >
-> `regionId` — необязательный фильтр по региону (ID из `GET /regions`), сочетается с `search`. Вузы
-> без региона под фильтр не попадают.
+> `regionId` — необязательный фильтр по региону (ID из `GET /regions`), сочетается с `search`.
 
 ## Regions — `/api/v1/regions`
 

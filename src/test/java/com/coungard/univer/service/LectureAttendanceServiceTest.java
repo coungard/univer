@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.data.Offset.offset;
 
+import com.coungard.univer.TestRegions;
 import com.coungard.univer.UniverApplication;
 import com.coungard.univer.dto.AttendanceStatsDto;
 import com.coungard.univer.dto.EnrollmentStatus;
@@ -25,6 +26,7 @@ import com.coungard.univer.repository.FacultyRepository;
 import com.coungard.univer.repository.LectureAttendanceRepository;
 import com.coungard.univer.repository.LectureRepository;
 import com.coungard.univer.repository.StudentRepository;
+import com.coungard.univer.repository.RegionRepository;
 import com.coungard.univer.repository.UniversityRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -87,6 +89,9 @@ class LectureAttendanceServiceTest {
   @Autowired
   private UniversityRepository universityRepository;
 
+  @Autowired
+  private RegionRepository regionRepository;
+
   private UUID universityId;
   private UUID courseId;
   private UUID lectureId;
@@ -107,6 +112,7 @@ class LectureAttendanceServiceTest {
 
     University university = new University();
     university.setName("Test University");
+    university.setRegion(TestRegions.create(regionRepository));
     universityId = universityRepository.save(university).getId();
 
     Faculty faculty = Faculty.builder()

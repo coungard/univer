@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.coungard.univer.TestRegions;
 import com.coungard.univer.UniverApplication;
 import com.coungard.univer.dto.TeacherDto;
 import com.coungard.univer.dto.registration.RegisterData;
@@ -21,6 +22,7 @@ import com.coungard.univer.exception.ValidationException;
 import com.coungard.univer.repository.DepartmentRepository;
 import com.coungard.univer.repository.FacultyRepository;
 import com.coungard.univer.repository.TeacherRepository;
+import com.coungard.univer.repository.RegionRepository;
 import com.coungard.univer.repository.UniversityRepository;
 import com.coungard.univer.security.KeycloakAdminService;
 import com.coungard.univer.security.Role;
@@ -72,6 +74,9 @@ class TeacherServiceTest {
   @Autowired
   private UniversityRepository universityRepository;
 
+  @Autowired
+  private RegionRepository regionRepository;
+
   @MockBean
   private KeycloakAdminService keycloakAdminService;
 
@@ -86,6 +91,7 @@ class TeacherServiceTest {
 
     University university = new University();
     university.setName("Test University");
+    university.setRegion(TestRegions.create(regionRepository));
     UUID universityId = universityRepository.save(university).getId();
 
     Faculty faculty = Faculty.builder()

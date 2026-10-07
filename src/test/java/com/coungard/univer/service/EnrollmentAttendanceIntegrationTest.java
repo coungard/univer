@@ -3,6 +3,7 @@ package com.coungard.univer.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.data.Offset.offset;
 
+import com.coungard.univer.TestRegions;
 import com.coungard.univer.UniverApplication;
 import com.coungard.univer.dto.AttendanceStatsDto;
 import com.coungard.univer.dto.EducationForm;
@@ -33,6 +34,7 @@ import com.coungard.univer.repository.ProgramRepository;
 import com.coungard.univer.repository.SemesterRepository;
 import com.coungard.univer.repository.StudentRepository;
 import com.coungard.univer.repository.StudyYearRepository;
+import com.coungard.univer.repository.RegionRepository;
 import com.coungard.univer.repository.UniversityRepository;
 import com.coungard.univer.repository.WeekScheduleCycleRepository;
 import java.time.DayOfWeek;
@@ -112,6 +114,9 @@ class EnrollmentAttendanceIntegrationTest {
   private UniversityRepository universityRepository;
 
   @Autowired
+  private RegionRepository regionRepository;
+
+  @Autowired
   private WeekScheduleCycleRepository weekScheduleCycleRepository;
 
   @Autowired
@@ -143,6 +148,7 @@ class EnrollmentAttendanceIntegrationTest {
 
     University university = new University();
     university.setName("Test University");
+    university.setRegion(TestRegions.create(regionRepository));
     universityId = universityRepository.save(university).getId();
 
     Faculty faculty = Faculty.builder()

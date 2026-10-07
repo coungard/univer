@@ -8,6 +8,7 @@ import com.coungard.univer.dto.AddressDto;
 import com.coungard.univer.dto.UniversityDto;
 import com.coungard.univer.entity.Region;
 import com.coungard.univer.exception.ResourceNotFoundException;
+import com.coungard.univer.exception.ValidationException;
 import com.coungard.univer.repository.RegionRepository;
 import com.coungard.univer.repository.UniversityRepository;
 import java.util.UUID;
@@ -52,10 +53,13 @@ class UniversityServiceTest {
   @Autowired
   private RegionRepository regionRepository;
 
+  private UUID regionId;
+
   @BeforeEach
   void setUp() {
     universityRepository.deleteAll();
     regionRepository.deleteAll();
+    regionId = createRegion("01", "Test Region").getId();
   }
 
   @Test
@@ -74,6 +78,7 @@ class UniversityServiceTest {
 
     UniversityDto dto = UniversityDto.builder()
         .name("MIT")
+        .regionId(regionId)
         .description("Massachusetts Institute of Technology")
         .rector("Sally Kornbluth")
         .foundingYear(1861)
@@ -104,6 +109,7 @@ class UniversityServiceTest {
     // Given
     UniversityDto harvardDto = UniversityDto.builder()
         .name("Harvard")
+        .regionId(regionId)
         .description("Harvard University")
         .address(AddressDto.builder()
             .country("USA")
@@ -118,6 +124,7 @@ class UniversityServiceTest {
 
     UniversityDto oxfordDto = UniversityDto.builder()
         .name("Oxford")
+        .regionId(regionId)
         .description("University of Oxford")
         .address(AddressDto.builder()
             .country("UK")
@@ -150,6 +157,7 @@ class UniversityServiceTest {
     // Given
     UniversityDto harvardDto = UniversityDto.builder()
         .name("Harvard University")
+        .regionId(regionId)
         .description("Harvard University")
         .address(AddressDto.builder()
             .country("USA")
@@ -164,6 +172,7 @@ class UniversityServiceTest {
 
     UniversityDto oxfordDto = UniversityDto.builder()
         .name("Oxford University")
+        .regionId(regionId)
         .description("University of Oxford")
         .address(AddressDto.builder()
             .country("UK")
@@ -178,6 +187,7 @@ class UniversityServiceTest {
 
     UniversityDto mitDto = UniversityDto.builder()
         .name("MIT")
+        .regionId(regionId)
         .description("Massachusetts Institute of Technology")
         .address(AddressDto.builder()
             .country("USA")
@@ -233,7 +243,6 @@ class UniversityServiceTest {
     universityService.createUniversity(UniversityDto.builder().name("ДГТУ").regionId(dagestan.getId()).build());
     universityService.createUniversity(UniversityDto.builder().name("ДГУ").regionId(dagestan.getId()).build());
     universityService.createUniversity(UniversityDto.builder().name("МГУ").regionId(moscow.getId()).build());
-    universityService.createUniversity(UniversityDto.builder().name("Без региона").build());
 
     Pageable pageable = PageRequest.of(0, 10);
 
@@ -257,6 +266,17 @@ class UniversityServiceTest {
     assertThatThrownBy(() -> universityService.createUniversity(dto))
         .isInstanceOf(ResourceNotFoundException.class)
         .hasMessageContaining("Region not found with id:");
+  }
+
+  @Test
+  @DisplayName("Исключение при создании университета без региона")
+  void shouldThrowExceptionWhenRegionIsMissing() {
+    UniversityDto dto = UniversityDto.builder()
+        .name("ДГТУ")
+        .build();
+
+    assertThatThrownBy(() -> universityService.createUniversity(dto))
+        .isInstanceOf(ValidationException.class);
   }
 
   private Region createRegion(String code, String name) {

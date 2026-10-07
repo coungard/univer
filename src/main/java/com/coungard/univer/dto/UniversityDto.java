@@ -2,6 +2,7 @@ package com.coungard.univer.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Builder;
 
@@ -30,7 +31,8 @@ public record UniversityDto(
         Instant updatedAt,
         AddressDto address,
 
-        @Schema(description = "ID региона (субъекта РФ), см. GET /api/v1/regions; может быть null, пока регион не определён")
+        @NotNull(message = "Регион обязателен")
+        @Schema(description = "ID региона (субъекта РФ), см. GET /api/v1/regions")
         UUID regionId,
 
         List<FacultyDto> faculties
