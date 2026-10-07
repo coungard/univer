@@ -33,6 +33,15 @@
 определению, пароль пользователь вводит только на странице самого Keycloak (в системном браузере), а не
 внутри приложения.
 
+**Исключение — автовход сразу после регистрации.** `POST /students/register` и `POST /teachers/register`
+токенов не возвращают, а логин и пароль пользователь только что ввёл в самом приложении. Чтобы не
+отправлять его в браузер вводить их второй раз, приложение один раз получает токены через
+`grant_type=password` на `univer-mobile` (без секрета — клиент публичный) и открывает профиль. Для этого
+у клиента включён Direct access grants. Обычный вход по-прежнему идёт через Authorization Code + PKCE.
+`password` grant не умеет показывать промежуточные экраны Keycloak, поэтому пользователь после
+регистрации должен быть полностью готов ко входу (`enabled`, постоянный пароль, без `requiredActions`,
+роль уже назначена) — иначе ответ `invalid_grant: Account is not fully set up`.
+
 ---
 
 ## Публичный Keycloak-клиент `univer-mobile`
@@ -44,7 +53,7 @@
 | Client ID | `univer-mobile` |
 | Client authentication (secret) | выключено — публичный клиент |
 | Standard flow (Authorization Code) | включён |
-| Direct access grants (`password`) | выключен |
+| Direct access grants (`password`) | включён — только для автовхода сразу после регистрации (см. ниже) |
 | PKCE Code Challenge Method | `S256`, обязателен |
 | Valid redirect URIs | `univer://auth/callback` (кастомная схема приложения, не `localhost`) |
 | Valid post logout redirect URIs | `univer://auth/logout` |
