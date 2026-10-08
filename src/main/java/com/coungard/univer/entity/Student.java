@@ -54,6 +54,17 @@ public class Student implements Auditable {
   @JoinColumn(name = "university_id")
   private University university;
 
+  /**
+   * Факультет и номер курса, выбранные самим студентом. Хранятся отдельно от {@link #group}: группы
+   * в справочнике может ещё не быть, а выбор факультета и курса терять нельзя.
+   */
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "faculty_id")
+  private Faculty faculty;
+
+  @Column(name = "year_number")
+  private Integer yearNumber;
+
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "group_id")
   private Group group;

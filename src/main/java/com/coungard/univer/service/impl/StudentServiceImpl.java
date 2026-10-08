@@ -4,12 +4,17 @@ import com.coungard.univer.dto.StudentDto;
 import com.coungard.univer.mapper.StudentMapper;
 import com.coungard.univer.dto.registration.RegisterData;
 import com.coungard.univer.dto.registration.RegisterStudentRequest;
+import com.coungard.univer.dto.request.UpdateStudentProfileRequest;
+import com.coungard.univer.entity.Faculty;
 import com.coungard.univer.entity.Group;
 import com.coungard.univer.entity.Person;
 import com.coungard.univer.entity.Student;
+import com.coungard.univer.entity.StudyYear;
 import com.coungard.univer.entity.University;
 import com.coungard.univer.exception.ConflictException;
 import com.coungard.univer.exception.ResourceNotFoundException;
+import com.coungard.univer.exception.ValidationException;
+import com.coungard.univer.repository.FacultyRepository;
 import com.coungard.univer.repository.GroupRepository;
 import com.coungard.univer.repository.StudentRepository;
 import com.coungard.univer.repository.UniversityRepository;
@@ -17,6 +22,7 @@ import com.coungard.univer.security.KeycloakAdminService;
 import com.coungard.univer.security.Role;
 import com.coungard.univer.service.StudentService;
 import com.coungard.univer.validation.StudentValidator;
+import java.util.Objects;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +39,7 @@ public class StudentServiceImpl implements StudentService {
 
   private final StudentRepository studentRepository;
   private final UniversityRepository universityRepository;
+  private final FacultyRepository facultyRepository;
   private final GroupRepository groupRepository;
   private final StudentMapper studentMapper;
   private final StudentValidator studentValidator;
@@ -152,6 +159,123 @@ public class StudentServiceImpl implements StudentService {
 
     Student updated = studentRepository.save(existing);
     return studentMapper.toDto(updated);
+  }
+
+  @Override
+  @Transactional
+  public StudentDto updateMyProfile(UUID id, UpdateStudentProfileRequest request) {
+    Student student = studentRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("Студент не найден с ID: " + id));
+
+    // Строго сверху вниз по цепочке: каждый шаг сбрасывает всё, что ниже, а следующие шаги того же
+    // запроса заполняют это заново
+    if (request.isUniversityIdSet()) {
+      changeUniversity(student, request.getUniversityId());
+    }
+    if (request.isFacultyIdSet()) {
+      changeFaculty(student, request.getFacultyId());
+    }
+    if (request.isYearNumberSet()) {
+      changeYearNumber(student, request.getYearNumber());
+    }
+    if (request.isGroupIdSet()) {
+      changeGroup(student, request.getGroupId());
+    }
+
+    Student updated = studentRepository.save(student);
+    return studentMapper.toDto(updated);
+  }
+
+  private void changeUniversity(Student student, UUID universityId) {
+    UUID currentId = student.getUniversity() != null ? student.getUniversity().getId() : null;
+    if (Objects.equals(currentId, universityId)) {
+      return;
+    }
+    University university = universityId == null
+        ? null
+        : universityRepository.findById(universityId)
+            .orElseThrow(() -> new ResourceNotFoundException("Университет не найден с ID: " + universityId));
+
+    student.setUniversity(university);
+    student.setFaculty(null);
+    student.setYearNumber(null);
+    student.setGroup(null);
+  }
+
+  private void changeFaculty(Student student, UUID facultyId) {
+    UUID currentId = student.getFaculty() != null ? student.getFaculty().getId() : null;
+    if (Objects.equals(currentId, facultyId)) {
+      return;
+    }
+    Faculty faculty = facultyId == null
+        ? null
+        : facultyRepository.findById(facultyId)
+            .orElseThrow(() -> new ResourceNotFoundException("Факультет не найден с ID: " + facultyId));
+    if (faculty != null) {
+      alignUniversity(student, faculty, "Факультет не относится к университету студента");
+    }
+
+    student.setFaculty(faculty);
+    student.setYearNumber(null);
+    student.setGroup(null);
+  }
+
+  private void changeYearNumber(Student student, Integer yearNumber) {
+    if (Objects.equals(student.getYearNumber(), yearNumber)) {
+      return;
+    }
+    if (yearNumber != null && student.getFaculty() == null) {
+      throw new ValidationException("Нельзя выбрать курс, пока не выбран факультет");
+    }
+
+    student.setYearNumber(yearNumber);
+    student.setGroup(null);
+  }
+
+  private void changeGroup(Student student, UUID groupId) {
+    if (groupId == null) {
+      student.setGroup(null);
+      return;
+    }
+    Group group = groupRepository.findById(groupId)
+        .orElseThrow(() -> new ResourceNotFoundException("Группа не найдена с ID: " + groupId));
+
+    // Группа привязана к факультету только по цепочке: семестр → учебный год → программа → факультет
+    StudyYear studyYear = group.getSemester().getStudyYear();
+    UUID groupFacultyId = studyYear.getProgram().getFacultyId();
+    if (groupFacultyId == null) {
+      throw new ValidationException("Группа не привязана к факультету — выбрать её нельзя");
+    }
+
+    if (student.getFaculty() == null) {
+      Faculty faculty = facultyRepository.findById(groupFacultyId)
+          .orElseThrow(() -> new ResourceNotFoundException("Факультет не найден с ID: " + groupFacultyId));
+      alignUniversity(student, faculty, "Группа не относится к университету студента");
+      student.setFaculty(faculty);
+    } else if (!student.getFaculty().getId().equals(groupFacultyId)) {
+      throw new ValidationException("Группа не относится к факультету студента");
+    }
+
+    if (student.getYearNumber() == null) {
+      student.setYearNumber(studyYear.getYearNumber());
+    } else if (!student.getYearNumber().equals(studyYear.getYearNumber())) {
+      throw new ValidationException("Группа относится к " + studyYear.getYearNumber()
+          + " курсу, а у студента выбран " + student.getYearNumber());
+    }
+
+    student.setGroup(group);
+  }
+
+  /**
+   * Согласовать университет студента с факультетом: если университет ещё не выбран — проставить
+   * университет факультета, иначе они обязаны совпадать.
+   */
+  private void alignUniversity(Student student, Faculty faculty, String mismatchMessage) {
+    if (student.getUniversity() == null) {
+      student.setUniversity(faculty.getUniversity());
+    } else if (!student.getUniversity().getId().equals(faculty.getUniversity().getId())) {
+      throw new ValidationException(mismatchMessage);
+    }
   }
 
   @Override

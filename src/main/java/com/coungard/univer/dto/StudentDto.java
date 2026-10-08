@@ -39,6 +39,10 @@ public record StudentDto(
 
         UUID universityId,
 
+        UUID facultyId,
+
+        Integer yearNumber,
+
         UUID groupId
 ) {
 }

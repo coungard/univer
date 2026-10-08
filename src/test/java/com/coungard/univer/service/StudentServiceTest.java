@@ -14,6 +14,7 @@ import com.coungard.univer.dto.SemesterType;
 import com.coungard.univer.dto.StudentDto;
 import com.coungard.univer.dto.registration.RegisterData;
 import com.coungard.univer.dto.registration.RegisterStudentRequest;
+import com.coungard.univer.dto.request.UpdateStudentProfileRequest;
 import com.coungard.univer.entity.Faculty;
 import com.coungard.univer.entity.Group;
 import com.coungard.univer.entity.Person;
@@ -24,6 +25,7 @@ import com.coungard.univer.entity.StudyYear;
 import com.coungard.univer.entity.University;
 import com.coungard.univer.exception.ConflictException;
 import com.coungard.univer.exception.ResourceNotFoundException;
+import com.coungard.univer.exception.ValidationException;
 import com.coungard.univer.repository.FacultyRepository;
 import com.coungard.univer.repository.GroupRepository;
 import com.coungard.univer.repository.ProgramRepository;
@@ -349,6 +351,236 @@ class StudentServiceTest {
         .hasMessageContaining("Student not found");
   }
 
+  // === PATCH /students/me ===
+
+  @Test
+  void shouldFillProfileStepByStepFromUniversityToGroup() {
+    UUID studentId = createTestStudent("ivan", "Иван", "Иванов", null, null).id();
+    UUID facultyId = createTestFaculty(universityId);
+    Group group = createTestGroup("У232 КСиТ", facultyId, 2);
+
+    // Остановиться можно на любом шаге — профиль остаётся валидным
+    StudentDto withUniversity = studentService.updateMyProfile(studentId, profile().university(universityId).build());
+    assertThat(withUniversity.universityId()).isEqualTo(universityId);
+    assertThat(withUniversity.facultyId()).isNull();
+
+    StudentDto withFaculty = studentService.updateMyProfile(studentId, profile().faculty(facultyId).build());
+    assertThat(withFaculty.facultyId()).isEqualTo(facultyId);
+    assertThat(withFaculty.yearNumber()).isNull();
+
+    StudentDto withYear = studentService.updateMyProfile(studentId, profile().year(2).build());
+    assertThat(withYear.yearNumber()).isEqualTo(2);
+    assertThat(withYear.groupId()).isNull();
+
+    StudentDto withGroup = studentService.updateMyProfile(studentId, profile().group(group.getId()).build());
+    assertThat(withGroup.universityId()).isEqualTo(universityId);
+    assertThat(withGroup.facultyId()).isEqualTo(facultyId);
+    assertThat(withGroup.yearNumber()).isEqualTo(2);
+    assertThat(withGroup.groupId()).isEqualTo(group.getId());
+  }
+
+  @Test
+  void shouldFillUniversityFacultyAndYearFromGroup() {
+    UUID studentId = createTestStudent("ivan", "Иван", "Иванов", null, null).id();
+    UUID facultyId = createTestFaculty(universityId);
+    Group group = createTestGroup("У332 КСиТ", facultyId, 3);
+
+    StudentDto updated = studentService.updateMyProfile(studentId, profile().group(group.getId()).build());
+
+    assertThat(updated.universityId()).isEqualTo(universityId);
+    assertThat(updated.facultyId()).isEqualTo(facultyId);
+    assertThat(updated.yearNumber()).isEqualTo(3);
+    assertThat(updated.groupId()).isEqualTo(group.getId());
+  }
+
+  @Test
+  void shouldNotChangeFieldsMissingFromRequest() {
+    UUID studentId = createStudentInGroup(2).id();
+    StudentDto before = studentService.getStudentById(studentId);
+
+    StudentDto updated = studentService.updateMyProfile(studentId, profile().build());
+
+    assertThat(updated.universityId()).isEqualTo(before.universityId());
+    assertThat(updated.facultyId()).isEqualTo(before.facultyId());
+    assertThat(updated.yearNumber()).isEqualTo(2);
+    assertThat(updated.groupId()).isEqualTo(before.groupId());
+  }
+
+  @Test
+  void shouldKeepLowerFieldsWhenSameValueIsSentAgain() {
+    StudentDto student = createStudentInGroup(2);
+
+    StudentDto updated = studentService.updateMyProfile(student.id(),
+        profile().university(student.universityId()).faculty(student.facultyId()).year(2).build());
+
+    assertThat(updated.groupId()).isEqualTo(student.groupId());
+  }
+
+  @Test
+  void shouldResetFacultyYearAndGroupWhenUniversityChanges() {
+    UUID studentId = createStudentInGroup(2).id();
+    UUID otherUniversityId = createOtherUniversity().getId();
+
+    StudentDto updated = studentService.updateMyProfile(studentId, profile().university(otherUniversityId).build());
+
+    assertThat(updated.universityId()).isEqualTo(otherUniversityId);
+    assertThat(updated.facultyId()).isNull();
+    assertThat(updated.yearNumber()).isNull();
+    assertThat(updated.groupId()).isNull();
+  }
+
+  @Test
+  void shouldResetYearAndGroupWhenFacultyChanges() {
+    StudentDto student = createStudentInGroup(2);
+    UUID otherFacultyId = createTestFaculty(universityId);
+
+    StudentDto updated = studentService.updateMyProfile(student.id(), profile().faculty(otherFacultyId).build());
+
+    assertThat(updated.universityId()).isEqualTo(universityId);
+    assertThat(updated.facultyId()).isEqualTo(otherFacultyId);
+    assertThat(updated.yearNumber()).isNull();
+    assertThat(updated.groupId()).isNull();
+  }
+
+  @Test
+  void shouldResetGroupWhenYearChanges() {
+    StudentDto student = createStudentInGroup(2);
+
+    StudentDto updated = studentService.updateMyProfile(student.id(), profile().year(3).build());
+
+    assertThat(updated.facultyId()).isEqualTo(student.facultyId());
+    assertThat(updated.yearNumber()).isEqualTo(3);
+    assertThat(updated.groupId()).isNull();
+  }
+
+  @Test
+  void shouldClearFieldAndEverythingBelowOnExplicitNull() {
+    StudentDto student = createStudentInGroup(2);
+
+    StudentDto withoutGroup = studentService.updateMyProfile(student.id(), profile().group(null).build());
+    assertThat(withoutGroup.groupId()).isNull();
+    assertThat(withoutGroup.yearNumber()).isEqualTo(2);
+
+    StudentDto withoutUniversity = studentService.updateMyProfile(student.id(), profile().university(null).build());
+    assertThat(withoutUniversity.universityId()).isNull();
+    assertThat(withoutUniversity.facultyId()).isNull();
+    assertThat(withoutUniversity.yearNumber()).isNull();
+  }
+
+  @Test
+  void shouldMoveToAnotherUniversityInSingleRequest() {
+    UUID studentId = createStudentInGroup(2).id();
+    UUID otherUniversityId = createOtherUniversity().getId();
+    UUID otherFacultyId = createTestFaculty(otherUniversityId);
+    Group otherGroup = createTestGroup("Б101", otherFacultyId, 1);
+
+    StudentDto updated = studentService.updateMyProfile(studentId, profile()
+        .university(otherUniversityId)
+        .faculty(otherFacultyId)
+        .year(1)
+        .group(otherGroup.getId())
+        .build());
+
+    assertThat(updated.universityId()).isEqualTo(otherUniversityId);
+    assertThat(updated.facultyId()).isEqualTo(otherFacultyId);
+    assertThat(updated.yearNumber()).isEqualTo(1);
+    assertThat(updated.groupId()).isEqualTo(otherGroup.getId());
+  }
+
+  @Test
+  void shouldRejectFacultyOfAnotherUniversity() {
+    UUID studentId = createTestStudent("ivan", "Иван", "Иванов", null).id();
+    UUID foreignFacultyId = createTestFaculty(createOtherUniversity().getId());
+
+    assertThatThrownBy(() -> studentService.updateMyProfile(studentId, profile().faculty(foreignFacultyId).build()))
+        .isInstanceOf(ValidationException.class)
+        .hasMessageContaining("Факультет не относится к университету");
+  }
+
+  @Test
+  void shouldRejectYearWithoutFaculty() {
+    UUID studentId = createTestStudent("ivan", "Иван", "Иванов", null).id();
+
+    assertThatThrownBy(() -> studentService.updateMyProfile(studentId, profile().year(1).build()))
+        .isInstanceOf(ValidationException.class)
+        .hasMessageContaining("не выбран факультет");
+  }
+
+  @Test
+  void shouldRejectGroupOfAnotherFacultyOrYear() {
+    StudentDto student = createStudentInGroup(2);
+    Group sameFacultyOtherYear = createTestGroup("У332 КСиТ", student.facultyId(), 3);
+    Group otherFaculty = createTestGroup("Э201", createTestFaculty(universityId), 2);
+
+    assertThatThrownBy(
+        () -> studentService.updateMyProfile(student.id(), profile().group(sameFacultyOtherYear.getId()).build()))
+        .isInstanceOf(ValidationException.class)
+        .hasMessageContaining("курсу");
+    assertThatThrownBy(
+        () -> studentService.updateMyProfile(student.id(), profile().group(otherFaculty.getId()).build()))
+        .isInstanceOf(ValidationException.class)
+        .hasMessageContaining("Группа не относится к факультету");
+
+    // Отклонённый запрос ничего не меняет
+    assertThat(studentService.getStudentById(student.id()).groupId()).isEqualTo(student.groupId());
+  }
+
+  @Test
+  void shouldThrowNotFoundForUnknownIdsInProfile() {
+    UUID studentId = createTestStudent("ivan", "Иван", "Иванов", null).id();
+
+    assertThatThrownBy(
+        () -> studentService.updateMyProfile(studentId, profile().university(UUID.randomUUID()).build()))
+        .isInstanceOf(ResourceNotFoundException.class);
+    assertThatThrownBy(() -> studentService.updateMyProfile(studentId, profile().faculty(UUID.randomUUID()).build()))
+        .isInstanceOf(ResourceNotFoundException.class);
+    assertThatThrownBy(() -> studentService.updateMyProfile(studentId, profile().group(UUID.randomUUID()).build()))
+        .isInstanceOf(ResourceNotFoundException.class);
+    assertThatThrownBy(() -> studentService.updateMyProfile(UUID.randomUUID(), profile().build()))
+        .isInstanceOf(ResourceNotFoundException.class);
+  }
+
+  /** Студент с полностью заполненным профилем: университет, факультет, курс и группа этого курса. */
+  private StudentDto createStudentInGroup(int yearNumber) {
+    UUID studentId = createTestStudent("ivan", "Иван", "Иванов", null).id();
+    Group group = createTestGroup("У532 КСиТ", createTestFaculty(universityId), yearNumber);
+    return studentService.updateMyProfile(studentId, profile().group(group.getId()).build());
+  }
+
+  private static ProfileRequestBuilder profile() {
+    return new ProfileRequestBuilder();
+  }
+
+  /** Собирает тело PATCH: вызванный метод — поле «передано» (в том числе с null), невызванный — нет. */
+  private static class ProfileRequestBuilder {
+
+    private final UpdateStudentProfileRequest request = new UpdateStudentProfileRequest();
+
+    ProfileRequestBuilder university(UUID universityId) {
+      request.setUniversityId(universityId);
+      return this;
+    }
+
+    ProfileRequestBuilder faculty(UUID facultyId) {
+      request.setFacultyId(facultyId);
+      return this;
+    }
+
+    ProfileRequestBuilder year(Integer yearNumber) {
+      request.setYearNumber(yearNumber);
+      return this;
+    }
+
+    ProfileRequestBuilder group(UUID groupId) {
+      request.setGroupId(groupId);
+      return this;
+    }
+
+    UpdateStudentProfileRequest build() {
+      return request;
+    }
+  }
+
   @Test
   void shouldDeleteStudentById() {
     // Given
@@ -387,9 +619,11 @@ class StudentServiceTest {
 
     student.setPerson(person);
     student.setEnrollmentDate(enrollmentDate);
-    University uni = new University();
-    uni.setId(universityId);
-    student.setUniversity(uni);
+    if (universityId != null) {
+      University uni = new University();
+      uni.setId(universityId);
+      student.setUniversity(uni);
+    }
 
     Student saved = studentRepository.save(student);
 
@@ -400,7 +634,7 @@ class StudentServiceTest {
         .lastname(saved.getPerson().getLastname())
         .email(saved.getPerson().getEmail())
         .enrollmentDate(saved.getEnrollmentDate())
-        .universityId(saved.getUniversity().getId())
+        .universityId(universityId)
         .build();
   }
 
@@ -412,12 +646,18 @@ class StudentServiceTest {
   }
 
   private Group createTestGroup(String name) {
+    return createTestGroup(name, createTestFaculty(universityId), 5);
+  }
+
+  private UUID createTestFaculty(UUID universityId) {
     Faculty faculty = Faculty.builder()
         .name("Faculty of Computer Science")
         .university(universityRepository.getReferenceById(universityId))
         .build();
-    UUID facultyId = facultyRepository.save(faculty).getId();
+    return facultyRepository.save(faculty).getId();
+  }
 
+  private Group createTestGroup(String name, UUID facultyId, int yearNumber) {
     Program program = new Program();
     program.setFacultyId(facultyId);
     program.setCode("09.03.04");
@@ -429,7 +669,7 @@ class StudentServiceTest {
 
     StudyYear studyYear = new StudyYear();
     studyYear.setProgram(programRepository.getReferenceById(programId));
-    studyYear.setYearNumber(5);
+    studyYear.setYearNumber(yearNumber);
     UUID studyYearId = studyYearRepository.save(studyYear).getId();
 
     Semester semester = new Semester();

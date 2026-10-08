@@ -2,6 +2,7 @@ package com.coungard.univer.service;
 
 import com.coungard.univer.dto.StudentDto;
 import com.coungard.univer.dto.registration.RegisterStudentRequest;
+import com.coungard.univer.dto.request.UpdateStudentProfileRequest;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -40,6 +41,21 @@ public interface StudentService {
    * @return обновлённый StudentDto
    */
   StudentDto updateStudent(UUID id, StudentDto studentDto);
+
+  /**
+   * Частично обновить профиль самим студентом: университет, факультет, курс и группу. Меняются
+   * только переданные поля; явный {@code null} очищает поле.
+   *
+   * <p>Поля образуют цепочку университет → факультет → курс → группа. Смена поля сбрасывает всё, что
+   * ниже по цепочке (если оно не передано в том же запросе). Незаполненные поля выше по цепочке
+   * проставляются по выбранному значению (например, факультет и курс — по группе), а уже заполненные
+   * обязаны с ним согласовываться, иначе {@code ValidationException}.
+   *
+   * @param id идентификатор студента (Keycloak subject вызывающего)
+   * @param request изменяемые поля
+   * @return обновлённый StudentDto
+   */
+  StudentDto updateMyProfile(UUID id, UpdateStudentProfileRequest request);
 
   /**
    * Удалить студента по ID. Также удаляет пользователя из Keycloak.

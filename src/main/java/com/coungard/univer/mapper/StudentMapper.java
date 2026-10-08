@@ -21,6 +21,8 @@ public class StudentMapper {
         .birthday(student.getPerson().getBirthday())
         .enrollmentDate(student.getEnrollmentDate())
         .universityId(student.getUniversity() != null ? student.getUniversity().getId() : null)
+        .facultyId(student.getFaculty() != null ? student.getFaculty().getId() : null)
+        .yearNumber(student.getYearNumber())
         .groupId(student.getGroup() != null ? student.getGroup().getId() : null)
         .createdAt(student.getCreatedAt())
         .updatedAt(student.getUpdatedAt())
