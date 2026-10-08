@@ -1367,14 +1367,6 @@
     "postupi_url": "https://petropavlovsk-kamchatskij.postupi.online/vuz/kamgu/",
     "postupi_confidence": "exact"
   },
-  "271-dstu-dagestan": {
-    "ucheba_id": "98012",
-    "matched_title": "КарГТУ, Карагандинский государственный технический университет",
-    "score": 0.906,
-    "confidence": "fuzzy",
-    "postupi_url": "https://mahachkala.postupi.online/vuz/dgtu-mahachkala/",
-    "postupi_confidence": "exact"
-  },
   "272-dgmu": {
     "ucheba_id": "98012",
     "matched_title": "КарГТУ, Карагандинский государственный технический университет",

@@ -1,5 +1,5 @@
 -- Наполняет public.address / public.universities вузами России (issue #73): исходная запись
--- ДГТУ (первая ниже) плюс все 700 вузов из explore/*.md, подготовленных вручную по материалам
+-- ДГТУ (первая ниже) плюс 699 вузов из explore/*.md, подготовленных вручную по материалам
 -- ru.wikipedia.org и открытых справочников вузов -- ссылки указаны в разделе "Источники"
 -- каждого файла. Сгенерировано скриптами scripts/generate_universities_migration.py и
 -- scripts/generate_remaining_universities_migration.py (объединено в этот файл вручную), см.
@@ -603,9 +603,6 @@ INSERT INTO public.universities (id, name, description, address_id, rector, foun
 
 INSERT INTO public.address (id, address, postal_code, country, region, city, street, phone_fax, email, website) VALUES ('4d2569b2-d45d-4829-b64f-c8152e02d5c2', '683032, Камчатский край, г. Петропавловск-Камчатский, ул. Пограничная, д. 4', '683032', 'Россия', 'Камчатский край', 'Петропавловск-Камчатский', 'ул. Пограничная, д. 4', NULL, 'info@kamgu.ru', 'https://kamgu.ru');
 INSERT INTO public.universities (id, name, description, address_id, rector, founding_year, student_count) VALUES ('f08be936-b36c-4fb2-8afc-d371267f7ec0', 'КамГУ', 'Камчатский государственный университет имени Витуса Беринга', '4d2569b2-d45d-4829-b64f-c8152e02d5c2', 'Ребковец Ольга Александровна (и.о. с августа 2023 года, впоследствии избрана ректором)', 1958, NULL);
-
-INSERT INTO public.address (id, address, postal_code, country, region, city, street, phone_fax, email, website) VALUES ('4445c38d-1171-4c5e-8c55-821392000712', '367015, Республика Дагестан, г. Махачкала, проспект Имама Шамиля, д. 70', '367015', 'Россия', 'Дагестан', 'Махачкала', 'проспект Имама Шамиля, д. 70', NULL, 'info@dstu.ru', 'https://dstu.ru');
-INSERT INTO public.universities (id, name, description, address_id, rector, founding_year, student_count) VALUES ('dc525ece-205b-490a-be9a-3b96dad91f13', 'ДГТУ', 'Дагестанский государственный технический университет', '4445c38d-1171-4c5e-8c55-821392000712', 'информация требует проверки перед переносом в БД — актуальные данные не были подтверждены веб-поиском', 1972, NULL);
 
 INSERT INTO public.address (id, address, postal_code, country, region, city, street, phone_fax, email, website) VALUES ('f07c8d8c-465f-4d83-ae78-5f32496a15e6', '367012, Республика Дагестан, г. Махачкала, площадь им. В.И. Ленина, д. 1', '367012', 'Россия', 'Дагестан', 'Махачкала', 'площадь им. В.И. Ленина, д. 1', NULL, 'info@dgmu.ru', 'https://dgmu.ru');
 INSERT INTO public.universities (id, name, description, address_id, rector, founding_year, student_count) VALUES ('c86e1e1e-a4eb-4813-a4bd-808631d4da5c', 'ДГМУ', 'Дагестанский государственный медицинский университет', 'f07c8d8c-465f-4d83-ae78-5f32496a15e6', 'Ханалиев Висампаша Юсупович', 1932, NULL);

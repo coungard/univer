@@ -614,10 +614,6 @@ INSERT INTO public.faculties (id, name, university_id) VALUES ('18416efa-1bb6-4c
 INSERT INTO public.faculties (id, name, university_id) VALUES ('b58047ae-f92b-45f1-9121-70a9bb54152e', 'Институт права и национальной безопасности', 'fea532b8-ff50-4b8a-8a77-6e9f6007748d');
 INSERT INTO public.faculties (id, name, university_id) VALUES ('2215a32d-e757-47b0-9730-221353a87911', 'Факультет естественных и технических наук', 'f08be936-b36c-4fb2-8afc-d371267f7ec0');
 INSERT INTO public.faculties (id, name, university_id) VALUES ('bf774e01-ae13-4608-8409-a71d2d378007', 'Факультет общественных и гуманитарных наук', 'f08be936-b36c-4fb2-8afc-d371267f7ec0');
-INSERT INTO public.faculties (id, name, university_id) VALUES ('e0b9f3f3-7cca-4702-8638-9b3d0bcdc947', 'Факультет радиоэлектроники и биотехнических систем', 'dc525ece-205b-490a-be9a-3b96dad91f13');
-INSERT INTO public.faculties (id, name, university_id) VALUES ('79dc4add-41a1-4746-99b6-b7aab6be5278', 'Факультет нефти, газа и природообустройства', 'dc525ece-205b-490a-be9a-3b96dad91f13');
-INSERT INTO public.faculties (id, name, university_id) VALUES ('66c68576-682f-4a1f-b342-f597767febcc', 'Факультет компьютерных технологий и энергетики', 'dc525ece-205b-490a-be9a-3b96dad91f13');
-INSERT INTO public.faculties (id, name, university_id) VALUES ('07ba99f9-49fd-4c51-8cd5-30bd6be7102d', 'Факультет информационных систем в экономике и управлении', 'dc525ece-205b-490a-be9a-3b96dad91f13');
 INSERT INTO public.faculties (id, name, university_id) VALUES ('f38f2d64-5de4-4552-8a12-9e39e6648208', 'Институт нефти и газа', 'ad2357cd-2163-44d1-a81a-ea6ef091265a');
 INSERT INTO public.faculties (id, name, university_id) VALUES ('eba4a269-7eeb-4e25-892f-601a7c7f0e3a', 'Институт энергетики', 'ad2357cd-2163-44d1-a81a-ea6ef091265a');
 INSERT INTO public.faculties (id, name, university_id) VALUES ('eb23b575-9921-4665-a2f7-71566199249c', 'Институт прикладных информационных технологий', 'ad2357cd-2163-44d1-a81a-ea6ef091265a');
