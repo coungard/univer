@@ -51,7 +51,7 @@ public class Student implements Auditable {
   private LocalDate enrollmentDate;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "university_id", nullable = false)
+  @JoinColumn(name = "university_id")
   private University university;
 
   @ManyToOne(fetch = FetchType.LAZY)

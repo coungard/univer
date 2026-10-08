@@ -61,8 +61,11 @@ public class StudentServiceImpl implements StudentService {
     String keycloakUserId = null;
     studentValidator.validateRegisterData(registerStudentRequest);
     try {
-      University university = universityRepository.findById(registerStudentRequest.universityId())
-          .orElseThrow(() -> new ResourceNotFoundException("University not found"));
+      // Университет необязателен: в многошаговой регистрации аккаунт создаётся до выбора вуза
+      University university = registerStudentRequest.universityId() == null
+          ? null
+          : universityRepository.findById(registerStudentRequest.universityId())
+              .orElseThrow(() -> new ResourceNotFoundException("University not found"));
 
       // 2. Создаём пользователя в Keycloak
       keycloakUserId = keycloakAdminService.createUser(RegisterData.builder()
@@ -130,9 +133,14 @@ public class StudentServiceImpl implements StudentService {
     existing.getPerson().setBirthday(studentDto.birthday());
     existing.setEnrollmentDate(studentDto.enrollmentDate());
 
-    University university = universityRepository.findById(studentDto.universityId())
-        .orElseThrow(() -> new ResourceNotFoundException("University not found with id: " + studentDto.universityId()));
-    existing.setUniversity(university);
+    if (studentDto.universityId() == null) {
+      existing.setUniversity(null);
+    } else {
+      University university = universityRepository.findById(studentDto.universityId())
+          .orElseThrow(
+              () -> new ResourceNotFoundException("University not found with id: " + studentDto.universityId()));
+      existing.setUniversity(university);
+    }
 
     if (studentDto.groupId() == null) {
       existing.setGroup(null);

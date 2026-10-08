@@ -363,6 +363,22 @@ class LectureServiceTest {
   }
 
   @Test
+  void shouldReturnEmptyPageWhenStudentHasNoUniversity() {
+    // Given: студент зарегистрировался, не выбрав университет
+    UUID studentId = createStudent(null);
+    Student student = studentRepository.findById(studentId).orElseThrow();
+    student.setUniversity(null);
+    studentRepository.save(student);
+    lectureService.createLecture(createDto(Set.of(group1Id)));
+
+    // When
+    Page<LectureDto> result = lectureService.getMyLectures(studentId, PageRequest.of(0, 10));
+
+    // Then
+    assertThat(result.getContent()).isEmpty();
+  }
+
+  @Test
   void shouldThrowExceptionWhenGettingMyLecturesForNonExistentStudent() {
     assertThatThrownBy(() -> lectureService.getMyLectures(UUID.randomUUID(), PageRequest.of(0, 10)))
         .isInstanceOf(ResourceNotFoundException.class);

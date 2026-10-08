@@ -35,7 +35,6 @@ public record RegisterStudentRequest(
         @PastOrPresent(message = "Дата рождения не может быть в будущем")
         LocalDate birthday,
 
-        @NotNull(message = "ID университета обязателен")
         UUID universityId
 ) {
 }

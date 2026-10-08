@@ -171,6 +171,30 @@ class StudentServiceTest {
   }
 
   @Test
+  void shouldRegisterStudentWithoutUniversity() {
+    String mockKeycloakId = UUID.randomUUID().toString();
+    RegisterStudentRequest registerDto = new RegisterStudentRequest(
+        "ivan",
+        "Иван",
+        "Иванов",
+        null,
+        "ivan@example.com",
+        "password123",
+        null,
+        LocalDate.now().minusYears(20),
+        null
+    );
+    when(keycloakAdminService.createUser(any(RegisterData.class))).thenReturn(mockKeycloakId);
+
+    StudentDto registered = studentService.registerStudent(registerDto);
+
+    assertThat(registered.universityId()).isNull();
+    assertThat(registered.groupId()).isNull();
+    assertThat(studentService.getStudentById(registered.id()).universityId()).isNull();
+    assertThat(studentService.getStudents(PageRequest.of(0, 10)).getContent()).hasSize(1);
+  }
+
+  @Test
   void shouldDeleteKeycloakUserWhenStudentCannotBeSaved() {
     String mockKeycloakId = UUID.randomUUID().toString();
     RegisterStudentRequest registerDto = new RegisterStudentRequest(
