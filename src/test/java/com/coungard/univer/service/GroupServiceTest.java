@@ -79,6 +79,8 @@ class GroupServiceTest {
   @Autowired
   private RegionRepository regionRepository;
 
+  private UUID universityId;
+
   private UUID semesterId;
 
   @BeforeEach
@@ -93,7 +95,7 @@ class GroupServiceTest {
     University university = new University();
     university.setName("Test University");
     university.setRegion(TestRegions.create(regionRepository));
-    UUID universityId = universityRepository.save(university).getId();
+    universityId = universityRepository.save(university).getId();
 
     Faculty faculty = Faculty.builder()
         .name("Faculty of Computer Science")
@@ -226,5 +228,178 @@ class GroupServiceTest {
   void shouldThrowExceptionWhenDeletingNonExistentGroup() {
     assertThatThrownBy(() -> groupService.deleteGroup(UUID.randomUUID()))
         .isInstanceOf(ResourceNotFoundException.class);
+  }
+
+  // === GET /groups?facultyId=&yearNumber= ===
+
+  @Test
+  void shouldGetGroupsOfFacultyAndYearAcrossAllPrograms() {
+    // Given: две программы одного факультета на 2 курсе, плюс 3 курс и чужой факультет
+    UUID facultyId = createFaculty();
+    createGroup(currentSemester(createStudyYear(facultyId, 2)), "А-21");
+    createGroup(currentSemester(createStudyYear(facultyId, 2)), "Б-21");
+    createGroup(currentSemester(createStudyYear(facultyId, 3)), "А-31");
+    createGroup(currentSemester(createStudyYear(createFaculty(), 2)), "Чужая-21");
+
+    // When
+    Page<GroupDto> result = groupService.getGroups(facultyId, 2, PageRequest.of(0, 10));
+
+    // Then
+    assertThat(result.getContent()).extracting(GroupDto::name).containsExactly("А-21", "Б-21");
+    assertThat(result.getTotalElements()).isEqualTo(2);
+  }
+
+  @Test
+  void shouldFilterByFacultyOrYearAlone() {
+    UUID facultyId = createFaculty();
+    createGroup(currentSemester(createStudyYear(facultyId, 1)), "А-11");
+    createGroup(currentSemester(createStudyYear(facultyId, 2)), "А-21");
+    createGroup(currentSemester(createStudyYear(createFaculty(), 2)), "Чужая-21");
+
+    assertThat(groupService.getGroups(facultyId, null, PageRequest.of(0, 10)).getContent())
+        .extracting(GroupDto::name).containsExactly("А-11", "А-21");
+    assertThat(groupService.getGroups(null, 2, PageRequest.of(0, 10)).getContent())
+        .extracting(GroupDto::name).containsExactly("А-21", "Чужая-21");
+  }
+
+  @Test
+  void shouldReturnAllGroupsWhenNoFilterGiven() {
+    // Без фильтров правило актуального семестра не применяется — прежнее поведение
+    UUID studyYearId = createStudyYear(createFaculty(), 2);
+    LocalDate today = LocalDate.now();
+    createGroup(createSemester(studyYearId, today.minusYears(1), today.minusMonths(8)), "Прошлая");
+    createGroup(currentSemester(studyYearId), "Текущая");
+
+    Page<GroupDto> result = groupService.getGroups(null, null, PageRequest.of(0, 10));
+
+    assertThat(result.getContent()).extracting(GroupDto::name).containsExactlyInAnyOrder("Прошлая", "Текущая");
+  }
+
+  @Test
+  void shouldReturnOnlyGroupsOfSemesterRunningToday() {
+    UUID facultyId = createFaculty();
+    UUID studyYearId = createStudyYear(facultyId, 2);
+    LocalDate today = LocalDate.now();
+    createGroup(createSemester(studyYearId, today.minusMonths(8), today.minusMonths(4)), "Прошлая");
+    // Границы семестра включаются: сегодня — его первый день
+    createGroup(createSemester(studyYearId, today, today.plusMonths(3)), "Текущая");
+    createGroup(createSemester(studyYearId, today.plusMonths(5), today.plusMonths(9)), "Будущая");
+
+    Page<GroupDto> result = groupService.getGroups(facultyId, 2, PageRequest.of(0, 10));
+
+    assertThat(result.getContent()).extracting(GroupDto::name).containsExactly("Текущая");
+  }
+
+  @Test
+  void shouldReturnGroupsOfNearestUpcomingSemesterBetweenSemesters() {
+    // Каникулы: прошлый семестр закончился, следующие ещё не начались — берём ближайший из них
+    UUID facultyId = createFaculty();
+    UUID studyYearId = createStudyYear(facultyId, 2);
+    LocalDate today = LocalDate.now();
+    createGroup(createSemester(studyYearId, today.minusMonths(5), today.minusDays(10)), "Прошлая");
+    createGroup(createSemester(studyYearId, today.plusDays(20), today.plusMonths(4)), "Ближайшая");
+    createGroup(createSemester(studyYearId, today.plusMonths(6), today.plusMonths(10)), "Дальняя");
+
+    Page<GroupDto> result = groupService.getGroups(facultyId, 2, PageRequest.of(0, 10));
+
+    assertThat(result.getContent()).extracting(GroupDto::name).containsExactly("Ближайшая");
+  }
+
+  @Test
+  void shouldFallBackToLatestFinishedSemesterWhenNoUpcomingOne() {
+    // Следующий семестр ещё не заведён в справочнике — показываем последний закончившийся
+    UUID facultyId = createFaculty();
+    UUID studyYearId = createStudyYear(facultyId, 2);
+    LocalDate today = LocalDate.now();
+    createGroup(createSemester(studyYearId, today.minusMonths(12), today.minusMonths(8)), "Давняя");
+    createGroup(createSemester(studyYearId, today.minusMonths(5), today.minusDays(10)), "Последняя");
+
+    Page<GroupDto> result = groupService.getGroups(facultyId, 2, PageRequest.of(0, 10));
+
+    assertThat(result.getContent()).extracting(GroupDto::name).containsExactly("Последняя");
+  }
+
+  @Test
+  void shouldChooseSemesterIndependentlyForEachStudyYear() {
+    // У одной программы семестр идёт, у другой — каникулы: каждая даёт свой актуальный семестр
+    UUID facultyId = createFaculty();
+    UUID runningYearId = createStudyYear(facultyId, 2);
+    UUID vacationYearId = createStudyYear(facultyId, 2);
+    LocalDate today = LocalDate.now();
+    createGroup(currentSemester(runningYearId), "Идёт");
+    createGroup(createSemester(runningYearId, today.plusMonths(5), today.plusMonths(9)), "Идёт-следующий");
+    createGroup(createSemester(vacationYearId, today.plusDays(20), today.plusMonths(4)), "Каникулы-следующий");
+
+    Page<GroupDto> result = groupService.getGroups(facultyId, 2, PageRequest.of(0, 10));
+
+    assertThat(result.getContent()).extracting(GroupDto::name).containsExactly("Идёт", "Каникулы-следующий");
+  }
+
+  @Test
+  void shouldReturnEmptyPageWhenNoGroupsMatch() {
+    UUID facultyId = createFaculty();
+    createGroup(currentSemester(createStudyYear(facultyId, 2)), "А-21");
+
+    assertThat(groupService.getGroups(facultyId, 4, PageRequest.of(0, 10)).getContent()).isEmpty();
+    assertThat(groupService.getGroups(UUID.randomUUID(), 2, PageRequest.of(0, 10)).getContent()).isEmpty();
+  }
+
+  @Test
+  void shouldPaginateFilteredGroups() {
+    UUID facultyId = createFaculty();
+    UUID currentSemesterId = currentSemester(createStudyYear(facultyId, 2));
+    createGroup(currentSemesterId, "А-21");
+    createGroup(currentSemesterId, "Б-21");
+    createGroup(currentSemesterId, "В-21");
+
+    Page<GroupDto> secondPage = groupService.getGroups(facultyId, 2, PageRequest.of(1, 2));
+
+    assertThat(secondPage.getTotalElements()).isEqualTo(3);
+    assertThat(secondPage.getContent()).extracting(GroupDto::name).containsExactly("В-21");
+  }
+
+  // === Вспомогательные методы ===
+
+  private UUID createFaculty() {
+    Faculty faculty = Faculty.builder()
+        .name("Faculty " + UUID.randomUUID())
+        .university(universityRepository.getReferenceById(universityId))
+        .build();
+    return facultyRepository.save(faculty).getId();
+  }
+
+  /** Новая программа факультета и её учебный год с заданным номером курса. */
+  private UUID createStudyYear(UUID facultyId, int yearNumber) {
+    Program program = new Program();
+    program.setFacultyId(facultyId);
+    program.setCode("09.03.04");
+    program.setName("Software Engineering");
+    program.setEducationLevel("Bachelor");
+    program.setEducationForm(EducationForm.FULL_TIME);
+    program.setDurationOfStudy(Period.ofYears(4));
+    UUID programId = programRepository.save(program).getId();
+
+    StudyYear studyYear = new StudyYear();
+    studyYear.setProgram(programRepository.getReferenceById(programId));
+    studyYear.setYearNumber(yearNumber);
+    return studyYearRepository.save(studyYear).getId();
+  }
+
+  private UUID createSemester(UUID studyYearId, LocalDate startDate, LocalDate endDate) {
+    Semester semester = new Semester();
+    semester.setStudyYear(studyYearRepository.getReferenceById(studyYearId));
+    semester.setType(SemesterType.AUTUMN);
+    semester.setStartDate(startDate);
+    semester.setEndDate(endDate);
+    return semesterRepository.save(semester).getId();
+  }
+
+  private UUID currentSemester(UUID studyYearId) {
+    LocalDate today = LocalDate.now();
+    return createSemester(studyYearId, today.minusMonths(1), today.plusMonths(3));
+  }
+
+  private void createGroup(UUID semesterId, String name) {
+    groupService.createGroup(GroupDto.builder().semesterId(semesterId).name(name).build());
   }
 }

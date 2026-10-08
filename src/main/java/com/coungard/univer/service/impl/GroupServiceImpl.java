@@ -8,6 +8,7 @@ import com.coungard.univer.mapper.GroupMapper;
 import com.coungard.univer.repository.GroupRepository;
 import com.coungard.univer.repository.SemesterRepository;
 import com.coungard.univer.service.GroupService;
+import java.time.LocalDate;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -48,6 +49,16 @@ public class GroupServiceImpl implements GroupService {
   @Transactional(readOnly = true)
   public Page<GroupDto> getGroups(Pageable pageable) {
     return groupRepository.findAll(pageable).map(groupMapper::toDto);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Page<GroupDto> getGroups(UUID facultyId, Integer yearNumber, Pageable pageable) {
+    if (facultyId == null && yearNumber == null) {
+      return getGroups(pageable);
+    }
+    return groupRepository.findCurrentSemesterGroups(facultyId, yearNumber, LocalDate.now(), pageable)
+        .map(groupMapper::toDto);
   }
 
   @Override

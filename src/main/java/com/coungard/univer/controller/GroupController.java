@@ -34,14 +34,22 @@ public class GroupController {
 
   private final GroupService groupService;
 
-  @Operation(summary = "Получить группы с пагинацией")
+  @Operation(
+      summary = "Получить группы с пагинацией",
+      description = "Без фильтров — все группы. С facultyId и/или yearNumber — группы факультета на "
+          + "указанном курсе по всем программам факультета, только из актуального семестра: идущего "
+          + "сейчас, иначе ближайшего будущего, иначе последнего закончившегося. Если подходящих "
+          + "групп нет — пустая страница."
+  )
   @GetMapping
   public ResponseEntity<Page<GroupDto>> getGroups(
+      @RequestParam(required = false) UUID facultyId,
+      @RequestParam(required = false) Integer yearNumber,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "10") int size) {
 
     Pageable pageable = PageRequest.of(page, size);
-    Page<GroupDto> groups = groupService.getGroups(pageable);
+    Page<GroupDto> groups = groupService.getGroups(facultyId, yearNumber, pageable);
     return ResponseEntity.ok(groups);
   }
 

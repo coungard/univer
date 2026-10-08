@@ -32,6 +32,18 @@ public interface GroupService {
   Page<GroupDto> getGroups(Pageable pageable);
 
   /**
+   * Получить страницу групп факультета и/или курса — по всем программам факультета, только из
+   * актуального семестра каждого учебного года: идущего сейчас, иначе ближайшего будущего, иначе
+   * последнего закончившегося. Если оба фильтра не заданы — все группы, как {@link #getGroups(Pageable)}.
+   *
+   * @param facultyId идентификатор факультета, необязателен
+   * @param yearNumber номер курса, необязателен
+   * @param pageable параметры пагинации
+   * @return страница GroupDto; пустая, если подходящих групп нет
+   */
+  Page<GroupDto> getGroups(UUID facultyId, Integer yearNumber, Pageable pageable);
+
+  /**
    * Получить страницу групп по ID семестра.
    *
    * @param semesterId идентификатор семестра
