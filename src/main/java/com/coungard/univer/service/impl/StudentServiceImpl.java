@@ -240,12 +240,9 @@ public class StudentServiceImpl implements StudentService {
     Group group = groupRepository.findById(groupId)
         .orElseThrow(() -> new ResourceNotFoundException("Группа не найдена с ID: " + groupId));
 
-    // Группа привязана к факультету только по цепочке: семестр → учебный год → программа → факультет
+    // Группа привязана к факультету только по цепочке: семестр → учебный год → факультет
     StudyYear studyYear = group.getSemester().getStudyYear();
-    UUID groupFacultyId = studyYear.getProgram().getFacultyId();
-    if (groupFacultyId == null) {
-      throw new ValidationException("Группа не привязана к факультету — выбрать её нельзя");
-    }
+    UUID groupFacultyId = studyYear.getFacultyId();
 
     if (student.getFaculty() == null) {
       Faculty faculty = facultyRepository.findById(groupFacultyId)

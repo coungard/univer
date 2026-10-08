@@ -9,8 +9,8 @@ import lombok.Builder;
 public record StudyYearDto(
     UUID id,
 
-    @NotNull(message = "ID программы обязателен")
-    UUID programId,
+    @NotNull(message = "ID факультета обязателен")
+    UUID facultyId,
 
     @NotNull(message = "Номер курса обязателен")
     @Min(value = 1, message = "Номер курса не может быть меньше 1")

@@ -13,7 +13,7 @@ public class StudyYearMapper {
     }
     return StudyYearDto.builder()
         .id(studyYear.getId())
-        .programId(studyYear.getProgram().getId())
+        .facultyId(studyYear.getFacultyId())
         .yearNumber(studyYear.getYearNumber())
         .build();
   }
@@ -23,6 +23,7 @@ public class StudyYearMapper {
       return null;
     }
     StudyYear studyYear = new StudyYear();
+    studyYear.setFacultyId(dto.facultyId());
     studyYear.setYearNumber(dto.yearNumber());
     return studyYear;
   }

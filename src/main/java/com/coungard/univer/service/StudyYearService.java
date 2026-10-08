@@ -8,8 +8,8 @@ import org.springframework.data.domain.Pageable;
 public interface StudyYearService {
 
   /**
-   * Создать новый курс обучения (год обучения в рамках программы). Номер курса не может превышать
-   * длительность программы ({@code Program.durationOfStudy.years}).
+   * Создать новый курс обучения (год обучения на факультете). Номер курса уникален в пределах
+   * факультета.
    *
    * @param studyYearDto данные курса обучения
    * @return созданный StudyYearDto
@@ -33,13 +33,13 @@ public interface StudyYearService {
   Page<StudyYearDto> getStudyYears(Pageable pageable);
 
   /**
-   * Получить страницу курсов обучения по ID программы.
+   * Получить страницу курсов обучения по ID факультета.
    *
-   * @param programId идентификатор программы
+   * @param facultyId идентификатор факультета
    * @param pageable параметры пагинации и сортировки
    * @return страница StudyYearDto
    */
-  Page<StudyYearDto> getStudyYearsByProgram(UUID programId, Pageable pageable);
+  Page<StudyYearDto> getStudyYearsByFaculty(UUID facultyId, Pageable pageable);
 
   /**
    * Обновить курс обучения.

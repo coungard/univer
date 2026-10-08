@@ -17,7 +17,7 @@ public interface GroupRepository extends JpaRepository<Group, UUID> {
 
   /**
    * Группы «актуального» на дату {@code today} семестра, с необязательными фильтрами по факультету
-   * (группа → семестр → учебный год → программа → факультет) и номеру курса.
+   * (группа → семестр → учебный год → факультет) и номеру курса.
    *
    * <p>Актуальный семестр выбирается отдельно для каждого учебного года ({@code StudyYear}), в три
    * ступени: идущий сейчас ({@code startDate <= today <= endDate}); если такого нет — ближайший
@@ -25,15 +25,13 @@ public interface GroupRepository extends JpaRepository<Group, UUID> {
    *
    * <p>Незаданный фильтр записан как {@code COALESCE(:param, поле)}, а не {@code :param IS NULL OR ...}:
    * для параметра, который встречается только в {@code IS NULL}, PostgreSQL не может вывести тип
-   * («could not determine data type of parameter»). {@code IS NOT DISTINCT FROM} — потому что
-   * {@code programs.faculty_id} может быть {@code NULL}.
+   * («could not determine data type of parameter»).
    */
   @Query("""
       SELECT g FROM Group g
         JOIN g.semester s
         JOIN s.studyYear sy
-        JOIN sy.program p
-      WHERE p.facultyId IS NOT DISTINCT FROM COALESCE(:facultyId, p.facultyId)
+      WHERE sy.facultyId = COALESCE(:facultyId, sy.facultyId)
         AND sy.yearNumber = COALESCE(:yearNumber, sy.yearNumber)
         AND (
           (s.startDate <= :today AND s.endDate >= :today)

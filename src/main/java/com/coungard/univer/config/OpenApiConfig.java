@@ -29,7 +29,6 @@ public class OpenApiConfig {
   // Список тегов в нужном порядке
   private static final List<String> TAG_ORDER = asList(
       "Universities",
-      "Programs",
       "Students",
       "Teachers",
       "Faculties",

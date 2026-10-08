@@ -54,7 +54,6 @@ public class SecurityConfig {
             // Отключено намеренно: удобно для локальной отладки — требуем JWT
             // даже на списковых эндпоинтах, чтобы не путать публичное и приватное поведение.
 //            .requestMatchers("/api/v1/teachers*").permitAll()
-//            .requestMatchers("/api/v1/programs*").permitAll()
             .anyRequest().authenticated()
         )
         .oauth2ResourceServer(oauth2 -> oauth2

@@ -34,8 +34,7 @@
 ```mermaid
 graph TD
     Univ[University<br/>университет] --> Fac[Faculty<br/>факультет, напр. КСиТ]
-    Fac --> Prog[Program<br/>образовательная программа]
-    Prog --> Year[StudyYear<br/>курс: 1..5, = Program.durationOfStudy]
+    Fac --> Year[StudyYear<br/>курс: 1..5]
     Year --> Sem[Semester<br/>осенний / весенний]
     Sem --> Grp[Group<br/>студенческая группа, напр. У532-КСиТ]
     Sem --> Cycle[WeekScheduleCycle<br/>циклическое расписание семестра по чётности недели]
@@ -53,7 +52,7 @@ graph TD
 
 | Сущность | Статус |
 |---|---|
-| `University`, `Faculty`, `Program`, `Department`, `Teacher`, `Student` | ✅ реализовано |
+| `University`, `Faculty`, `Department`, `Teacher`, `Student` | ✅ реализовано |
 | `Course` (учебный предмет), `Lecture` (разовая лекция) | ✅ реализовано (Этап 2, issue #29/#30) |
 | `StudyYear` (год обучения 1–5) | ❌ не реализовано — целевая сущность |
 | `Semester` (осенний/весенний) | ❌ не реализовано — целевая сущность |
@@ -68,8 +67,7 @@ graph TD
 ```mermaid
 erDiagram
     UNIVERSITY ||--o{ FACULTY : "имеет"
-    FACULTY ||--o{ PROGRAM : "предлагает"
-    PROGRAM ||--o{ STUDY_YEAR : "1..5 курс, N = длительность программы"
+    FACULTY ||--o{ STUDY_YEAR : "1..5 курс"
     STUDY_YEAR ||--o{ SEMESTER : "осенний / весенний"
     SEMESTER ||--o{ GROUP : "формируются группы"
     FACULTY ||--o{ GROUP : "аббревиатура в названии"
@@ -97,7 +95,7 @@ erDiagram
   относится группа, и факультет — отдельные связи (`Group.studyYear`, через него `Faculty`), а не то, что
   нужно парсить из имени.
 - Если у разных университетов в системе разные соглашения об именовании — `Group.name` всё равно остаётся
-  свободной строкой; связи (`studyYear`, `program`) — источник истины, а не текст названия.
+  свободной строкой; связи (`semester` → `studyYear` → факультет) — источник истины, а не текст названия.
 
 ---
 

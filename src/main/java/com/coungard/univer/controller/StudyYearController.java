@@ -45,15 +45,15 @@ public class StudyYearController {
     return ResponseEntity.ok(studyYears);
   }
 
-  @Operation(summary = "Получить курсы обучения по ID программы с пагинацией")
-  @GetMapping("/program/{programId}")
-  public ResponseEntity<Page<StudyYearDto>> getStudyYearsByProgram(
-      @PathVariable UUID programId,
+  @Operation(summary = "Получить курсы обучения по ID факультета с пагинацией")
+  @GetMapping("/faculty/{facultyId}")
+  public ResponseEntity<Page<StudyYearDto>> getStudyYearsByFaculty(
+      @PathVariable UUID facultyId,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "10") int size) {
 
     Pageable pageable = PageRequest.of(page, size);
-    Page<StudyYearDto> studyYears = studyYearService.getStudyYearsByProgram(programId, pageable);
+    Page<StudyYearDto> studyYears = studyYearService.getStudyYearsByFaculty(facultyId, pageable);
     return ResponseEntity.ok(studyYears);
   }
 

@@ -9,7 +9,6 @@ import static org.mockito.Mockito.when;
 
 import com.coungard.univer.TestRegions;
 import com.coungard.univer.UniverApplication;
-import com.coungard.univer.dto.EducationForm;
 import com.coungard.univer.dto.SemesterType;
 import com.coungard.univer.dto.StudentDto;
 import com.coungard.univer.dto.registration.RegisterData;
@@ -18,7 +17,6 @@ import com.coungard.univer.dto.request.UpdateStudentProfileRequest;
 import com.coungard.univer.entity.Faculty;
 import com.coungard.univer.entity.Group;
 import com.coungard.univer.entity.Person;
-import com.coungard.univer.entity.Program;
 import com.coungard.univer.entity.Semester;
 import com.coungard.univer.entity.Student;
 import com.coungard.univer.entity.StudyYear;
@@ -28,7 +26,6 @@ import com.coungard.univer.exception.ResourceNotFoundException;
 import com.coungard.univer.exception.ValidationException;
 import com.coungard.univer.repository.FacultyRepository;
 import com.coungard.univer.repository.GroupRepository;
-import com.coungard.univer.repository.ProgramRepository;
 import com.coungard.univer.repository.SemesterRepository;
 import com.coungard.univer.repository.StudentRepository;
 import com.coungard.univer.repository.StudyYearRepository;
@@ -37,7 +34,6 @@ import com.coungard.univer.repository.UniversityRepository;
 import com.coungard.univer.security.KeycloakAdminService;
 import com.coungard.univer.security.Role;
 import java.time.LocalDate;
-import java.time.Period;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -87,9 +83,6 @@ class StudentServiceTest {
   private FacultyRepository facultyRepository;
 
   @Autowired
-  private ProgramRepository programRepository;
-
-  @Autowired
   private StudyYearRepository studyYearRepository;
 
   @Autowired
@@ -109,7 +102,6 @@ class StudentServiceTest {
     groupRepository.deleteAll();
     semesterRepository.deleteAll();
     studyYearRepository.deleteAll();
-    programRepository.deleteAll();
     facultyRepository.deleteAll();
     universityRepository.deleteAll();
 
@@ -658,19 +650,17 @@ class StudentServiceTest {
   }
 
   private Group createTestGroup(String name, UUID facultyId, int yearNumber) {
-    Program program = new Program();
-    program.setFacultyId(facultyId);
-    program.setCode("09.03.04");
-    program.setName("Software Engineering");
-    program.setEducationLevel("Bachelor");
-    program.setEducationForm(EducationForm.FULL_TIME);
-    program.setDurationOfStudy(Period.ofYears(4));
-    UUID programId = programRepository.save(program).getId();
-
-    StudyYear studyYear = new StudyYear();
-    studyYear.setProgram(programRepository.getReferenceById(programId));
-    studyYear.setYearNumber(yearNumber);
-    UUID studyYearId = studyYearRepository.save(studyYear).getId();
+    // Курс уникален в пределах факультета — вторая группа того же курса переиспользует учебный год
+    UUID studyYearId = studyYearRepository.findAll().stream()
+        .filter(sy -> sy.getFacultyId().equals(facultyId) && sy.getYearNumber() == yearNumber)
+        .map(StudyYear::getId)
+        .findFirst()
+        .orElseGet(() -> {
+          StudyYear studyYear = new StudyYear();
+          studyYear.setFacultyId(facultyId);
+          studyYear.setYearNumber(yearNumber);
+          return studyYearRepository.save(studyYear).getId();
+        });
 
     Semester semester = new Semester();
     semester.setStudyYear(studyYearRepository.getReferenceById(studyYearId));

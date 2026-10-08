@@ -5,19 +5,15 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.coungard.univer.TestRegions;
 import com.coungard.univer.UniverApplication;
-import com.coungard.univer.dto.EducationForm;
 import com.coungard.univer.dto.StudyYearDto;
 import com.coungard.univer.entity.Faculty;
-import com.coungard.univer.entity.Program;
 import com.coungard.univer.entity.University;
 import com.coungard.univer.exception.ResourceNotFoundException;
 import com.coungard.univer.exception.ValidationException;
 import com.coungard.univer.repository.FacultyRepository;
-import com.coungard.univer.repository.ProgramRepository;
 import com.coungard.univer.repository.StudyYearRepository;
 import com.coungard.univer.repository.RegionRepository;
 import com.coungard.univer.repository.UniversityRepository;
-import java.time.Period;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -57,9 +53,6 @@ class StudyYearServiceTest {
   private StudyYearRepository studyYearRepository;
 
   @Autowired
-  private ProgramRepository programRepository;
-
-  @Autowired
   private FacultyRepository facultyRepository;
 
   @Autowired
@@ -68,40 +61,32 @@ class StudyYearServiceTest {
   @Autowired
   private RegionRepository regionRepository;
 
-  private UUID programId;
+  private UUID universityId;
+
+  private UUID facultyId;
 
   @BeforeEach
   void setUp() {
     studyYearRepository.deleteAll();
-    programRepository.deleteAll();
     facultyRepository.deleteAll();
     universityRepository.deleteAll();
 
     University university = new University();
     university.setName("Test University");
     university.setRegion(TestRegions.create(regionRepository));
-    UUID universityId = universityRepository.save(university).getId();
+    universityId = universityRepository.save(university).getId();
 
     Faculty faculty = Faculty.builder()
         .name("Faculty of Computer Science")
         .university(universityRepository.getReferenceById(universityId))
         .build();
-    UUID facultyId = facultyRepository.save(faculty).getId();
-
-    Program program = new Program();
-    program.setFacultyId(facultyId);
-    program.setCode("09.03.04");
-    program.setName("Software Engineering");
-    program.setEducationLevel("Bachelor");
-    program.setEducationForm(EducationForm.FULL_TIME);
-    program.setDurationOfStudy(Period.ofYears(4));
-    programId = programRepository.save(program).getId();
+    facultyId = facultyRepository.save(faculty).getId();
   }
 
   @Test
   void shouldCreateAndRetrieveStudyYear() {
     // Given
-    StudyYearDto dto = StudyYearDto.builder().programId(programId).yearNumber(1).build();
+    StudyYearDto dto = StudyYearDto.builder().facultyId(facultyId).yearNumber(1).build();
 
     // When
     StudyYearDto created = studyYearService.createStudyYear(dto);
@@ -109,33 +94,51 @@ class StudyYearServiceTest {
 
     // Then
     assertThat(found).isNotNull();
-    assertThat(found.programId()).isEqualTo(programId);
+    assertThat(found.facultyId()).isEqualTo(facultyId);
     assertThat(found.yearNumber()).isEqualTo(1);
   }
 
   @Test
-  void shouldThrowExceptionWhenCreatingStudyYearWithNonExistentProgram() {
-    StudyYearDto dto = StudyYearDto.builder().programId(UUID.randomUUID()).yearNumber(1).build();
+  void shouldThrowExceptionWhenCreatingStudyYearWithNonExistentFaculty() {
+    StudyYearDto dto = StudyYearDto.builder().facultyId(UUID.randomUUID()).yearNumber(1).build();
 
     assertThatThrownBy(() -> studyYearService.createStudyYear(dto))
         .isInstanceOf(ResourceNotFoundException.class);
   }
 
   @Test
-  void shouldThrowExceptionWhenYearNumberExceedsProgramDuration() {
-    // Программа рассчитана на 4 года, курс 5 не должен пройти валидацию
-    StudyYearDto dto = StudyYearDto.builder().programId(programId).yearNumber(5).build();
+  void shouldAllowSameYearNumberOnDifferentFaculties() {
+    // Номер курса уникален в пределах факультета, а не глобально
+    UUID otherFacultyId = facultyRepository.save(Faculty.builder()
+        .name("Faculty of Economics")
+        .university(universityRepository.getReferenceById(universityId))
+        .build()).getId();
+    studyYearService.createStudyYear(StudyYearDto.builder().facultyId(facultyId).yearNumber(1).build());
 
-    assertThatThrownBy(() -> studyYearService.createStudyYear(dto))
+    StudyYearDto created = studyYearService.createStudyYear(
+        StudyYearDto.builder().facultyId(otherFacultyId).yearNumber(1).build());
+
+    assertThat(created.facultyId()).isEqualTo(otherFacultyId);
+  }
+
+  @Test
+  void shouldThrowExceptionWhenUpdatingToYearNumberTakenOnFaculty() {
+    studyYearService.createStudyYear(StudyYearDto.builder().facultyId(facultyId).yearNumber(1).build());
+    StudyYearDto second = studyYearService.createStudyYear(
+        StudyYearDto.builder().facultyId(facultyId).yearNumber(2).build());
+
+    StudyYearDto update = StudyYearDto.builder().facultyId(facultyId).yearNumber(1).build();
+
+    assertThatThrownBy(() -> studyYearService.updateStudyYear(second.id(), update))
         .isInstanceOf(ValidationException.class);
   }
 
   @Test
-  void shouldThrowExceptionWhenCreatingDuplicateYearNumberForSameProgram() {
+  void shouldThrowExceptionWhenCreatingDuplicateYearNumberForSameFaculty() {
     // Given
-    studyYearService.createStudyYear(StudyYearDto.builder().programId(programId).yearNumber(1).build());
+    studyYearService.createStudyYear(StudyYearDto.builder().facultyId(facultyId).yearNumber(1).build());
 
-    StudyYearDto duplicate = StudyYearDto.builder().programId(programId).yearNumber(1).build();
+    StudyYearDto duplicate = StudyYearDto.builder().facultyId(facultyId).yearNumber(1).build();
 
     // When & Then
     assertThatThrownBy(() -> studyYearService.createStudyYear(duplicate))
@@ -152,8 +155,8 @@ class StudyYearServiceTest {
   @Test
   void shouldGetStudyYears() {
     // Given
-    studyYearService.createStudyYear(StudyYearDto.builder().programId(programId).yearNumber(1).build());
-    studyYearService.createStudyYear(StudyYearDto.builder().programId(programId).yearNumber(2).build());
+    studyYearService.createStudyYear(StudyYearDto.builder().facultyId(facultyId).yearNumber(1).build());
+    studyYearService.createStudyYear(StudyYearDto.builder().facultyId(facultyId).yearNumber(2).build());
 
     Pageable pageable = PageRequest.of(0, 10);
 
@@ -168,14 +171,14 @@ class StudyYearServiceTest {
   }
 
   @Test
-  void shouldGetStudyYearsByProgram() {
+  void shouldGetStudyYearsByFaculty() {
     // Given
-    studyYearService.createStudyYear(StudyYearDto.builder().programId(programId).yearNumber(1).build());
+    studyYearService.createStudyYear(StudyYearDto.builder().facultyId(facultyId).yearNumber(1).build());
 
     Pageable pageable = PageRequest.of(0, 10);
 
     // When
-    Page<StudyYearDto> result = studyYearService.getStudyYearsByProgram(programId, pageable);
+    Page<StudyYearDto> result = studyYearService.getStudyYearsByFaculty(facultyId, pageable);
 
     // Then
     assertThat(result.getContent()).hasSize(1);
@@ -186,9 +189,9 @@ class StudyYearServiceTest {
   void shouldUpdateStudyYear() {
     // Given
     StudyYearDto original = studyYearService.createStudyYear(
-        StudyYearDto.builder().programId(programId).yearNumber(1).build());
+        StudyYearDto.builder().facultyId(facultyId).yearNumber(1).build());
 
-    StudyYearDto updateDto = StudyYearDto.builder().programId(programId).yearNumber(2).build();
+    StudyYearDto updateDto = StudyYearDto.builder().facultyId(facultyId).yearNumber(2).build();
 
     // When
     StudyYearDto updated = studyYearService.updateStudyYear(original.id(), updateDto);
@@ -199,7 +202,7 @@ class StudyYearServiceTest {
 
   @Test
   void shouldThrowExceptionWhenUpdatingNonExistentStudyYear() {
-    StudyYearDto dto = StudyYearDto.builder().programId(programId).yearNumber(1).build();
+    StudyYearDto dto = StudyYearDto.builder().facultyId(facultyId).yearNumber(1).build();
 
     assertThatThrownBy(() -> studyYearService.updateStudyYear(UUID.randomUUID(), dto))
         .isInstanceOf(ResourceNotFoundException.class);
@@ -209,7 +212,7 @@ class StudyYearServiceTest {
   void shouldDeleteStudyYearById() {
     // Given
     StudyYearDto studyYear = studyYearService.createStudyYear(
-        StudyYearDto.builder().programId(programId).yearNumber(1).build());
+        StudyYearDto.builder().facultyId(facultyId).yearNumber(1).build());
 
     // When
     studyYearService.deleteStudyYear(studyYear.id());
