@@ -47,6 +47,9 @@ public class GlobalExceptionHandler {
     body.put("error", "Conflict");
     body.put("message", ex.getMessage());
     body.put("field", ex.getField());
+    if (ex.getExistingId() != null) {
+      body.put("id", ex.getExistingId());
+    }
     body.put("path", "/");
 
     return new ResponseEntity<>(body, HttpStatus.CONFLICT);

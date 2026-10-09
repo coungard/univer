@@ -4,6 +4,7 @@ import com.coungard.univer.dto.StudentDto;
 import com.coungard.univer.mapper.StudentMapper;
 import com.coungard.univer.dto.registration.RegisterData;
 import com.coungard.univer.dto.registration.RegisterStudentRequest;
+import com.coungard.univer.dto.request.CreateStudentGroupRequest;
 import com.coungard.univer.dto.request.UpdateStudentProfileRequest;
 import com.coungard.univer.entity.Faculty;
 import com.coungard.univer.entity.Group;
@@ -20,6 +21,7 @@ import com.coungard.univer.repository.StudentRepository;
 import com.coungard.univer.repository.UniversityRepository;
 import com.coungard.univer.security.KeycloakAdminService;
 import com.coungard.univer.security.Role;
+import com.coungard.univer.service.GroupService;
 import com.coungard.univer.service.StudentService;
 import com.coungard.univer.validation.StudentValidator;
 import java.util.Objects;
@@ -41,6 +43,7 @@ public class StudentServiceImpl implements StudentService {
   private final UniversityRepository universityRepository;
   private final FacultyRepository facultyRepository;
   private final GroupRepository groupRepository;
+  private final GroupService groupService;
   private final StudentMapper studentMapper;
   private final StudentValidator studentValidator;
 
@@ -181,6 +184,24 @@ public class StudentServiceImpl implements StudentService {
     if (request.isGroupIdSet()) {
       changeGroup(student, request.getGroupId());
     }
+
+    Student updated = studentRepository.save(student);
+    return studentMapper.toDto(updated);
+  }
+
+  @Override
+  @Transactional
+  public StudentDto createMyGroup(UUID id, CreateStudentGroupRequest request) {
+    Student student = studentRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("Студент не найден с ID: " + id));
+
+    if (student.getFaculty() == null || student.getYearNumber() == null) {
+      throw new ValidationException("Нельзя создать группу, пока не выбраны факультет и курс");
+    }
+
+    UUID groupId = groupService.createGroupInCurrentSemester(
+        student.getFaculty().getId(), student.getYearNumber(), request.name(), request.fullName()).id();
+    student.setGroup(groupRepository.getReferenceById(groupId));
 
     Student updated = studentRepository.save(student);
     return studentMapper.toDto(updated);

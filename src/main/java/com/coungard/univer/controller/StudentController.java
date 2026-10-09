@@ -2,6 +2,7 @@ package com.coungard.univer.controller;
 
 import com.coungard.univer.dto.StudentDto;
 import com.coungard.univer.dto.registration.RegisterStudentRequest;
+import com.coungard.univer.dto.request.CreateStudentGroupRequest;
 import com.coungard.univer.dto.request.UpdateStudentProfileRequest;
 import com.coungard.univer.service.StudentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -83,6 +84,36 @@ public class StudentController {
 
     StudentDto updated = studentService.updateMyProfile(UUID.fromString(jwt.getSubject()), request);
     return ResponseEntity.ok(updated);
+  }
+
+  @Operation(
+      summary = "Создать свою группу и зачислиться в неё",
+      description = "Для случая, когда нужной группы нет в GET /groups?facultyId=&yearNumber=. Факультет "
+          + "и курс берутся из профиля студента, семестр подбирается на сервере: актуальный семестр "
+          + "курса, а если учебного года или семестров ещё нет — они создаются. Созданная группа сразу "
+          + "видна в списке групп курса."
+  )
+  @ApiResponses({
+      @ApiResponse(responseCode = "201", description = "Группа создана, студент зачислен в неё"),
+      @ApiResponse(responseCode = "409", description = "Группа с таким названием на этом курсе уже есть; "
+          + "в теле — field: \"name\" и id существующей группы"),
+      @ApiResponse(responseCode = "422", description = "В профиле не выбраны факультет и курс")
+  })
+  @PostMapping("/me/group")
+  @PreAuthorize("hasRole('STUDENT')")
+  public ResponseEntity<StudentDto> createMyGroup(
+      @AuthenticationPrincipal Jwt jwt,
+      @Valid @RequestBody CreateStudentGroupRequest request) {
+
+    StudentDto updated = studentService.createMyGroup(UUID.fromString(jwt.getSubject()), request);
+
+    URI location = ServletUriComponentsBuilder
+        .fromCurrentServletMapping()
+        .path("/api/v1/groups/{id}")
+        .buildAndExpand(updated.groupId())
+        .toUri();
+
+    return ResponseEntity.created(location).body(updated);
   }
 
   @Operation(summary = "Получить студента по ID")

@@ -2,6 +2,7 @@ package com.coungard.univer.service;
 
 import com.coungard.univer.dto.StudentDto;
 import com.coungard.univer.dto.registration.RegisterStudentRequest;
+import com.coungard.univer.dto.request.CreateStudentGroupRequest;
 import com.coungard.univer.dto.request.UpdateStudentProfileRequest;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
@@ -56,6 +57,18 @@ public interface StudentService {
    * @return обновлённый StudentDto
    */
   StudentDto updateMyProfile(UUID id, UpdateStudentProfileRequest request);
+
+  /**
+   * Создать группу самим студентом и сразу зачислить его в неё — когда нужной группы на его курсе
+   * нет. Факультет и курс берутся из профиля студента; если они не заполнены —
+   * {@code ValidationException}. Семестр подбирается на сервере, см.
+   * {@link GroupService#createGroupInCurrentSemester}.
+   *
+   * @param id идентификатор студента (Keycloak subject вызывающего)
+   * @param request название группы и его необязательная расшифровка
+   * @return обновлённый StudentDto с проставленным {@code groupId}
+   */
+  StudentDto createMyGroup(UUID id, CreateStudentGroupRequest request);
 
   /**
    * Удалить студента по ID. Также удаляет пользователя из Keycloak.

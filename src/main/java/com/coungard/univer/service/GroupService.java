@@ -16,6 +16,22 @@ public interface GroupService {
   GroupDto createGroup(GroupDto groupDto);
 
   /**
+   * Создать группу на курсе факультета, не зная семестра: группа попадает в актуальный семестр
+   * учебного года — тот же, из которого группы отдаёт {@link #getGroups(UUID, Integer, Pageable)},
+   * поэтому сразу видна в этом списке. Если учебного года {@code (facultyId, yearNumber)} или
+   * семестров у него ещё нет — они создаются; даты нового семестра — см. {@link SemesterPeriod}.
+   *
+   * @param facultyId идентификатор факультета
+   * @param yearNumber номер курса
+   * @param name название группы
+   * @param fullName полная расшифровка названия, необязательна
+   * @return созданный GroupDto
+   * @throws com.coungard.univer.exception.ConflictException группа с таким названием в этом семестре
+   *     уже есть — с ID существующей группы
+   */
+  GroupDto createGroupInCurrentSemester(UUID facultyId, Integer yearNumber, String name, String fullName);
+
+  /**
    * Получить группу по ID.
    *
    * @param id идентификатор группы
@@ -32,7 +48,7 @@ public interface GroupService {
   Page<GroupDto> getGroups(Pageable pageable);
 
   /**
-   * Получить страницу групп факультета и/или курса — по всем программам факультета, только из
+   * Получить страницу групп факультета и/или курса — только из
    * актуального семестра каждого учебного года: идущего сейчас, иначе ближайшего будущего, иначе
    * последнего закончившегося. Если оба фильтра не заданы — все группы, как {@link #getGroups(Pageable)}.
    *

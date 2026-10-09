@@ -11,6 +11,7 @@ import com.coungard.univer.entity.Faculty;
 import com.coungard.univer.entity.Semester;
 import com.coungard.univer.entity.StudyYear;
 import com.coungard.univer.entity.University;
+import com.coungard.univer.exception.ConflictException;
 import com.coungard.univer.exception.ResourceNotFoundException;
 import com.coungard.univer.repository.FacultyRepository;
 import com.coungard.univer.repository.GroupRepository;
@@ -121,6 +122,43 @@ class GroupServiceTest {
     assertThat(found).isNotNull();
     assertThat(found.semesterId()).isEqualTo(semesterId);
     assertThat(found.name()).isEqualTo("У532 КСиТ");
+  }
+
+  @Test
+  void shouldStoreFullNameAndTrimName() {
+    GroupDto created = groupService.createGroup(GroupDto.builder()
+        .semesterId(semesterId)
+        .name(" У530 ")
+        .fullName("Разработка программных и информационных систем")
+        .build());
+
+    assertThat(created.name()).isEqualTo("У530");
+    assertThat(created.fullName()).isEqualTo("Разработка программных и информационных систем");
+
+    GroupDto updated = groupService.updateGroup(created.id(),
+        GroupDto.builder().semesterId(semesterId).name("У530").fullName("  ").build());
+    assertThat(updated.fullName()).isNull();
+  }
+
+  @Test
+  void shouldRejectDuplicateNameInSameSemester() {
+    GroupDto first = groupService.createGroup(GroupDto.builder().semesterId(semesterId).name("У532 КСиТ").build());
+    GroupDto second = groupService.createGroup(GroupDto.builder().semesterId(semesterId).name("У533 КСиТ").build());
+
+    assertThatThrownBy(
+        () -> groupService.createGroup(GroupDto.builder().semesterId(semesterId).name("у532 ксит ").build()))
+        .isInstanceOfSatisfying(ConflictException.class, ex -> {
+          assertThat(ex.getField()).isEqualTo("name");
+          assertThat(ex.getExistingId()).isEqualTo(first.id());
+        });
+    assertThatThrownBy(() -> groupService.updateGroup(second.id(),
+        GroupDto.builder().semesterId(semesterId).name("У532 КСИТ").build()))
+        .isInstanceOf(ConflictException.class);
+
+    // Сама себе группа не мешает: то же название при обновлении допустимо
+    GroupDto renamed = groupService.updateGroup(first.id(),
+        GroupDto.builder().semesterId(semesterId).name("у532 КСиТ").build());
+    assertThat(renamed.name()).isEqualTo("у532 КСиТ");
   }
 
   @Test

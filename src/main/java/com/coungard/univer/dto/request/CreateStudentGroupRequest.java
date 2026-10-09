@@ -1,17 +1,13 @@
-package com.coungard.univer.dto;
+package com.coungard.univer.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import java.util.UUID;
-import lombok.Builder;
 
-@Builder
-public record GroupDto(
-    UUID id,
-
-    @NotNull(message = "ID семестра обязателен")
-    UUID semesterId,
+/**
+ * Тело {@code POST /students/me/group}: студент создаёт группу, которой нет в справочнике, и сразу в
+ * неё зачисляется. Факультет и курс в запросе не передаются — берутся из профиля студента.
+ */
+public record CreateStudentGroupRequest(
 
     @NotBlank(message = "Название группы обязательно")
     @Size(max = 64, message = "Название группы не длиннее 64 символов")

@@ -42,4 +42,11 @@ public class Group {
 
   @Column(name = "name", nullable = false, length = 64)
   private String name;
+
+  /**
+   * Полная расшифровка названия (например, «Разработка программных и информационных систем» для
+   * «У530»). Необязательна.
+   */
+  @Column(name = "full_name")
+  private String fullName;
 }

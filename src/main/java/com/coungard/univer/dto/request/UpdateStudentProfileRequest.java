@@ -1,6 +1,7 @@
 package com.coungard.univer.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import java.util.UUID;
 import lombok.Getter;
@@ -20,6 +21,7 @@ public class UpdateStudentProfileRequest {
   private UUID facultyId;
 
   @Min(value = 1, message = "Номер курса должен быть не меньше 1")
+  @Max(value = 6, message = "Номер курса должен быть не больше 6")
   private Integer yearNumber;
 
   private UUID groupId;
