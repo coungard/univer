@@ -67,6 +67,12 @@ public class UniversityRequest implements Auditable {
   @JoinColumn(name = "university_id")
   private University university;
 
+  /**
+   * Необязательное пояснение администратора при отклонении: что не так с заявкой.
+   */
+  @Column(length = 500)
+  private String comment;
+
   @CreatedDate
   @Column(name = "created_at")
   private Instant createdAt;

@@ -17,6 +17,9 @@ public interface UniversityRequestService {
    * Оставить заявку самим студентом либо обновить свою необработанную: у студента не больше одной
    * заявки в {@code PENDING}. После закрытия или отклонения прежней создаётся новая.
    *
+   * <p>Два одновременных запроса одного студента (двойное нажатие «Отправить») вторую заявку не
+   * создают: проигравший гонку получает заявку, созданную победившим.
+   *
    * @param studentId идентификатор студента (Keycloak subject вызывающего)
    * @param request название университета и необязательный регион
    * @return созданная или обновлённая заявка
@@ -55,9 +58,10 @@ public interface UniversityRequestService {
    * Отклонить заявку администратором. Профиль автора не меняется.
    *
    * @param id идентификатор заявки
+   * @param comment необязательное пояснение для студента; пустое сохраняется как {@code null}
    * @throws com.coungard.univer.exception.ValidationException заявка уже обработана
    */
-  UniversityRequestDto rejectRequest(UUID id);
+  UniversityRequestDto rejectRequest(UUID id, String comment);
 
   /**
    * Закрыть необработанную заявку студента, у которого появился университет не через заявку: он сам

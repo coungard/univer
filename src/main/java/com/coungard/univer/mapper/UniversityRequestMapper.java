@@ -18,6 +18,7 @@ public class UniversityRequestMapper {
         .regionName(request.getRegion() != null ? request.getRegion().getName() : null)
         .status(request.getStatus())
         .universityId(request.getUniversity() != null ? request.getUniversity().getId() : null)
+        .comment(request.getComment())
         .studentId(request.getStudent().getId())
         .studentUsername(request.getStudent().getPerson().getUsername())
         .studentFullname(request.getStudent().getPerson().getFullname())

@@ -23,7 +23,16 @@ import com.coungard.univer.repository.StudentRepository;
 import com.coungard.univer.repository.UniversityRepository;
 import com.coungard.univer.repository.UniversityRequestRepository;
 import com.coungard.univer.security.KeycloakAdminService;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +42,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -77,6 +87,9 @@ class UniversityRequestServiceTest {
 
   @Autowired
   private RegionRepository regionRepository;
+
+  @Autowired
+  private JdbcTemplate jdbcTemplate;
 
   @MockBean
   private KeycloakAdminService keycloakAdminService;
@@ -190,11 +203,57 @@ class UniversityRequestServiceTest {
     UniversityRequestDto request = universityRequestService.submitMyRequest(studentId,
         new SubmitUniversityRequest("asdf", null));
 
-    UniversityRequestDto rejected = universityRequestService.rejectRequest(request.id());
+    UniversityRequestDto rejected = universityRequestService.rejectRequest(
+        request.id(), "  Это не университет ");
 
     assertThat(rejected.status()).isEqualTo(UniversityRequestStatus.REJECTED);
     assertThat(rejected.universityId()).isNull();
+    assertThat(rejected.comment()).isEqualTo("Это не университет");
     assertThat(studentService.getStudentById(studentId).universityId()).isNull();
+    assertThat(universityRequestService.getMyRequest(studentId).comment()).isEqualTo("Это не университет");
+  }
+
+  @Test
+  void shouldRejectRequestWithoutComment() {
+    UUID first = universityRequestService.submitMyRequest(studentId,
+        new SubmitUniversityRequest("asdf", null)).id();
+    UUID second = universityRequestService.submitMyRequest(createStudent("petr"),
+        new SubmitUniversityRequest("asdf", null)).id();
+
+    assertThat(universityRequestService.rejectRequest(first, null).comment()).isNull();
+    assertThat(universityRequestService.rejectRequest(second, "   ").comment()).isNull();
+  }
+
+  @Test
+  void shouldKeepSingleRequestWhenSubmittedConcurrently() throws Exception {
+    // Схему в тестах создаёт Hibernate, а не Flyway — частичный уникальный индекс из V39 заводим сами
+    jdbcTemplate.execute("CREATE UNIQUE INDEX IF NOT EXISTS uq_university_request_pending_student "
+        + "ON university_requests(student_id) WHERE status = 'PENDING'");
+
+    int threads = 8;
+    ExecutorService executor = Executors.newFixedThreadPool(threads);
+    CountDownLatch start = new CountDownLatch(1);
+    try {
+      List<Future<UniversityRequestDto>> results = new ArrayList<>();
+      for (int i = 0; i < threads; i++) {
+        results.add(executor.submit(() -> {
+          start.await();
+          return universityRequestService.submitMyRequest(studentId,
+              new SubmitUniversityRequest("Техникум", region.getId()));
+        }));
+      }
+      start.countDown();
+
+      // Никто не падает с ошибкой, и все получают одну и ту же заявку
+      Set<UUID> ids = new HashSet<>();
+      for (Future<UniversityRequestDto> result : results) {
+        ids.add(result.get(30, TimeUnit.SECONDS).id());
+      }
+      assertThat(ids).hasSize(1);
+      assertThat(universityRequestRepository.count()).isEqualTo(1);
+    } finally {
+      executor.shutdownNow();
+    }
   }
 
   @Test
@@ -205,9 +264,9 @@ class UniversityRequestServiceTest {
 
     UUID rejectedId = universityRequestService.submitMyRequest(createStudent("petr"),
         new SubmitUniversityRequest("Техникум", null)).id();
-    universityRequestService.rejectRequest(rejectedId);
+    universityRequestService.rejectRequest(rejectedId, null);
 
-    assertThatThrownBy(() -> universityRequestService.rejectRequest(completedId))
+    assertThatThrownBy(() -> universityRequestService.rejectRequest(completedId, null))
         .isInstanceOf(ValidationException.class);
     assertThatThrownBy(() -> universityRequestService.completeRequest(rejectedId, universityId))
         .isInstanceOf(ValidationException.class);
@@ -223,7 +282,7 @@ class UniversityRequestServiceTest {
     assertThatThrownBy(() -> universityRequestService.completeRequest(UUID.randomUUID(), universityId))
         .isInstanceOf(ResourceNotFoundException.class)
         .hasMessageContaining("Заявка не найдена");
-    assertThatThrownBy(() -> universityRequestService.rejectRequest(UUID.randomUUID()))
+    assertThatThrownBy(() -> universityRequestService.rejectRequest(UUID.randomUUID(), null))
         .isInstanceOf(ResourceNotFoundException.class);
     assertThatThrownBy(() -> universityRequestService.completeRequest(requestId, UUID.randomUUID()))
         .isInstanceOf(ResourceNotFoundException.class)
@@ -236,7 +295,7 @@ class UniversityRequestServiceTest {
   void shouldCreateNewRequestAfterPreviousOneIsRejected() {
     UUID rejectedId = universityRequestService.submitMyRequest(studentId,
         new SubmitUniversityRequest("asdf", null)).id();
-    universityRequestService.rejectRequest(rejectedId);
+    universityRequestService.rejectRequest(rejectedId, null);
 
     UniversityRequestDto next = universityRequestService.submitMyRequest(studentId,
         new SubmitUniversityRequest("Техникум", region.getId()));
@@ -276,7 +335,7 @@ class UniversityRequestServiceTest {
     assertThat(closed.id()).isEqualTo(requestId);
     assertThat(closed.status()).isEqualTo(UniversityRequestStatus.COMPLETED);
     assertThat(closed.universityId()).isEqualTo(universityId);
-    assertThatThrownBy(() -> universityRequestService.rejectRequest(requestId))
+    assertThatThrownBy(() -> universityRequestService.rejectRequest(requestId, null))
         .isInstanceOf(ValidationException.class);
   }
 
@@ -334,7 +393,7 @@ class UniversityRequestServiceTest {
     UUID third = universityRequestService.submitMyRequest(createStudent("anna"),
         new SubmitUniversityRequest("asdf", null)).id();
     universityRequestService.completeRequest(first, universityId);
-    universityRequestService.rejectRequest(third);
+    universityRequestService.rejectRequest(third, null);
 
     Page<UniversityRequestDto> all = universityRequestService.getRequests(null, OLDEST_FIRST);
     assertThat(all.getContent()).extracting(UniversityRequestDto::id).containsExactly(first, second, third);

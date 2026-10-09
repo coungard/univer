@@ -15,6 +15,8 @@ CREATE TABLE university_requests (
     -- Университет, которым заявка закрыта: добавленный администратором либо выбранный самим студентом,
     -- пока заявка ждала.
     university_id UUID,
+    -- Необязательное пояснение администратора при отклонении: студент видит, что исправить.
+    comment VARCHAR(500),
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP,
     -- ON DELETE CASCADE: заявка без автора никому не нужна.

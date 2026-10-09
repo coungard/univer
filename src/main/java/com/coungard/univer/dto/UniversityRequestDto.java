@@ -23,6 +23,9 @@ public record UniversityRequestDto(
     @Schema(description = "Университет, которым заявка закрыта; заполнен только у COMPLETED")
     UUID universityId,
 
+    @Schema(description = "Пояснение администратора при отклонении; заполнено только у REJECTED и не всегда")
+    String comment,
+
     @Schema(description = "Автор заявки")
     UUID studentId,
 

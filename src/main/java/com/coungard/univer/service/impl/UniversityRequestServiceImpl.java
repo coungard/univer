@@ -17,10 +17,13 @@ import com.coungard.univer.repository.UniversityRequestRepository;
 import com.coungard.univer.service.UniversityRequestService;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.util.StringUtils;
 
 @Service
 @RequiredArgsConstructor
@@ -31,10 +34,25 @@ public class UniversityRequestServiceImpl implements UniversityRequestService {
   private final UniversityRepository universityRepository;
   private final RegionRepository regionRepository;
   private final UniversityRequestMapper universityRequestMapper;
+  private final TransactionTemplate transactionTemplate;
 
   @Override
-  @Transactional
   public UniversityRequestDto submitMyRequest(UUID studentId, SubmitUniversityRequest request) {
+    // Транзакции здесь программные: после нарушения уникального индекса транзакция уже непригодна,
+    // и уже созданную заявку приходится читать в новой
+    try {
+      return transactionTemplate.execute(status -> saveMyRequest(studentId, request));
+    } catch (DataIntegrityViolationException ex) {
+      // Гонка двух запросов одного студента: оба не нашли необработанной заявки, второй INSERT
+      // остановил uq_university_request_pending_student. Отдаём заявку, созданную первым
+      return transactionTemplate.execute(status -> universityRequestRepository
+          .findByStudentIdAndStatus(studentId, UniversityRequestStatus.PENDING)
+          .map(universityRequestMapper::toDto)
+          .orElseThrow(() -> ex));
+    }
+  }
+
+  private UniversityRequestDto saveMyRequest(UUID studentId, SubmitUniversityRequest request) {
     Student student = studentRepository.findById(studentId)
         .orElseThrow(() -> new ResourceNotFoundException("Студент не найден с ID: " + studentId));
 
@@ -59,7 +77,8 @@ public class UniversityRequestServiceImpl implements UniversityRequestService {
     universityRequest.setName(request.name().strip());
     universityRequest.setRegion(region);
 
-    UniversityRequest saved = universityRequestRepository.save(universityRequest);
+    // saveAndFlush, а не save: нарушение уникального индекса должно всплыть здесь, а не на коммите
+    UniversityRequest saved = universityRequestRepository.saveAndFlush(universityRequest);
     return universityRequestMapper.toDto(saved);
   }
 
@@ -105,9 +124,10 @@ public class UniversityRequestServiceImpl implements UniversityRequestService {
 
   @Override
   @Transactional
-  public UniversityRequestDto rejectRequest(UUID id) {
+  public UniversityRequestDto rejectRequest(UUID id, String comment) {
     UniversityRequest universityRequest = findPendingRequest(id);
     universityRequest.setStatus(UniversityRequestStatus.REJECTED);
+    universityRequest.setComment(StringUtils.hasText(comment) ? comment.strip() : null);
 
     UniversityRequest saved = universityRequestRepository.save(universityRequest);
     return universityRequestMapper.toDto(saved);

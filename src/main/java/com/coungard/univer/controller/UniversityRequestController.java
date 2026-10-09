@@ -3,6 +3,7 @@ package com.coungard.univer.controller;
 import com.coungard.univer.dto.UniversityRequestDto;
 import com.coungard.univer.dto.UniversityRequestStatus;
 import com.coungard.univer.dto.request.CompleteUniversityRequest;
+import com.coungard.univer.dto.request.RejectUniversityRequest;
 import com.coungard.univer.service.UniversityRequestService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -73,7 +74,8 @@ public class UniversityRequestController {
 
   @Operation(
       summary = "Отклонить заявку",
-      description = "Не университет, дубль, мусор. Профиль автора заявки не меняется."
+      description = "Не университет, дубль, мусор. Профиль автора заявки не меняется. Тело необязательно: "
+          + "в comment можно пояснить студенту, почему заявка отклонена."
   )
   @ApiResponses({
       @ApiResponse(responseCode = "200", description = "Заявка отклонена"),
@@ -82,8 +84,12 @@ public class UniversityRequestController {
   })
   @PostMapping("/{id}/reject")
   @PreAuthorize("hasRole('ADMIN')")
-  public ResponseEntity<UniversityRequestDto> rejectRequest(@PathVariable UUID id) {
-    UniversityRequestDto rejected = universityRequestService.rejectRequest(id);
+  public ResponseEntity<UniversityRequestDto> rejectRequest(
+      @PathVariable UUID id,
+      @Valid @RequestBody(required = false) RejectUniversityRequest request) {
+
+    UniversityRequestDto rejected = universityRequestService.rejectRequest(
+        id, request != null ? request.comment() : null);
     return ResponseEntity.ok(rejected);
   }
 }
