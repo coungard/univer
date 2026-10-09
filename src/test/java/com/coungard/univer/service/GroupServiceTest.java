@@ -5,24 +5,20 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.coungard.univer.TestRegions;
 import com.coungard.univer.UniverApplication;
-import com.coungard.univer.dto.EducationForm;
 import com.coungard.univer.dto.GroupDto;
 import com.coungard.univer.dto.SemesterType;
 import com.coungard.univer.entity.Faculty;
-import com.coungard.univer.entity.Program;
 import com.coungard.univer.entity.Semester;
 import com.coungard.univer.entity.StudyYear;
 import com.coungard.univer.entity.University;
 import com.coungard.univer.exception.ResourceNotFoundException;
 import com.coungard.univer.repository.FacultyRepository;
 import com.coungard.univer.repository.GroupRepository;
-import com.coungard.univer.repository.ProgramRepository;
 import com.coungard.univer.repository.SemesterRepository;
 import com.coungard.univer.repository.StudyYearRepository;
 import com.coungard.univer.repository.RegionRepository;
 import com.coungard.univer.repository.UniversityRepository;
 import java.time.LocalDate;
-import java.time.Period;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -68,9 +64,6 @@ class GroupServiceTest {
   private StudyYearRepository studyYearRepository;
 
   @Autowired
-  private ProgramRepository programRepository;
-
-  @Autowired
   private FacultyRepository facultyRepository;
 
   @Autowired
@@ -88,7 +81,6 @@ class GroupServiceTest {
     groupRepository.deleteAll();
     semesterRepository.deleteAll();
     studyYearRepository.deleteAll();
-    programRepository.deleteAll();
     facultyRepository.deleteAll();
     universityRepository.deleteAll();
 
@@ -103,17 +95,8 @@ class GroupServiceTest {
         .build();
     UUID facultyId = facultyRepository.save(faculty).getId();
 
-    Program program = new Program();
-    program.setFacultyId(facultyId);
-    program.setCode("09.03.04");
-    program.setName("Software Engineering");
-    program.setEducationLevel("Bachelor");
-    program.setEducationForm(EducationForm.FULL_TIME);
-    program.setDurationOfStudy(Period.ofYears(4));
-    UUID programId = programRepository.save(program).getId();
-
     StudyYear studyYear = new StudyYear();
-    studyYear.setProgram(programRepository.getReferenceById(programId));
+    studyYear.setFacultyId(facultyId);
     studyYear.setYearNumber(5);
     UUID studyYearId = studyYearRepository.save(studyYear).getId();
 
@@ -233,11 +216,12 @@ class GroupServiceTest {
   // === GET /groups?facultyId=&yearNumber= ===
 
   @Test
-  void shouldGetGroupsOfFacultyAndYearAcrossAllPrograms() {
-    // Given: две программы одного факультета на 2 курсе, плюс 3 курс и чужой факультет
+  void shouldGetGroupsOfFacultyAndYear() {
+    // Given: две группы факультета на 2 курсе, плюс 3 курс и чужой факультет
     UUID facultyId = createFaculty();
-    createGroup(currentSemester(createStudyYear(facultyId, 2)), "А-21");
-    createGroup(currentSemester(createStudyYear(facultyId, 2)), "Б-21");
+    UUID secondYearSemesterId = currentSemester(createStudyYear(facultyId, 2));
+    createGroup(secondYearSemesterId, "А-21");
+    createGroup(secondYearSemesterId, "Б-21");
     createGroup(currentSemester(createStudyYear(facultyId, 3)), "А-31");
     createGroup(currentSemester(createStudyYear(createFaculty(), 2)), "Чужая-21");
 
@@ -321,16 +305,16 @@ class GroupServiceTest {
 
   @Test
   void shouldChooseSemesterIndependentlyForEachStudyYear() {
-    // У одной программы семестр идёт, у другой — каникулы: каждая даёт свой актуальный семестр
+    // У одного курса семестр идёт, у другого — каникулы: каждый даёт свой актуальный семестр
     UUID facultyId = createFaculty();
     UUID runningYearId = createStudyYear(facultyId, 2);
-    UUID vacationYearId = createStudyYear(facultyId, 2);
+    UUID vacationYearId = createStudyYear(facultyId, 3);
     LocalDate today = LocalDate.now();
     createGroup(currentSemester(runningYearId), "Идёт");
     createGroup(createSemester(runningYearId, today.plusMonths(5), today.plusMonths(9)), "Идёт-следующий");
     createGroup(createSemester(vacationYearId, today.plusDays(20), today.plusMonths(4)), "Каникулы-следующий");
 
-    Page<GroupDto> result = groupService.getGroups(facultyId, 2, PageRequest.of(0, 10));
+    Page<GroupDto> result = groupService.getGroups(facultyId, null, PageRequest.of(0, 10));
 
     assertThat(result.getContent()).extracting(GroupDto::name).containsExactly("Идёт", "Каникулы-следующий");
   }
@@ -368,19 +352,10 @@ class GroupServiceTest {
     return facultyRepository.save(faculty).getId();
   }
 
-  /** Новая программа факультета и её учебный год с заданным номером курса. */
+  /** Учебный год факультета с заданным номером курса. */
   private UUID createStudyYear(UUID facultyId, int yearNumber) {
-    Program program = new Program();
-    program.setFacultyId(facultyId);
-    program.setCode("09.03.04");
-    program.setName("Software Engineering");
-    program.setEducationLevel("Bachelor");
-    program.setEducationForm(EducationForm.FULL_TIME);
-    program.setDurationOfStudy(Period.ofYears(4));
-    UUID programId = programRepository.save(program).getId();
-
     StudyYear studyYear = new StudyYear();
-    studyYear.setProgram(programRepository.getReferenceById(programId));
+    studyYear.setFacultyId(facultyId);
     studyYear.setYearNumber(yearNumber);
     return studyYearRepository.save(studyYear).getId();
   }

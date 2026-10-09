@@ -1,12 +1,11 @@
 package com.coungard.univer.service.impl;
 
 import com.coungard.univer.dto.StudyYearDto;
-import com.coungard.univer.entity.Program;
 import com.coungard.univer.entity.StudyYear;
 import com.coungard.univer.exception.ResourceNotFoundException;
 import com.coungard.univer.exception.ValidationException;
 import com.coungard.univer.mapper.StudyYearMapper;
-import com.coungard.univer.repository.ProgramRepository;
+import com.coungard.univer.repository.FacultyRepository;
 import com.coungard.univer.repository.StudyYearRepository;
 import com.coungard.univer.service.StudyYearService;
 import java.util.UUID;
@@ -21,20 +20,17 @@ import org.springframework.transaction.annotation.Transactional;
 public class StudyYearServiceImpl implements StudyYearService {
 
   private final StudyYearRepository studyYearRepository;
-  private final ProgramRepository programRepository;
+  private final FacultyRepository facultyRepository;
   private final StudyYearMapper studyYearMapper;
 
   @Override
   @Transactional
   public StudyYearDto createStudyYear(StudyYearDto studyYearDto) {
-    Program program = programRepository.findById(studyYearDto.programId())
-        .orElseThrow(() -> new ResourceNotFoundException("Программа не найдена с ID: " + studyYearDto.programId()));
+    validateFacultyExists(studyYearDto.facultyId());
 
-    validateYearNumber(program, studyYearDto.yearNumber());
-    validateUnique(studyYearDto.programId(), studyYearDto.yearNumber());
+    validateUnique(studyYearDto.facultyId(), studyYearDto.yearNumber());
 
     StudyYear studyYear = studyYearMapper.toEntity(studyYearDto);
-    studyYear.setProgram(program);
 
     StudyYear saved = studyYearRepository.save(studyYear);
     return studyYearMapper.toDto(saved);
@@ -56,8 +52,8 @@ public class StudyYearServiceImpl implements StudyYearService {
 
   @Override
   @Transactional(readOnly = true)
-  public Page<StudyYearDto> getStudyYearsByProgram(UUID programId, Pageable pageable) {
-    return studyYearRepository.findByProgramId(programId, pageable).map(studyYearMapper::toDto);
+  public Page<StudyYearDto> getStudyYearsByFaculty(UUID facultyId, Pageable pageable) {
+    return studyYearRepository.findByFacultyId(facultyId, pageable).map(studyYearMapper::toDto);
   }
 
   @Override
@@ -66,18 +62,15 @@ public class StudyYearServiceImpl implements StudyYearService {
     StudyYear existing = studyYearRepository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("Курс обучения не найден с ID: " + id));
 
-    Program program = programRepository.findById(studyYearDto.programId())
-        .orElseThrow(() -> new ResourceNotFoundException("Программа не найдена с ID: " + studyYearDto.programId()));
-
-    validateYearNumber(program, studyYearDto.yearNumber());
+    validateFacultyExists(studyYearDto.facultyId());
 
     boolean changed = !existing.getYearNumber().equals(studyYearDto.yearNumber())
-        || !existing.getProgram().getId().equals(studyYearDto.programId());
+        || !existing.getFacultyId().equals(studyYearDto.facultyId());
     if (changed) {
-      validateUnique(studyYearDto.programId(), studyYearDto.yearNumber());
+      validateUnique(studyYearDto.facultyId(), studyYearDto.yearNumber());
     }
 
-    existing.setProgram(program);
+    existing.setFacultyId(studyYearDto.facultyId());
     existing.setYearNumber(studyYearDto.yearNumber());
 
     StudyYear updated = studyYearRepository.save(existing);
@@ -93,21 +86,16 @@ public class StudyYearServiceImpl implements StudyYearService {
     studyYearRepository.deleteById(id);
   }
 
-  private void validateYearNumber(Program program, Integer yearNumber) {
-    if (program.getDurationOfStudy() == null) {
-      return;
-    }
-    int maxYears = program.getDurationOfStudy().getYears();
-    if (maxYears > 0 && yearNumber > maxYears) {
-      throw new ValidationException(
-          "Курс " + yearNumber + " превышает длительность программы (" + maxYears + " лет)");
+  private void validateFacultyExists(UUID facultyId) {
+    if (!facultyRepository.existsById(facultyId)) {
+      throw new ResourceNotFoundException("Факультет не найден с ID: " + facultyId);
     }
   }
 
-  private void validateUnique(UUID programId, Integer yearNumber) {
-    if (studyYearRepository.existsByProgramIdAndYearNumber(programId, yearNumber)) {
+  private void validateUnique(UUID facultyId, Integer yearNumber) {
+    if (studyYearRepository.existsByFacultyIdAndYearNumber(facultyId, yearNumber)) {
       throw new ValidationException(
-          "Курс " + yearNumber + " уже существует для программы с ID: " + programId);
+          "Курс " + yearNumber + " уже существует на факультете с ID: " + facultyId);
     }
   }
 }

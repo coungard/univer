@@ -88,19 +88,9 @@
 ### DepartmentDto
 `id`, `name`★, `description`, `facultyId`.
 
-### ProgramDto (ответ)
-`id`, `facultyId`, `code`, `name`, `profession`, `direction`, `educationLevel`,
-`educationForm: EducationForm`, `durationOfStudy: StudyDuration`, `qualification`.
-
-### CreateProgramRequest (запрос create/update программы)
-`facultyId`★, `code`★, `name`★, `profession`, `direction`, `educationLevel`★, `educationForm`,
-`durationOfStudy`★, `qualification`.
-
-- `EducationForm` (enum): `FULL_TIME` | `PART_TIME` | `FULL_AND_PART_TIME`.
-- `StudyDuration`: `{ "years": int, "months": int, "days": int }`.
-
 ### StudyYearDto
-`id`, `programId`★, `yearNumber`★ (`≥ 1`).
+`id`, `facultyId`★, `yearNumber`★ (`≥ 1`). Учебный год — это курс факультета («1 курс», «2 курс»);
+пара `facultyId` + `yearNumber` уникальна.
 
 ### SemesterDto
 `id`, `studyYearId`★, `type: SemesterType`★, `startDate`★, `endDate`★.
@@ -250,23 +240,12 @@
 > `GET`-эндпоинты публичны по той же причине, что и у `Faculties`/`Universities` — нужны для выбора
 > кафедры на экране регистрации преподавателя.
 
-## Programs — `/api/v1/programs`
-
-| Метод | Путь | Auth | Тело запроса | Тело ответа |
-|---|---|---|---|---|
-| POST | `/` | любая роль | `CreateProgramRequest` | `201` + `ProgramDto` |
-| GET | `/{id}` | любая роль | — | `ProgramDto` |
-| GET | `/` | любая роль | — (`?page&size`) | `Page<ProgramDto>` |
-| GET | `/faculty/{facultyId}` | `ADMIN`/`TEACHER`/`STUDENT` | — (`?page&size`) | `Page<ProgramDto>` |
-| PUT | `/{id}` | `ADMIN` | `CreateProgramRequest` | `ProgramDto` |
-| DELETE | `/{id}` | `ADMIN` | — | `204` |
-
 ## StudyYears — `/api/v1/study-years`
 
 | Метод | Путь | Auth | Тело запроса | Тело ответа |
 |---|---|---|---|---|
 | GET | `/` | любая роль | — (`?page&size`) | `Page<StudyYearDto>` |
-| GET | `/program/{programId}` | любая роль | — (`?page&size`) | `Page<StudyYearDto>` |
+| GET | `/faculty/{facultyId}` | любая роль | — (`?page&size`) | `Page<StudyYearDto>` |
 | GET | `/{id}` | любая роль | — | `StudyYearDto` |
 | POST | `/` | `ADMIN` | `StudyYearDto` | `201` + `StudyYearDto` |
 | PUT | `/{id}` | `ADMIN` | `StudyYearDto` | `StudyYearDto` |
@@ -352,13 +331,13 @@
 | PUT | `/{id}` | `ADMIN` | `GroupDto` | `GroupDto` |
 | DELETE | `/{id}` | `ADMIN` | — | `204` |
 
-- **`GET /?facultyId=…&yearNumber=…`** — группы факультета на указанном курсе по всем программам
-  факультета, одним запросом вместо обхода цепочки программа → учебный год → семестр → группа
+- **`GET /?facultyId=…&yearNumber=…`** — группы факультета на указанном курсе,
+  одним запросом вместо обхода цепочки учебный год → семестр → группа
   (последний шаг регистрации студента). Оба параметра необязательны и работают по отдельности: только
   `facultyId` — все курсы факультета, только `yearNumber` — этот курс на всех факультетах. Без обоих
   параметров — прежнее поведение: все группы, без отбора по семестру.
 - С любым из фильтров в выдачу попадают только группы **актуального семестра**. Он выбирается на
-  сегодняшнюю дату отдельно для каждого учебного года (программа + курс), в три ступени:
+  сегодняшнюю дату отдельно для каждого учебного года (факультет + курс), в три ступени:
   1. семестр, который идёт сейчас (`startDate ≤ сегодня ≤ endDate`, границы включаются);
   2. если такого нет (каникулы) — ближайший будущий;
   3. если нет и будущих (следующий семестр ещё не заведён) — последний закончившийся.
@@ -437,11 +416,11 @@
     четырьмя полями. Повторная отправка текущего значения сменой не считается и ничего не
     сбрасывает. Явный `null` очищает поле и всё, что ниже.
   - **Незаполненное выше по цепочке проставляется автоматически**: `groupId` проставляет
-    `facultyId` и `yearNumber` по цепочке группы (группа → семестр → учебный год → программа →
-    факультет), а `facultyId` или `groupId` — ещё и `universityId`, если он не выбран.
+    `facultyId` и `yearNumber` по цепочке группы (группа → семестр → учебный год → факультет),
+    а `facultyId` или `groupId` — ещё и `universityId`, если он не выбран.
   - **Уже заполненное обязано согласовываться**, иначе `422` с пояснением в `message`: факультет
     должен принадлежать университету студента, группа — его факультету и курсу; курс нельзя выбрать
-    без факультета; группу, чья программа не привязана к факультету, выбрать нельзя.
+    без факультета.
   - Несуществующий `universityId`/`facultyId`/`groupId` — `404`; `yearNumber < 1` — `400`.
   - После выбора группы `GET /lectures/me` сразу отдаёт её расписание.
 - **`GET /{id}`** требует роль `STUDENT` у самого вызывающего (эндпоинт не проверяет, что `id` совпадает с
@@ -509,9 +488,5 @@
 - `Faculties`/`Departments` create/update/delete не защищены ролью (см. врезку в разделе `Faculties`
   выше) — стоит уточнить у бэкенд-команды, до того как открывать соответствующие экраны не-`ADMIN`
   пользователям.
-- `Programs`: часть эндпоинтов (`POST /`, `GET /{id}`, `GET /`) не имеет `@PreAuthorize` вовсе (закомментирован
-  в коде), а `GET /faculty/{facultyId}` требует одну из трёх ролей — несогласованность между эндпоинтами
-  одного ресурса, доступ де-факто одинаковый (любой аутентифицированный), но стоит иметь в виду при
-  ревью бэкенда.
 - `Teachers`: `POST /` (без `/register`) не привязан к Keycloak и не имеет ограничения по роли — не
   использовать этот путь для функции «регистрация преподавателя» в приложении, только `POST /register`.

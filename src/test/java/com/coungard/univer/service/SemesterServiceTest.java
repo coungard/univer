@@ -5,23 +5,19 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.coungard.univer.TestRegions;
 import com.coungard.univer.UniverApplication;
-import com.coungard.univer.dto.EducationForm;
 import com.coungard.univer.dto.SemesterDto;
 import com.coungard.univer.dto.SemesterType;
 import com.coungard.univer.entity.Faculty;
-import com.coungard.univer.entity.Program;
 import com.coungard.univer.entity.StudyYear;
 import com.coungard.univer.entity.University;
 import com.coungard.univer.exception.ResourceNotFoundException;
 import com.coungard.univer.exception.ValidationException;
 import com.coungard.univer.repository.FacultyRepository;
-import com.coungard.univer.repository.ProgramRepository;
 import com.coungard.univer.repository.SemesterRepository;
 import com.coungard.univer.repository.StudyYearRepository;
 import com.coungard.univer.repository.RegionRepository;
 import com.coungard.univer.repository.UniversityRepository;
 import java.time.LocalDate;
-import java.time.Period;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -64,9 +60,6 @@ class SemesterServiceTest {
   private StudyYearRepository studyYearRepository;
 
   @Autowired
-  private ProgramRepository programRepository;
-
-  @Autowired
   private FacultyRepository facultyRepository;
 
   @Autowired
@@ -81,7 +74,6 @@ class SemesterServiceTest {
   void setUp() {
     semesterRepository.deleteAll();
     studyYearRepository.deleteAll();
-    programRepository.deleteAll();
     facultyRepository.deleteAll();
     universityRepository.deleteAll();
 
@@ -96,17 +88,8 @@ class SemesterServiceTest {
         .build();
     UUID facultyId = facultyRepository.save(faculty).getId();
 
-    Program program = new Program();
-    program.setFacultyId(facultyId);
-    program.setCode("09.03.04");
-    program.setName("Software Engineering");
-    program.setEducationLevel("Bachelor");
-    program.setEducationForm(EducationForm.FULL_TIME);
-    program.setDurationOfStudy(Period.ofYears(4));
-    UUID programId = programRepository.save(program).getId();
-
     StudyYear studyYear = new StudyYear();
-    studyYear.setProgram(programRepository.getReferenceById(programId));
+    studyYear.setFacultyId(facultyId);
     studyYear.setYearNumber(1);
     studyYearId = studyYearRepository.save(studyYear).getId();
   }

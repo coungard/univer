@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.coungard.univer.TestRegions;
 import com.coungard.univer.UniverApplication;
-import com.coungard.univer.dto.EducationForm;
 import com.coungard.univer.dto.LectureDto;
 import com.coungard.univer.dto.SemesterType;
 import com.coungard.univer.dto.WeekParity;
@@ -16,7 +15,6 @@ import com.coungard.univer.entity.Faculty;
 import com.coungard.univer.entity.Group;
 import com.coungard.univer.entity.Pair;
 import com.coungard.univer.entity.Person;
-import com.coungard.univer.entity.Program;
 import com.coungard.univer.entity.Semester;
 import com.coungard.univer.entity.Student;
 import com.coungard.univer.entity.StudyYear;
@@ -30,7 +28,6 @@ import com.coungard.univer.repository.FacultyRepository;
 import com.coungard.univer.repository.GroupRepository;
 import com.coungard.univer.repository.LectureRepository;
 import com.coungard.univer.repository.PairRepository;
-import com.coungard.univer.repository.ProgramRepository;
 import com.coungard.univer.repository.SemesterRepository;
 import com.coungard.univer.repository.StudentRepository;
 import com.coungard.univer.repository.StudyYearRepository;
@@ -41,7 +38,6 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.Period;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -99,9 +95,6 @@ class LectureServiceTest {
   private StudyYearRepository studyYearRepository;
 
   @Autowired
-  private ProgramRepository programRepository;
-
-  @Autowired
   private CourseRepository courseRepository;
 
   @Autowired
@@ -148,7 +141,6 @@ class LectureServiceTest {
     studyYearRepository.deleteAll();
     courseRepository.deleteAll();
     departmentRepository.deleteAll();
-    programRepository.deleteAll();
     facultyRepository.deleteAll();
     universityRepository.deleteAll();
 
@@ -173,17 +165,8 @@ class LectureServiceTest {
     course.setDepartment(departmentRepository.getReferenceById(departmentId));
     courseId = courseRepository.save(course).getId();
 
-    Program program = new Program();
-    program.setFacultyId(facultyId);
-    program.setCode("09.03.04");
-    program.setName("Software Engineering");
-    program.setEducationLevel("Bachelor");
-    program.setEducationForm(EducationForm.FULL_TIME);
-    program.setDurationOfStudy(Period.ofYears(4));
-    UUID programId = programRepository.save(program).getId();
-
     StudyYear studyYear = new StudyYear();
-    studyYear.setProgram(programRepository.getReferenceById(programId));
+    studyYear.setFacultyId(facultyId);
     studyYear.setYearNumber(1);
     UUID studyYearId = studyYearRepository.save(studyYear).getId();
 

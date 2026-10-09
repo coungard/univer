@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface StudyYearRepository extends JpaRepository<StudyYear, UUID> {
 
-  Page<StudyYear> findByProgramId(UUID programId, Pageable pageable);
+  Page<StudyYear> findByFacultyId(UUID facultyId, Pageable pageable);
 
-  boolean existsByProgramIdAndYearNumber(UUID programId, Integer yearNumber);
+  boolean existsByFacultyIdAndYearNumber(UUID facultyId, Integer yearNumber);
 }
