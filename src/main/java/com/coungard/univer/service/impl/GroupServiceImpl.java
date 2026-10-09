@@ -41,13 +41,14 @@ public class GroupServiceImpl implements GroupService {
     Semester semester = semesterRepository.findById(groupDto.semesterId())
         .orElseThrow(() -> new ResourceNotFoundException("Семестр не найден с ID: " + groupDto.semesterId()));
 
-    Group saved = saveNewGroup(semester, groupDto.name(), groupDto.fullName());
+    Group saved = saveNewGroup(semester, groupDto.name(), groupDto.fullName(), null);
     return groupMapper.toDto(saved);
   }
 
   @Override
   @Transactional
-  public GroupDto createGroupInCurrentSemester(UUID facultyId, Integer yearNumber, String name, String fullName) {
+  public GroupDto createGroupInCurrentSemester(UUID facultyId, Integer yearNumber, String name, String fullName,
+      UUID createdByStudentId) {
     if (!facultyRepository.existsById(facultyId)) {
       throw new ResourceNotFoundException("Факультет не найден с ID: " + facultyId);
     }
@@ -72,8 +73,24 @@ public class GroupServiceImpl implements GroupService {
           return semesterRepository.save(created);
         });
 
-    Group saved = saveNewGroup(semester, name, fullName);
+    Group saved = saveNewGroup(semester, name, fullName, createdByStudentId);
     return groupMapper.toDto(saved);
+  }
+
+  @Override
+  @Transactional
+  public GroupDto renameGroup(UUID id, String name, String fullName) {
+    Group existing = groupRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("Группа не найдена с ID: " + id));
+
+    String newName = name.strip();
+    validateNameIsFree(existing.getSemester(), newName, id);
+
+    existing.setName(newName);
+    existing.setFullName(normalizeFullName(fullName));
+
+    Group updated = groupRepository.save(existing);
+    return groupMapper.toDto(updated);
   }
 
   @Override
@@ -135,7 +152,7 @@ public class GroupServiceImpl implements GroupService {
     groupRepository.deleteById(id);
   }
 
-  private Group saveNewGroup(Semester semester, String rawName, String fullName) {
+  private Group saveNewGroup(Semester semester, String rawName, String fullName, UUID createdByStudentId) {
     String name = rawName.strip();
     validateNameIsFree(semester, name, null);
 
@@ -143,6 +160,7 @@ public class GroupServiceImpl implements GroupService {
     group.setSemester(semester);
     group.setName(name);
     group.setFullName(normalizeFullName(fullName));
+    group.setCreatedByStudentId(createdByStudentId);
     return groupRepository.save(group);
   }
 

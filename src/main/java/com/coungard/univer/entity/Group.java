@@ -49,4 +49,12 @@ public class Group {
    */
   @Column(name = "full_name")
   private String fullName;
+
+  /**
+   * Студент, создавший группу сам ({@code POST /students/me/group}); {@code null} у групп,
+   * заведённых администратором. По нему считается лимит групп на студента и проверяется право
+   * исправить название.
+   */
+  @Column(name = "created_by_student_id")
+  private UUID createdByStudentId;
 }

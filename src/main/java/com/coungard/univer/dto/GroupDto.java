@@ -18,6 +18,8 @@ public record GroupDto(
     String name,
 
     @Size(max = 255, message = "Расшифровка названия группы не длиннее 255 символов")
-    String fullName
+    String fullName,
+
+    UUID createdByStudentId
 ) {
 }

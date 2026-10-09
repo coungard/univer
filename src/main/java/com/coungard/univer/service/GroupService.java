@@ -25,11 +25,25 @@ public interface GroupService {
    * @param yearNumber номер курса
    * @param name название группы
    * @param fullName полная расшифровка названия, необязательна
+   * @param createdByStudentId студент, создающий группу
    * @return созданный GroupDto
    * @throws com.coungard.univer.exception.ConflictException группа с таким названием в этом семестре
    *     уже есть — с ID существующей группы
    */
-  GroupDto createGroupInCurrentSemester(UUID facultyId, Integer yearNumber, String name, String fullName);
+  GroupDto createGroupInCurrentSemester(UUID facultyId, Integer yearNumber, String name, String fullName,
+      UUID createdByStudentId);
+
+  /**
+   * Изменить название группы и его расшифровку, не трогая семестр и создателя.
+   *
+   * @param id идентификатор группы
+   * @param name новое название
+   * @param fullName новая расшифровка названия; {@code null} или пустая строка её очищает
+   * @return обновлённый GroupDto
+   * @throws com.coungard.univer.exception.ConflictException другая группа с таким названием в этом
+   *     семестре уже есть — с ID существующей группы
+   */
+  GroupDto renameGroup(UUID id, String name, String fullName);
 
   /**
    * Получить группу по ID.

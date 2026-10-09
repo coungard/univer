@@ -1,5 +1,6 @@
 package com.coungard.univer.controller;
 
+import com.coungard.univer.dto.GroupDto;
 import com.coungard.univer.dto.StudentDto;
 import com.coungard.univer.dto.registration.RegisterStudentRequest;
 import com.coungard.univer.dto.request.CreateStudentGroupRequest;
@@ -97,7 +98,8 @@ public class StudentController {
       @ApiResponse(responseCode = "201", description = "Группа создана, студент зачислен в неё"),
       @ApiResponse(responseCode = "409", description = "Группа с таким названием на этом курсе уже есть; "
           + "в теле — field: \"name\" и id существующей группы"),
-      @ApiResponse(responseCode = "422", description = "В профиле не выбраны факультет и курс")
+      @ApiResponse(responseCode = "422", description = "В профиле не выбраны факультет и курс либо студент "
+          + "уже создал максимум групп")
   })
   @PostMapping("/me/group")
   @PreAuthorize("hasRole('STUDENT')")
@@ -114,6 +116,28 @@ public class StudentController {
         .toUri();
 
     return ResponseEntity.created(location).body(updated);
+  }
+
+  @Operation(
+      summary = "Исправить название своей группы",
+      description = "Меняет название и расшифровку группы, в которой состоит студент. Разрешено, только "
+          + "если он сам создал эту группу и кроме него в ней никого нет."
+  )
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "Название изменено"),
+      @ApiResponse(responseCode = "409", description = "Группа с таким названием на этом курсе уже есть; "
+          + "в теле — field: \"name\" и id существующей группы"),
+      @ApiResponse(responseCode = "422", description = "У студента нет группы, группу создал не он или в "
+          + "ней уже есть другие студенты")
+  })
+  @PutMapping("/me/group")
+  @PreAuthorize("hasRole('STUDENT')")
+  public ResponseEntity<GroupDto> updateMyGroup(
+      @AuthenticationPrincipal Jwt jwt,
+      @Valid @RequestBody CreateStudentGroupRequest request) {
+
+    GroupDto updated = studentService.updateMyGroup(UUID.fromString(jwt.getSubject()), request);
+    return ResponseEntity.ok(updated);
   }
 
   @Operation(summary = "Получить студента по ID")

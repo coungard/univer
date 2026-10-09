@@ -16,6 +16,8 @@ public interface GroupRepository extends JpaRepository<Group, UUID> {
 
   Page<Group> findBySemesterId(UUID semesterId, Pageable pageable);
 
+  long countByCreatedByStudentId(UUID createdByStudentId);
+
   /**
    * Группы семестра с таким же названием без учёта регистра и крайних пробелов. Список, а не
    * {@code Optional}: уникальность названия появилась позже самих групп (issue #86).

@@ -1,5 +1,6 @@
 package com.coungard.univer.service.impl;
 
+import com.coungard.univer.dto.GroupDto;
 import com.coungard.univer.dto.StudentDto;
 import com.coungard.univer.mapper.StudentMapper;
 import com.coungard.univer.dto.registration.RegisterData;
@@ -199,12 +200,37 @@ public class StudentServiceImpl implements StudentService {
       throw new ValidationException("Нельзя создать группу, пока не выбраны факультет и курс");
     }
 
+    if (groupRepository.countByCreatedByStudentId(id) >= MAX_CREATED_GROUPS) {
+      throw new ValidationException("Студент может создать не больше " + MAX_CREATED_GROUPS + " групп");
+    }
+
     UUID groupId = groupService.createGroupInCurrentSemester(
-        student.getFaculty().getId(), student.getYearNumber(), request.name(), request.fullName()).id();
+        student.getFaculty().getId(), student.getYearNumber(), request.name(), request.fullName(), id).id();
     student.setGroup(groupRepository.getReferenceById(groupId));
 
     Student updated = studentRepository.save(student);
     return studentMapper.toDto(updated);
+  }
+
+  @Override
+  @Transactional
+  public GroupDto updateMyGroup(UUID id, CreateStudentGroupRequest request) {
+    Student student = studentRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("Студент не найден с ID: " + id));
+
+    Group group = student.getGroup();
+    if (group == null) {
+      throw new ValidationException("У студента не выбрана группа");
+    }
+    if (!id.equals(group.getCreatedByStudentId())) {
+      throw new ValidationException("Изменить название можно только у группы, которую студент создал сам");
+    }
+    if (studentRepository.countByGroupId(group.getId()) > 1) {
+      throw new ValidationException("В группе уже есть другие студенты — название может изменить только "
+          + "администратор");
+    }
+
+    return groupService.renameGroup(group.getId(), request.name(), request.fullName());
   }
 
   private void changeUniversity(Student student, UUID universityId) {

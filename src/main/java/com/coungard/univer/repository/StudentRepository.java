@@ -15,4 +15,6 @@ public interface StudentRepository extends JpaRepository<Student, UUID>, JpaSpec
   boolean existsByPersonUsername(String username);
 
   List<Student> findByGroupId(UUID groupId);
+
+  long countByGroupId(UUID groupId);
 }

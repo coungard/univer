@@ -16,6 +16,7 @@ public class GroupMapper {
         .semesterId(group.getSemester().getId())
         .name(group.getName())
         .fullName(group.getFullName())
+        .createdByStudentId(group.getCreatedByStudentId())
         .build();
   }
 

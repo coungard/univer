@@ -1,5 +1,6 @@
 package com.coungard.univer.service;
 
+import com.coungard.univer.dto.GroupDto;
 import com.coungard.univer.dto.StudentDto;
 import com.coungard.univer.dto.registration.RegisterStudentRequest;
 import com.coungard.univer.dto.request.CreateStudentGroupRequest;
@@ -9,6 +10,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface StudentService {
+
+  /**
+   * Сколько групп один студент может создать сам. Считаются существующие группы: удалённая
+   * администратором группа лимит освобождает.
+   */
+  int MAX_CREATED_GROUPS = 3;
 
   /**
    * Получить страницу студентов с пагинацией и сортировкой.
@@ -67,8 +74,22 @@ public interface StudentService {
    * @param id идентификатор студента (Keycloak subject вызывающего)
    * @param request название группы и его необязательная расшифровка
    * @return обновлённый StudentDto с проставленным {@code groupId}
+   * @throws com.coungard.univer.exception.ValidationException студент уже создал максимум групп
+   *     ({@link #MAX_CREATED_GROUPS})
    */
   StudentDto createMyGroup(UUID id, CreateStudentGroupRequest request);
+
+  /**
+   * Исправить самим студентом название своей группы (и его расшифровку) — например, опечатку.
+   * Разрешено, только если студент сам создал группу, в которой состоит, и кроме него в ней никого
+   * нет: название, которое уже видят одногруппники, меняет только администратор. Иначе —
+   * {@code ValidationException}.
+   *
+   * @param id идентификатор студента (Keycloak subject вызывающего)
+   * @param request новое название группы и его необязательная расшифровка
+   * @return обновлённый GroupDto
+   */
+  GroupDto updateMyGroup(UUID id, CreateStudentGroupRequest request);
 
   /**
    * Удалить студента по ID. Также удаляет пользователя из Keycloak.
