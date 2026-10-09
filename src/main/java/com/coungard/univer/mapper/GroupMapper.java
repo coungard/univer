@@ -15,6 +15,8 @@ public class GroupMapper {
         .id(group.getId())
         .semesterId(group.getSemester().getId())
         .name(group.getName())
+        .fullName(group.getFullName())
+        .createdByStudentId(group.getCreatedByStudentId())
         .build();
   }
 
@@ -24,6 +26,7 @@ public class GroupMapper {
     }
     Group group = new Group();
     group.setName(dto.name());
+    group.setFullName(dto.fullName());
     return group;
   }
 }

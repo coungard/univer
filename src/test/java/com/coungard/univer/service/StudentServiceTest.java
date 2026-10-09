@@ -9,10 +9,12 @@ import static org.mockito.Mockito.when;
 
 import com.coungard.univer.TestRegions;
 import com.coungard.univer.UniverApplication;
+import com.coungard.univer.dto.GroupDto;
 import com.coungard.univer.dto.SemesterType;
 import com.coungard.univer.dto.StudentDto;
 import com.coungard.univer.dto.registration.RegisterData;
 import com.coungard.univer.dto.registration.RegisterStudentRequest;
+import com.coungard.univer.dto.request.CreateStudentGroupRequest;
 import com.coungard.univer.dto.request.UpdateStudentProfileRequest;
 import com.coungard.univer.entity.Faculty;
 import com.coungard.univer.entity.Group;
@@ -69,6 +71,9 @@ class StudentServiceTest {
 
   @Autowired
   private StudentService studentService;
+
+  @Autowired
+  private GroupService groupService;
 
   @Autowired
   private StudentRepository studentRepository;
@@ -530,6 +535,199 @@ class StudentServiceTest {
         .isInstanceOf(ResourceNotFoundException.class);
     assertThatThrownBy(() -> studentService.updateMyProfile(UUID.randomUUID(), profile().build()))
         .isInstanceOf(ResourceNotFoundException.class);
+  }
+
+  // === POST /students/me/group ===
+
+  @Test
+  void shouldCreateGroupWithStudyYearAndSemesterAndEnrollStudent() {
+    UUID studentId = createTestStudent("ivan", "Иван", "Иванов", null).id();
+    UUID facultyId = createTestFaculty(universityId);
+    studentService.updateMyProfile(studentId, profile().faculty(facultyId).year(3).build());
+
+    StudentDto updated = studentService.createMyGroup(studentId,
+        new CreateStudentGroupRequest("  У530 ", "Разработка программных и информационных систем"));
+
+    Group group = groupRepository.findById(updated.groupId()).orElseThrow();
+    assertThat(group.getName()).isEqualTo("У530");
+    assertThat(group.getCreatedByStudentId()).isEqualTo(studentId);
+    assertThat(group.getFullName()).isEqualTo("Разработка программных и информационных систем");
+    assertThat(updated.facultyId()).isEqualTo(facultyId);
+    assertThat(updated.yearNumber()).isEqualTo(3);
+
+    // Учебного года и семестра не было — созданы; семестр — текущее календарное полугодие
+    StudyYear studyYear = studyYearRepository.findByFacultyIdAndYearNumber(facultyId, 3).orElseThrow();
+    Semester semester = semesterRepository.findAllByStudyYearId(studyYear.getId()).get(0);
+    SemesterPeriod period = SemesterPeriod.at(LocalDate.now());
+    assertThat(semester.getId()).isEqualTo(group.getSemester().getId());
+    assertThat(semester.getType()).isEqualTo(period.type());
+    assertThat(semester.getStartDate()).isEqualTo(period.startDate());
+    assertThat(semester.getEndDate()).isEqualTo(period.endDate());
+
+    // Группа сразу видна в списке групп курса
+    assertThat(groupService.getGroups(facultyId, 3, PageRequest.of(0, 10)).getContent())
+        .extracting(GroupDto::id)
+        .containsExactly(group.getId());
+  }
+
+  @Test
+  void shouldCreateGroupInExistingSemesterOfStudyYear() {
+    UUID studentId = createTestStudent("ivan", "Иван", "Иванов", null).id();
+    UUID facultyId = createTestFaculty(universityId);
+    Group existing = createTestGroup("У231", facultyId, 2);
+    studentService.updateMyProfile(studentId, profile().faculty(facultyId).year(2).build());
+
+    StudentDto updated = studentService.createMyGroup(studentId, new CreateStudentGroupRequest("У232", null));
+
+    Group created = groupRepository.findById(updated.groupId()).orElseThrow();
+    assertThat(created.getSemester().getId()).isEqualTo(existing.getSemester().getId());
+    assertThat(created.getFullName()).isNull();
+    assertThat(studyYearRepository.count()).isEqualTo(1);
+    assertThat(semesterRepository.count()).isEqualTo(1);
+  }
+
+  @Test
+  void shouldReportExistingGroupWhenNameIsTaken() {
+    UUID studentId = createTestStudent("ivan", "Иван", "Иванов", null).id();
+    UUID facultyId = createTestFaculty(universityId);
+    Group existing = createTestGroup("У232 КСиТ", facultyId, 2);
+    studentService.updateMyProfile(studentId, profile().faculty(facultyId).year(2).build());
+
+    // Без учёта регистра и крайних пробелов
+    assertThatThrownBy(
+        () -> studentService.createMyGroup(studentId, new CreateStudentGroupRequest(" у232 ксит ", null)))
+        .isInstanceOfSatisfying(ConflictException.class, ex -> {
+          assertThat(ex.getField()).isEqualTo("name");
+          assertThat(ex.getExistingId()).isEqualTo(existing.getId());
+        });
+
+    assertThat(groupRepository.count()).isEqualTo(1);
+    assertThat(studentService.getStudentById(studentId).groupId()).isNull();
+  }
+
+  @Test
+  void shouldAllowSameGroupNameOnAnotherYear() {
+    UUID studentId = createTestStudent("ivan", "Иван", "Иванов", null).id();
+    UUID facultyId = createTestFaculty(universityId);
+    createTestGroup("У232", facultyId, 2);
+    studentService.updateMyProfile(studentId, profile().faculty(facultyId).year(3).build());
+
+    StudentDto updated = studentService.createMyGroup(studentId, new CreateStudentGroupRequest("У232", null));
+
+    assertThat(updated.groupId()).isNotNull();
+    assertThat(groupRepository.count()).isEqualTo(2);
+  }
+
+  @Test
+  void shouldRejectCreatingGroupWithoutFacultyAndYear() {
+    UUID studentId = createTestStudent("ivan", "Иван", "Иванов", null).id();
+    CreateStudentGroupRequest request = new CreateStudentGroupRequest("У530", null);
+
+    assertThatThrownBy(() -> studentService.createMyGroup(studentId, request))
+        .isInstanceOf(ValidationException.class);
+
+    // Факультет выбран, курс — ещё нет
+    studentService.updateMyProfile(studentId, profile().faculty(createTestFaculty(universityId)).build());
+    assertThatThrownBy(() -> studentService.createMyGroup(studentId, request))
+        .isInstanceOf(ValidationException.class);
+
+    assertThat(groupRepository.count()).isZero();
+    assertThatThrownBy(() -> studentService.createMyGroup(UUID.randomUUID(), request))
+        .isInstanceOf(ResourceNotFoundException.class);
+  }
+
+  @Test
+  void shouldLimitNumberOfGroupsCreatedByOneStudent() {
+    UUID studentId = createTestStudent("ivan", "Иван", "Иванов", null).id();
+    UUID facultyId = createTestFaculty(universityId);
+    studentService.updateMyProfile(studentId, profile().faculty(facultyId).year(2).build());
+
+    for (int i = 1; i <= StudentService.MAX_CREATED_GROUPS; i++) {
+      studentService.createMyGroup(studentId, new CreateStudentGroupRequest("У23" + i, null));
+    }
+    UUID lastGroupId = studentService.getStudentById(studentId).groupId();
+
+    assertThatThrownBy(() -> studentService.createMyGroup(studentId, new CreateStudentGroupRequest("У239", null)))
+        .isInstanceOf(ValidationException.class)
+        .hasMessageContaining("не больше 3");
+    assertThat(groupRepository.countByCreatedByStudentId(studentId)).isEqualTo(3);
+    assertThat(studentService.getStudentById(studentId).groupId()).isEqualTo(lastGroupId);
+
+    // Лимит — на студента: другой студент того же курса создаёт группу свободно
+    UUID otherId = createTestStudent("petr", "Пётр", "Петров", null).id();
+    studentService.updateMyProfile(otherId, profile().faculty(facultyId).year(2).build());
+    assertThat(studentService.createMyGroup(otherId, new CreateStudentGroupRequest("У239", null)).groupId())
+        .isNotNull();
+  }
+
+  // === PUT /students/me/group ===
+
+  @Test
+  void shouldRenameOwnGroupWhileStudentIsAloneInIt() {
+    UUID studentId = createTestStudent("ivan", "Иван", "Иванов", null).id();
+    studentService.updateMyProfile(studentId, profile().faculty(createTestFaculty(universityId)).year(2).build());
+    UUID groupId = studentService.createMyGroup(studentId, new CreateStudentGroupRequest("У23О", "Опечатка")).groupId();
+
+    GroupDto renamed = studentService.updateMyGroup(studentId, new CreateStudentGroupRequest(" У230 ", null));
+
+    assertThat(renamed.id()).isEqualTo(groupId);
+    assertThat(renamed.name()).isEqualTo("У230");
+    assertThat(renamed.fullName()).isNull();
+    assertThat(renamed.createdByStudentId()).isEqualTo(studentId);
+    assertThat(studentService.getStudentById(studentId).groupId()).isEqualTo(groupId);
+  }
+
+  @Test
+  void shouldNotRenameGroupOnceAnotherStudentJoined() {
+    UUID studentId = createTestStudent("ivan", "Иван", "Иванов", null).id();
+    studentService.updateMyProfile(studentId, profile().faculty(createTestFaculty(universityId)).year(2).build());
+    UUID groupId = studentService.createMyGroup(studentId, new CreateStudentGroupRequest("У230", null)).groupId();
+
+    UUID otherId = createTestStudent("petr", "Пётр", "Петров", null).id();
+    studentService.updateMyProfile(otherId, profile().group(groupId).build());
+
+    CreateStudentGroupRequest request = new CreateStudentGroupRequest("У231", null);
+    assertThatThrownBy(() -> studentService.updateMyGroup(studentId, request))
+        .isInstanceOf(ValidationException.class)
+        .hasMessageContaining("другие студенты");
+    // Вступивший в чужую группу тоже не может её переименовать
+    assertThatThrownBy(() -> studentService.updateMyGroup(otherId, request))
+        .isInstanceOf(ValidationException.class)
+        .hasMessageContaining("создал сам");
+    assertThat(groupRepository.findById(groupId).orElseThrow().getName()).isEqualTo("У230");
+
+    // Одногруппник ушёл — создатель снова один и может исправить название
+    studentService.updateMyProfile(otherId, profile().group(null).build());
+    assertThat(studentService.updateMyGroup(studentId, request).name()).isEqualTo("У231");
+  }
+
+  @Test
+  void shouldNotRenameGroupCreatedByAdminOrWhenStudentHasNoGroup() {
+    UUID studentId = createTestStudent("ivan", "Иван", "Иванов", null).id();
+    CreateStudentGroupRequest request = new CreateStudentGroupRequest("У231", null);
+
+    assertThatThrownBy(() -> studentService.updateMyGroup(studentId, request))
+        .isInstanceOf(ValidationException.class)
+        .hasMessageContaining("не выбрана группа");
+
+    Group adminGroup = createTestGroup("У230");
+    studentService.updateMyProfile(studentId, profile().group(adminGroup.getId()).build());
+    assertThatThrownBy(() -> studentService.updateMyGroup(studentId, request))
+        .isInstanceOf(ValidationException.class)
+        .hasMessageContaining("создал сам");
+  }
+
+  @Test
+  void shouldReportExistingGroupWhenRenamingToTakenName() {
+    UUID studentId = createTestStudent("ivan", "Иван", "Иванов", null).id();
+    UUID facultyId = createTestFaculty(universityId);
+    Group existing = createTestGroup("У231", facultyId, 2);
+    studentService.updateMyProfile(studentId, profile().faculty(facultyId).year(2).build());
+    studentService.createMyGroup(studentId, new CreateStudentGroupRequest("У232", null));
+
+    assertThatThrownBy(() -> studentService.updateMyGroup(studentId, new CreateStudentGroupRequest("у231", null)))
+        .isInstanceOfSatisfying(ConflictException.class,
+            ex -> assertThat(ex.getExistingId()).isEqualTo(existing.getId()));
   }
 
   /** Студент с полностью заполненным профилем: университет, факультет, курс и группа этого курса. */

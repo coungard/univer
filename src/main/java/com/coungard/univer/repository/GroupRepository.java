@@ -2,6 +2,7 @@ package com.coungard.univer.repository;
 
 import com.coungard.univer.entity.Group;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +15,20 @@ import org.springframework.stereotype.Repository;
 public interface GroupRepository extends JpaRepository<Group, UUID> {
 
   Page<Group> findBySemesterId(UUID semesterId, Pageable pageable);
+
+  long countByCreatedByStudentId(UUID createdByStudentId);
+
+  /**
+   * Группы семестра с таким же названием без учёта регистра и крайних пробелов. Список, а не
+   * {@code Optional}: уникальность названия появилась позже самих групп (issue #86).
+   */
+  @Query("""
+      SELECT g FROM Group g
+      WHERE g.semester.id = :semesterId
+        AND LOWER(TRIM(g.name)) = LOWER(TRIM(:name))
+      ORDER BY g.id
+      """)
+  List<Group> findBySemesterIdAndNameIgnoreCase(@Param("semesterId") UUID semesterId, @Param("name") String name);
 
   /**
    * Группы «актуального» на дату {@code today} семестра, с необязательными фильтрами по факультету
