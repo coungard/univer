@@ -9,11 +9,13 @@ import static org.mockito.Mockito.when;
 
 import com.coungard.univer.TestRegions;
 import com.coungard.univer.UniverApplication;
+import com.coungard.univer.dto.FacultyDto;
 import com.coungard.univer.dto.GroupDto;
 import com.coungard.univer.dto.SemesterType;
 import com.coungard.univer.dto.StudentDto;
 import com.coungard.univer.dto.registration.RegisterData;
 import com.coungard.univer.dto.registration.RegisterStudentRequest;
+import com.coungard.univer.dto.request.CreateStudentFacultyRequest;
 import com.coungard.univer.dto.request.CreateStudentGroupRequest;
 import com.coungard.univer.dto.request.UpdateStudentProfileRequest;
 import com.coungard.univer.entity.Faculty;
@@ -74,6 +76,9 @@ class StudentServiceTest {
 
   @Autowired
   private GroupService groupService;
+
+  @Autowired
+  private FacultyService facultyService;
 
   @Autowired
   private StudentRepository studentRepository;
@@ -535,6 +540,168 @@ class StudentServiceTest {
         .isInstanceOf(ResourceNotFoundException.class);
     assertThatThrownBy(() -> studentService.updateMyProfile(UUID.randomUUID(), profile().build()))
         .isInstanceOf(ResourceNotFoundException.class);
+  }
+
+  // === POST /students/me/faculty ===
+
+  @Test
+  void shouldCreateFacultyAndSelectItResettingYearAndGroup() {
+    StudentDto student = createStudentInGroup(2);
+
+    StudentDto updated = studentService.createMyFaculty(student.id(),
+        new CreateStudentFacultyRequest("  Экономический "));
+
+    assertThat(updated.universityId()).isEqualTo(universityId);
+    assertThat(updated.facultyId()).isNotNull().isNotEqualTo(student.facultyId());
+    assertThat(updated.yearNumber()).isNull();
+    assertThat(updated.groupId()).isNull();
+
+    Faculty faculty = facultyRepository.findById(updated.facultyId()).orElseThrow();
+    assertThat(faculty.getName()).isEqualTo("Экономический");
+    assertThat(faculty.getCreatedByStudentId()).isEqualTo(student.id());
+
+    // Факультет сразу виден в списке факультетов университета
+    assertThat(facultyService.getFacultiesByUniversity(universityId, PageRequest.of(0, 10)).getContent())
+        .extracting(FacultyDto::id)
+        .contains(faculty.getId());
+  }
+
+  @Test
+  void shouldReportExistingFacultyWhenNameIsTaken() {
+    UUID studentId = createTestStudent("ivan", "Иван", "Иванов", null).id();
+    UUID existingId = createTestFaculty(universityId);
+
+    // Без учёта регистра и крайних пробелов
+    assertThatThrownBy(() -> studentService.createMyFaculty(studentId,
+        new CreateStudentFacultyRequest(" faculty of computer SCIENCE ")))
+        .isInstanceOfSatisfying(ConflictException.class, ex -> {
+          assertThat(ex.getField()).isEqualTo("name");
+          assertThat(ex.getExistingId()).isEqualTo(existingId);
+        });
+
+    assertThat(facultyRepository.count()).isEqualTo(1);
+    assertThat(studentService.getStudentById(studentId).facultyId()).isNull();
+  }
+
+  @Test
+  void shouldAllowSameFacultyNameInAnotherUniversity() {
+    createTestFaculty(universityId);
+    UUID otherUniversityId = createOtherUniversity().getId();
+    UUID studentId = createTestStudent("ivan", "Иван", "Иванов", null, otherUniversityId).id();
+
+    StudentDto updated = studentService.createMyFaculty(studentId,
+        new CreateStudentFacultyRequest("Faculty of Computer Science"));
+
+    assertThat(updated.facultyId()).isNotNull();
+    assertThat(updated.universityId()).isEqualTo(otherUniversityId);
+  }
+
+  @Test
+  void shouldRejectCreatingFacultyWithoutUniversity() {
+    UUID studentId = createTestStudent("ivan", "Иван", "Иванов", null, null).id();
+    CreateStudentFacultyRequest request = new CreateStudentFacultyRequest("Экономический");
+
+    assertThatThrownBy(() -> studentService.createMyFaculty(studentId, request))
+        .isInstanceOf(ValidationException.class)
+        .hasMessageContaining("не выбран университет");
+    assertThat(facultyRepository.count()).isZero();
+    assertThatThrownBy(() -> studentService.createMyFaculty(UUID.randomUUID(), request))
+        .isInstanceOf(ResourceNotFoundException.class);
+  }
+
+  @Test
+  void shouldLimitNumberOfFacultiesCreatedByOneStudent() {
+    UUID studentId = createTestStudent("ivan", "Иван", "Иванов", null).id();
+
+    for (int i = 1; i <= StudentService.MAX_CREATED_FACULTIES; i++) {
+      studentService.createMyFaculty(studentId, new CreateStudentFacultyRequest("Факультет " + i));
+    }
+    UUID lastFacultyId = studentService.getStudentById(studentId).facultyId();
+
+    assertThatThrownBy(
+        () -> studentService.createMyFaculty(studentId, new CreateStudentFacultyRequest("Факультет 4")))
+        .isInstanceOf(ValidationException.class)
+        .hasMessageContaining("не больше 3");
+    assertThat(facultyRepository.countByCreatedByStudentId(studentId)).isEqualTo(3);
+    assertThat(studentService.getStudentById(studentId).facultyId()).isEqualTo(lastFacultyId);
+
+    // Лимит — на студента: другой студент того же университета создаёт факультет свободно
+    UUID otherId = createTestStudent("petr", "Пётр", "Петров", null).id();
+    assertThat(studentService.createMyFaculty(otherId, new CreateStudentFacultyRequest("Факультет 4")).facultyId())
+        .isNotNull();
+  }
+
+  // === PUT /students/me/faculty ===
+
+  @Test
+  void shouldRenameOwnFacultyWhileNoOtherStudentSelectedIt() {
+    UUID studentId = createTestStudent("ivan", "Иван", "Иванов", null).id();
+    UUID facultyId = studentService.createMyFaculty(studentId, new CreateStudentFacultyRequest("Экономичский"))
+        .facultyId();
+    // Выбранный курс и созданная группа переименованию не мешают и сами не меняются
+    studentService.updateMyProfile(studentId, profile().year(1).build());
+    UUID groupId = studentService.createMyGroup(studentId, new CreateStudentGroupRequest("Э101", null)).groupId();
+
+    FacultyDto renamed = studentService.updateMyFaculty(studentId, new CreateStudentFacultyRequest(" Экономический "));
+
+    assertThat(renamed.id()).isEqualTo(facultyId);
+    assertThat(renamed.name()).isEqualTo("Экономический");
+    assertThat(renamed.createdByStudentId()).isEqualTo(studentId);
+    StudentDto after = studentService.getStudentById(studentId);
+    assertThat(after.facultyId()).isEqualTo(facultyId);
+    assertThat(after.yearNumber()).isEqualTo(1);
+    assertThat(after.groupId()).isEqualTo(groupId);
+  }
+
+  @Test
+  void shouldNotRenameFacultyOnceAnotherStudentSelectedIt() {
+    UUID studentId = createTestStudent("ivan", "Иван", "Иванов", null).id();
+    UUID facultyId = studentService.createMyFaculty(studentId, new CreateStudentFacultyRequest("Экономический"))
+        .facultyId();
+
+    UUID otherId = createTestStudent("petr", "Пётр", "Петров", null).id();
+    studentService.updateMyProfile(otherId, profile().faculty(facultyId).build());
+
+    CreateStudentFacultyRequest request = new CreateStudentFacultyRequest("Юридический");
+    assertThatThrownBy(() -> studentService.updateMyFaculty(studentId, request))
+        .isInstanceOf(ValidationException.class)
+        .hasMessageContaining("другие студенты");
+    // Выбравший чужой факультет тоже не может его переименовать
+    assertThatThrownBy(() -> studentService.updateMyFaculty(otherId, request))
+        .isInstanceOf(ValidationException.class)
+        .hasMessageContaining("создал сам");
+    assertThat(facultyRepository.findById(facultyId).orElseThrow().getName()).isEqualTo("Экономический");
+
+    // Второй студент ушёл — создатель снова один и может исправить название
+    studentService.updateMyProfile(otherId, profile().faculty(null).build());
+    assertThat(studentService.updateMyFaculty(studentId, request).name()).isEqualTo("Юридический");
+  }
+
+  @Test
+  void shouldNotRenameFacultyCreatedByAdminOrWhenStudentHasNoFaculty() {
+    UUID studentId = createTestStudent("ivan", "Иван", "Иванов", null).id();
+    CreateStudentFacultyRequest request = new CreateStudentFacultyRequest("Юридический");
+
+    assertThatThrownBy(() -> studentService.updateMyFaculty(studentId, request))
+        .isInstanceOf(ValidationException.class)
+        .hasMessageContaining("не выбран факультет");
+
+    studentService.updateMyProfile(studentId, profile().faculty(createTestFaculty(universityId)).build());
+    assertThatThrownBy(() -> studentService.updateMyFaculty(studentId, request))
+        .isInstanceOf(ValidationException.class)
+        .hasMessageContaining("создал сам");
+  }
+
+  @Test
+  void shouldReportExistingFacultyWhenRenamingToTakenName() {
+    UUID studentId = createTestStudent("ivan", "Иван", "Иванов", null).id();
+    UUID existingId = createTestFaculty(universityId);
+    studentService.createMyFaculty(studentId, new CreateStudentFacultyRequest("Экономический"));
+
+    assertThatThrownBy(() -> studentService.updateMyFaculty(studentId,
+        new CreateStudentFacultyRequest("FACULTY OF COMPUTER SCIENCE")))
+        .isInstanceOfSatisfying(ConflictException.class,
+            ex -> assertThat(ex.getExistingId()).isEqualTo(existingId));
   }
 
   // === POST /students/me/group ===

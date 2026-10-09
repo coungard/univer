@@ -14,7 +14,8 @@ public record FacultyDto(
         String name,
         String description,
         List<DepartmentDto> departments,
-        UUID universityId
+        UUID universityId,
+        UUID createdByStudentId
 ) {
     public FacultyDto {
         departments = departments == null ? List.of() : departments;

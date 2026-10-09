@@ -42,6 +42,14 @@ public class Faculty {
   @JoinColumn(name = "university_id", nullable = false)
   private University university;
 
+  /**
+   * Студент, создавший факультет сам ({@code POST /students/me/faculty}); {@code null} у факультетов,
+   * заведённых администратором. По нему считается лимит факультетов на студента и проверяется право
+   * исправить название.
+   */
+  @Column(name = "created_by_student_id")
+  private UUID createdByStudentId;
+
   @OneToMany(mappedBy = "faculty", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Department> departments = new ArrayList<>();
 }
