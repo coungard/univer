@@ -17,4 +17,6 @@ public interface StudentRepository extends JpaRepository<Student, UUID>, JpaSpec
   List<Student> findByGroupId(UUID groupId);
 
   long countByGroupId(UUID groupId);
+
+  long countByFacultyId(UUID facultyId);
 }

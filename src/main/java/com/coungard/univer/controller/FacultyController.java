@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,6 +35,7 @@ public class FacultyController {
   private final FacultyService facultyService;
 
   @PostMapping
+  @PreAuthorize("hasRole('ADMIN')")
   @Operation(summary = "Добавить факультет")
   public ResponseEntity<FacultyDto> createFaculty(@RequestBody FacultyDto facultyDto) {
     FacultyDto created = facultyService.createFaculty(facultyDto);
@@ -67,6 +69,7 @@ public class FacultyController {
   }
 
   @PutMapping("/{id}")
+  @PreAuthorize("hasRole('ADMIN')")
   @Operation(summary = "Изменить факультет по ID ")
   public ResponseEntity<FacultyDto> updateFaculty(
       @PathVariable UUID id,
@@ -76,6 +79,7 @@ public class FacultyController {
   }
 
   @DeleteMapping("/{id}")
+  @PreAuthorize("hasRole('ADMIN')")
   @Operation(summary = "Удалить факультет по ID")
   public ResponseEntity<Void> deleteFaculty(@PathVariable UUID id) {
     facultyService.deleteFaculty(id);

@@ -1,8 +1,10 @@
 package com.coungard.univer.service;
 
+import com.coungard.univer.dto.FacultyDto;
 import com.coungard.univer.dto.GroupDto;
 import com.coungard.univer.dto.StudentDto;
 import com.coungard.univer.dto.registration.RegisterStudentRequest;
+import com.coungard.univer.dto.request.CreateStudentFacultyRequest;
 import com.coungard.univer.dto.request.CreateStudentGroupRequest;
 import com.coungard.univer.dto.request.UpdateStudentProfileRequest;
 import java.util.UUID;
@@ -16,6 +18,12 @@ public interface StudentService {
    * администратором группа лимит освобождает.
    */
   int MAX_CREATED_GROUPS = 3;
+
+  /**
+   * Сколько факультетов один студент может создать сам — по тому же правилу, что и
+   * {@link #MAX_CREATED_GROUPS}.
+   */
+  int MAX_CREATED_FACULTIES = 3;
 
   /**
    * Получить страницу студентов с пагинацией и сортировкой.
@@ -64,6 +72,31 @@ public interface StudentService {
    * @return обновлённый StudentDto
    */
   StudentDto updateMyProfile(UUID id, UpdateStudentProfileRequest request);
+
+  /**
+   * Создать факультет самим студентом и сразу выбрать его в профиле — когда нужного факультета в
+   * университете студента нет. Университет берётся из профиля; если он не заполнен —
+   * {@code ValidationException}. Курс и группа в профиле сбрасываются, как при смене факультета в
+   * {@link #updateMyProfile}.
+   *
+   * @param id идентификатор студента (Keycloak subject вызывающего)
+   * @param request название факультета
+   * @return обновлённый StudentDto с проставленным {@code facultyId}
+   * @throws com.coungard.univer.exception.ValidationException студент уже создал максимум факультетов
+   *     ({@link #MAX_CREATED_FACULTIES})
+   */
+  StudentDto createMyFaculty(UUID id, CreateStudentFacultyRequest request);
+
+  /**
+   * Исправить самим студентом название своего факультета — например, опечатку. Разрешено, только
+   * если студент сам создал факультет, выбранный в его профиле, и кроме него этот факультет никто
+   * из студентов не выбрал. Иначе — {@code ValidationException}.
+   *
+   * @param id идентификатор студента (Keycloak subject вызывающего)
+   * @param request новое название факультета
+   * @return обновлённый FacultyDto
+   */
+  FacultyDto updateMyFaculty(UUID id, CreateStudentFacultyRequest request);
 
   /**
    * Создать группу самим студентом и сразу зачислить его в неё — когда нужной группы на его курсе

@@ -1,8 +1,10 @@
 package com.coungard.univer.controller;
 
+import com.coungard.univer.dto.FacultyDto;
 import com.coungard.univer.dto.GroupDto;
 import com.coungard.univer.dto.StudentDto;
 import com.coungard.univer.dto.registration.RegisterStudentRequest;
+import com.coungard.univer.dto.request.CreateStudentFacultyRequest;
 import com.coungard.univer.dto.request.CreateStudentGroupRequest;
 import com.coungard.univer.dto.request.UpdateStudentProfileRequest;
 import com.coungard.univer.service.StudentService;
@@ -84,6 +86,59 @@ public class StudentController {
       @Valid @RequestBody UpdateStudentProfileRequest request) {
 
     StudentDto updated = studentService.updateMyProfile(UUID.fromString(jwt.getSubject()), request);
+    return ResponseEntity.ok(updated);
+  }
+
+  @Operation(
+      summary = "Создать свой факультет и выбрать его в профиле",
+      description = "Для случая, когда нужного факультета нет в GET /faculties/university/{id}. Университет "
+          + "берётся из профиля студента. Курс и группа в профиле сбрасываются, как при смене "
+          + "факультета через PATCH /students/me. Созданный факультет сразу виден в списке факультетов "
+          + "университета."
+  )
+  @ApiResponses({
+      @ApiResponse(responseCode = "201", description = "Факультет создан и выбран в профиле"),
+      @ApiResponse(responseCode = "409", description = "Факультет с таким названием в этом университете уже "
+          + "есть; в теле — field: \"name\" и id существующего факультета"),
+      @ApiResponse(responseCode = "422", description = "В профиле не выбран университет либо студент уже "
+          + "создал максимум факультетов")
+  })
+  @PostMapping("/me/faculty")
+  @PreAuthorize("hasRole('STUDENT')")
+  public ResponseEntity<StudentDto> createMyFaculty(
+      @AuthenticationPrincipal Jwt jwt,
+      @Valid @RequestBody CreateStudentFacultyRequest request) {
+
+    StudentDto updated = studentService.createMyFaculty(UUID.fromString(jwt.getSubject()), request);
+
+    URI location = ServletUriComponentsBuilder
+        .fromCurrentServletMapping()
+        .path("/api/v1/faculties/{id}")
+        .buildAndExpand(updated.facultyId())
+        .toUri();
+
+    return ResponseEntity.created(location).body(updated);
+  }
+
+  @Operation(
+      summary = "Исправить название своего факультета",
+      description = "Меняет название факультета, выбранного в профиле студента. Разрешено, только если он "
+          + "сам создал этот факультет и кроме него факультет никто из студентов не выбрал."
+  )
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "Название изменено"),
+      @ApiResponse(responseCode = "409", description = "Факультет с таким названием в этом университете уже "
+          + "есть; в теле — field: \"name\" и id существующего факультета"),
+      @ApiResponse(responseCode = "422", description = "У студента не выбран факультет, факультет создал не "
+          + "он или его уже выбрали другие студенты")
+  })
+  @PutMapping("/me/faculty")
+  @PreAuthorize("hasRole('STUDENT')")
+  public ResponseEntity<FacultyDto> updateMyFaculty(
+      @AuthenticationPrincipal Jwt jwt,
+      @Valid @RequestBody CreateStudentFacultyRequest request) {
+
+    FacultyDto updated = studentService.updateMyFaculty(UUID.fromString(jwt.getSubject()), request);
     return ResponseEntity.ok(updated);
   }
 

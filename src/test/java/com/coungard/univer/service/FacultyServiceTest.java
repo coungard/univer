@@ -8,6 +8,7 @@ import com.coungard.univer.UniverApplication;
 import com.coungard.univer.dto.FacultyDto;
 import com.coungard.univer.entity.Faculty;
 import com.coungard.univer.entity.University;
+import com.coungard.univer.exception.ConflictException;
 import com.coungard.univer.exception.ResourceNotFoundException;
 import com.coungard.univer.repository.FacultyRepository;
 import com.coungard.univer.repository.RegionRepository;
@@ -141,6 +142,29 @@ class FacultyServiceTest {
     // Then
     assertThat(updated.name()).isEqualTo("Faculty of Applied Chemistry");
     assertThat(updated.description()).isEqualTo("Renamed faculty");
+  }
+
+  @Test
+  void shouldRejectDuplicateNameInSameUniversity() {
+    FacultyDto chemistry = createTestFaculty("Faculty of Chemistry");
+    FacultyDto physics = createTestFaculty("Faculty of Physics");
+
+    // Без учёта регистра и крайних пробелов
+    assertThatThrownBy(() -> facultyService.createFaculty(
+        FacultyDto.builder().name(" faculty of CHEMISTRY ").universityId(universityId).build()))
+        .isInstanceOfSatisfying(ConflictException.class, ex -> {
+          assertThat(ex.getField()).isEqualTo("name");
+          assertThat(ex.getExistingId()).isEqualTo(chemistry.id());
+        });
+    assertThatThrownBy(() -> facultyService.updateFaculty(physics.id(),
+        FacultyDto.builder().name("Faculty of chemistry").universityId(universityId).build()))
+        .isInstanceOf(ConflictException.class);
+
+    // Сам себе факультет не мешает: обновление без смены названия допустимо
+    FacultyDto updated = facultyService.updateFaculty(chemistry.id(),
+        FacultyDto.builder().description("Updated").universityId(universityId).build());
+    assertThat(updated.name()).isEqualTo("Faculty of Chemistry");
+    assertThat(updated.description()).isEqualTo("Updated");
   }
 
   @Test

@@ -12,10 +12,12 @@ public interface FacultyMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "university.id", source = "universityId")
+    @Mapping(target = "createdByStudentId", ignore = true)
     Faculty toEntity(FacultyDto dto);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "university", ignore = true)
+    @Mapping(target = "createdByStudentId", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntityFromDto(FacultyDto dto, @MappingTarget Faculty faculty);
 }

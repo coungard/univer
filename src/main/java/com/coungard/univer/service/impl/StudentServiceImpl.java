@@ -1,10 +1,12 @@
 package com.coungard.univer.service.impl;
 
+import com.coungard.univer.dto.FacultyDto;
 import com.coungard.univer.dto.GroupDto;
 import com.coungard.univer.dto.StudentDto;
 import com.coungard.univer.mapper.StudentMapper;
 import com.coungard.univer.dto.registration.RegisterData;
 import com.coungard.univer.dto.registration.RegisterStudentRequest;
+import com.coungard.univer.dto.request.CreateStudentFacultyRequest;
 import com.coungard.univer.dto.request.CreateStudentGroupRequest;
 import com.coungard.univer.dto.request.UpdateStudentProfileRequest;
 import com.coungard.univer.entity.Faculty;
@@ -22,6 +24,7 @@ import com.coungard.univer.repository.StudentRepository;
 import com.coungard.univer.repository.UniversityRepository;
 import com.coungard.univer.security.KeycloakAdminService;
 import com.coungard.univer.security.Role;
+import com.coungard.univer.service.FacultyService;
 import com.coungard.univer.service.GroupService;
 import com.coungard.univer.service.StudentService;
 import com.coungard.univer.validation.StudentValidator;
@@ -45,6 +48,7 @@ public class StudentServiceImpl implements StudentService {
   private final FacultyRepository facultyRepository;
   private final GroupRepository groupRepository;
   private final GroupService groupService;
+  private final FacultyService facultyService;
   private final StudentMapper studentMapper;
   private final StudentValidator studentValidator;
 
@@ -188,6 +192,52 @@ public class StudentServiceImpl implements StudentService {
 
     Student updated = studentRepository.save(student);
     return studentMapper.toDto(updated);
+  }
+
+  @Override
+  @Transactional
+  public StudentDto createMyFaculty(UUID id, CreateStudentFacultyRequest request) {
+    Student student = studentRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("Студент не найден с ID: " + id));
+
+    if (student.getUniversity() == null) {
+      throw new ValidationException("Нельзя создать факультет, пока не выбран университет");
+    }
+    if (facultyRepository.countByCreatedByStudentId(id) >= MAX_CREATED_FACULTIES) {
+      throw new ValidationException("Студент может создать не больше " + MAX_CREATED_FACULTIES + " факультетов");
+    }
+
+    UUID facultyId = facultyService.createFacultyByStudent(
+        student.getUniversity().getId(), request.name(), id).id();
+
+    // Как при смене факультета в PATCH /students/me: курс и группа относились к прежнему
+    student.setFaculty(facultyRepository.getReferenceById(facultyId));
+    student.setYearNumber(null);
+    student.setGroup(null);
+
+    Student updated = studentRepository.save(student);
+    return studentMapper.toDto(updated);
+  }
+
+  @Override
+  @Transactional
+  public FacultyDto updateMyFaculty(UUID id, CreateStudentFacultyRequest request) {
+    Student student = studentRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("Студент не найден с ID: " + id));
+
+    Faculty faculty = student.getFaculty();
+    if (faculty == null) {
+      throw new ValidationException("У студента не выбран факультет");
+    }
+    if (!id.equals(faculty.getCreatedByStudentId())) {
+      throw new ValidationException("Изменить название можно только у факультета, который студент создал сам");
+    }
+    if (studentRepository.countByFacultyId(faculty.getId()) > 1) {
+      throw new ValidationException("Факультет уже выбрали другие студенты — название может изменить только "
+          + "администратор");
+    }
+
+    return facultyService.renameFaculty(faculty.getId(), request.name());
   }
 
   @Override
