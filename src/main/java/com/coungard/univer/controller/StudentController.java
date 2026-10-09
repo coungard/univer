@@ -3,11 +3,14 @@ package com.coungard.univer.controller;
 import com.coungard.univer.dto.FacultyDto;
 import com.coungard.univer.dto.GroupDto;
 import com.coungard.univer.dto.StudentDto;
+import com.coungard.univer.dto.UniversityRequestDto;
 import com.coungard.univer.dto.registration.RegisterStudentRequest;
 import com.coungard.univer.dto.request.CreateStudentFacultyRequest;
 import com.coungard.univer.dto.request.CreateStudentGroupRequest;
+import com.coungard.univer.dto.request.SubmitUniversityRequest;
 import com.coungard.univer.dto.request.UpdateStudentProfileRequest;
 import com.coungard.univer.service.StudentService;
+import com.coungard.univer.service.UniversityRequestService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -44,6 +47,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 public class StudentController {
 
   private final StudentService studentService;
+  private final UniversityRequestService universityRequestService;
 
   @Operation(summary = "Получить студентов с пагинацией")
   @GetMapping
@@ -87,6 +91,44 @@ public class StudentController {
 
     StudentDto updated = studentService.updateMyProfile(UUID.fromString(jwt.getSubject()), request);
     return ResponseEntity.ok(updated);
+  }
+
+  @Operation(
+      summary = "Получить свою заявку на добавление университета",
+      description = "Последняя заявка студента: необработанная, а если её нет — последняя закрытая или "
+          + "отклонённая. У закрытой заполнен universityId."
+  )
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "Заявка найдена"),
+      @ApiResponse(responseCode = "404", description = "Студент заявок не оставлял")
+  })
+  @GetMapping("/me/university-request")
+  @PreAuthorize("hasRole('STUDENT')")
+  public ResponseEntity<UniversityRequestDto> getMyUniversityRequest(@AuthenticationPrincipal Jwt jwt) {
+    UniversityRequestDto dto = universityRequestService.getMyRequest(UUID.fromString(jwt.getSubject()));
+    return ResponseEntity.ok(dto);
+  }
+
+  @Operation(
+      summary = "Оставить заявку на добавление университета",
+      description = "Для случая, когда нужного университета нет в GET /universities. У студента не больше "
+          + "одной необработанной заявки: повторный запрос обновляет её. Профиль заявка не меняет — "
+          + "университет появится в нём, когда администратор закроет заявку."
+  )
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "Заявка создана или обновлена"),
+      @ApiResponse(responseCode = "404", description = "Регион не найден"),
+      @ApiResponse(responseCode = "422", description = "В профиле уже выбран университет")
+  })
+  @PutMapping("/me/university-request")
+  @PreAuthorize("hasRole('STUDENT')")
+  public ResponseEntity<UniversityRequestDto> submitMyUniversityRequest(
+      @AuthenticationPrincipal Jwt jwt,
+      @Valid @RequestBody SubmitUniversityRequest request) {
+
+    UniversityRequestDto saved = universityRequestService.submitMyRequest(
+        UUID.fromString(jwt.getSubject()), request);
+    return ResponseEntity.ok(saved);
   }
 
   @Operation(

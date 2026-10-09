@@ -27,6 +27,7 @@ import com.coungard.univer.security.Role;
 import com.coungard.univer.service.FacultyService;
 import com.coungard.univer.service.GroupService;
 import com.coungard.univer.service.StudentService;
+import com.coungard.univer.service.UniversityRequestService;
 import com.coungard.univer.validation.StudentValidator;
 import java.util.Objects;
 import java.util.UUID;
@@ -49,6 +50,7 @@ public class StudentServiceImpl implements StudentService {
   private final GroupRepository groupRepository;
   private final GroupService groupService;
   private final FacultyService facultyService;
+  private final UniversityRequestService universityRequestService;
   private final StudentMapper studentMapper;
   private final StudentValidator studentValidator;
 
@@ -166,6 +168,7 @@ public class StudentServiceImpl implements StudentService {
     }
 
     Student updated = studentRepository.save(existing);
+    universityRequestService.completePendingRequestOnUniversityChosen(updated);
     return studentMapper.toDto(updated);
   }
 
@@ -191,6 +194,8 @@ public class StudentServiceImpl implements StudentService {
     }
 
     Student updated = studentRepository.save(student);
+    // Университет мог появиться и не напрямую — по выбранному факультету или группе
+    universityRequestService.completePendingRequestOnUniversityChosen(updated);
     return studentMapper.toDto(updated);
   }
 
