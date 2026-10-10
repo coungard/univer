@@ -17,9 +17,10 @@ import org.springframework.stereotype.Component;
 public class UniversityMapper {
 
   /**
-   * Преобразует University в UniversityDto с использованием билдера
+   * Преобразует University в UniversityDto с использованием билдера. Число факультетов передаётся
+   * отдельно: для списка оно считается одним запросом на страницу.
    */
-  public UniversityDto toDto(University university) {
+  public UniversityDto toDto(University university, long facultyCount) {
     if (university == null) {
       return null;
     }
@@ -35,6 +36,7 @@ public class UniversityMapper {
         .updatedAt(university.getUpdatedAt())
         .address(this.toAddressDto(university.getAddress()))
         .regionId(university.getRegion() != null ? university.getRegion().getId() : null)
+        .facultyCount(facultyCount)
         .faculties(this.toFacultyDtos(university.getFaculties()))
         .build();
   }
@@ -118,16 +120,6 @@ public class UniversityMapper {
     }
 
     return university;
-  }
-
-  public List<UniversityDto> toDtoList(List<University> universities) {
-    if (universities == null) {
-      return null;
-    }
-    return universities.stream()
-        .map(this::toDto)
-        .filter(Objects::nonNull)
-        .collect(Collectors.toList());
   }
 
   public List<University> toEntityList(List<UniversityDto> dtos) {

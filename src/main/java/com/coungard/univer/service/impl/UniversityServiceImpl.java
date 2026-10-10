@@ -8,10 +8,15 @@ import com.coungard.univer.exception.ResourceNotFoundException;
 import com.coungard.univer.exception.ValidationException;
 import com.coungard.univer.mapper.UniversityMapper;
 import com.coungard.univer.repository.AddressRepository;
+import com.coungard.univer.repository.FacultyRepository;
+import com.coungard.univer.repository.FacultyRepository.UniversityFacultyCount;
 import com.coungard.univer.repository.RegionRepository;
 import com.coungard.univer.repository.UniversityRepository;
 import com.coungard.univer.service.UniversityService;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +31,7 @@ public class UniversityServiceImpl implements UniversityService {
   private final UniversityRepository universityRepository;
   private final AddressRepository addressRepository;
   private final RegionRepository regionRepository;
+  private final FacultyRepository facultyRepository;
   private final UniversityMapper universityMapper;
 
   @Override
@@ -42,7 +48,26 @@ public class UniversityServiceImpl implements UniversityService {
           ? universityRepository.findByNameContainingIgnoreCase(search.trim(), pageable)
           : universityRepository.findAll(pageable);
     }
-    return page.map(universityMapper::toDto);
+    Map<UUID, Long> facultyCounts = countFaculties(page.getContent());
+    return page.map(university ->
+        universityMapper.toDto(university, facultyCounts.getOrDefault(university.getId(), 0L)));
+  }
+
+  /**
+   * Число факультетов для всех университетов страницы одним запросом, а не по запросу на университет.
+   */
+  private Map<UUID, Long> countFaculties(List<University> universities) {
+    if (universities.isEmpty()) {
+      return Map.of();
+    }
+    List<UUID> universityIds = universities.stream().map(University::getId).toList();
+    return facultyRepository.countByUniversityIds(universityIds).stream()
+        .collect(Collectors.toMap(
+            UniversityFacultyCount::getUniversityId, UniversityFacultyCount::getFacultyCount));
+  }
+
+  private UniversityDto toDto(University university) {
+    return universityMapper.toDto(university, facultyRepository.countByUniversityId(university.getId()));
   }
 
   @Override
@@ -50,7 +75,7 @@ public class UniversityServiceImpl implements UniversityService {
   public UniversityDto getUniversityById(UUID id) {
     University university = universityRepository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("University not found with id: " + id));
-    return universityMapper.toDto(university);
+    return toDto(university);
   }
 
   @Override
@@ -60,7 +85,7 @@ public class UniversityServiceImpl implements UniversityService {
     university.setRegion(findRegion(universityDto.regionId()));
 
     University saved = universityRepository.save(university);
-    return universityMapper.toDto(saved);
+    return toDto(saved);
   }
 
   @Override
@@ -90,7 +115,7 @@ public class UniversityServiceImpl implements UniversityService {
     existing.setRegion(findRegion(universityDto.regionId()));
 
     University saved = universityRepository.save(existing);
-    return universityMapper.toDto(saved);
+    return toDto(saved);
   }
 
   private Region findRegion(UUID regionId) {

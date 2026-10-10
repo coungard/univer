@@ -2,13 +2,16 @@ package com.coungard.univer.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.tuple;
 
 import com.coungard.univer.UniverApplication;
 import com.coungard.univer.dto.AddressDto;
 import com.coungard.univer.dto.UniversityDto;
+import com.coungard.univer.entity.Faculty;
 import com.coungard.univer.entity.Region;
 import com.coungard.univer.exception.ResourceNotFoundException;
 import com.coungard.univer.exception.ValidationException;
+import com.coungard.univer.repository.FacultyRepository;
 import com.coungard.univer.repository.RegionRepository;
 import com.coungard.univer.repository.UniversityRepository;
 import java.util.UUID;
@@ -49,6 +52,9 @@ class UniversityServiceTest {
 
   @Autowired
   private UniversityRepository universityRepository;
+
+  @Autowired
+  private FacultyRepository facultyRepository;
 
   @Autowired
   private RegionRepository regionRepository;
@@ -253,6 +259,62 @@ class UniversityServiceTest {
         .extracting(UniversityDto::name)
         .containsExactly("ДГТУ");
     assertThat(universityService.getUniversities("дгт", moscow.getId(), pageable).getContent()).isEmpty();
+  }
+
+  @Test
+  @DisplayName("Число факультетов приходит в списке — с поиском, с регионом и без параметров — и по ID")
+  void shouldReturnFacultyCount() {
+    Region dagestan = createRegion("05", "Республика Дагестан");
+
+    UUID withFaculties = universityService.createUniversity(
+        UniversityDto.builder().name("ДГТУ").regionId(dagestan.getId()).build()).id();
+    UUID withoutFaculties = universityService.createUniversity(
+        UniversityDto.builder().name("ДГУ").regionId(dagestan.getId()).build()).id();
+    createFaculty(withFaculties, "Факультет информатики");
+    createFaculty(withFaculties, "Факультет права");
+
+    Pageable pageable = PageRequest.of(0, 10);
+
+    assertThat(universityService.getUniversities(null, null, pageable).getContent())
+        .extracting(UniversityDto::id, UniversityDto::facultyCount)
+        .containsExactlyInAnyOrder(tuple(withFaculties, 2L), tuple(withoutFaculties, 0L));
+    assertThat(universityService.getUniversities(null, dagestan.getId(), pageable).getContent())
+        .extracting(UniversityDto::id, UniversityDto::facultyCount)
+        .containsExactlyInAnyOrder(tuple(withFaculties, 2L), tuple(withoutFaculties, 0L));
+    assertThat(universityService.getUniversities("дгт", null, pageable).getContent())
+        .extracting(UniversityDto::id, UniversityDto::facultyCount)
+        .containsExactly(tuple(withFaculties, 2L));
+
+    assertThat(universityService.getUniversityById(withFaculties).facultyCount()).isEqualTo(2L);
+    assertThat(universityService.getUniversityById(withoutFaculties).facultyCount()).isZero();
+  }
+
+  @Test
+  @DisplayName("Число факультетов из тела запроса игнорируется при создании и обновлении")
+  void shouldIgnoreFacultyCountFromRequest() {
+    UniversityDto saved = universityService.createUniversity(UniversityDto.builder()
+        .name("ДГТУ")
+        .regionId(regionId)
+        .facultyCount(99)
+        .build());
+    assertThat(saved.facultyCount()).isZero();
+
+    createFaculty(saved.id(), "Факультет информатики");
+
+    UniversityDto updated = universityService.updateUniversity(saved.id(), UniversityDto.builder()
+        .name("ДГТУ")
+        .regionId(regionId)
+        .facultyCount(99)
+        .build());
+    assertThat(updated.facultyCount()).isEqualTo(1L);
+    assertThat(universityService.getUniversityById(saved.id()).facultyCount()).isEqualTo(1L);
+  }
+
+  private void createFaculty(UUID universityId, String name) {
+    Faculty faculty = new Faculty();
+    faculty.setName(name);
+    faculty.setUniversity(universityRepository.getReferenceById(universityId));
+    facultyRepository.save(faculty);
   }
 
   @Test

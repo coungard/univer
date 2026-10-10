@@ -35,6 +35,11 @@ public record UniversityDto(
         @Schema(description = "ID региона (субъекта РФ), см. GET /api/v1/regions")
         UUID regionId,
 
+        @Schema(description = "Число факультетов университета, включая созданные студентами. "
+                + "Вычисляется сервером, в теле запроса игнорируется", example = "12",
+                accessMode = Schema.AccessMode.READ_ONLY)
+        long facultyCount,
+
         List<FacultyDto> faculties
 ) {
     public UniversityDto {
