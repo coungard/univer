@@ -122,12 +122,12 @@
 
 ### BellScheduleEntryDto
 `id`, `universityId` (`null` = дефолт для университетов без своей записи на этот `pairNumber`),
-`pairNumber`★ (`≥ 1`), `startTime`★, `endTime`★.
+`pairNumber`★ (`≥ 1`), `startTime`★, `endTime`★. Записи по умолчанию заведены на пары 1–8.
 
 ### PairDto
 `id`, `weekScheduleCycleId`★, `dayOfWeek`★ (`MONDAY`…`SUNDAY`), `weekParity: WeekParity`★,
 `pairNumber`★ (`≥ 1`), `startTime` (опционально — если не задано, подставляется из
-`BellScheduleEntry` по университету курса и `pairNumber`), `endTime`, `courseId`★, `teacherId`, `room`,
+`BellScheduleEntry` по университету группы и `pairNumber`), `endTime`, `courseId`★, `teacherId`, `room`,
 `groupIds: UUID[]`★ (непусто). Шаблон повторяющегося занятия в циклическом расписании — из него
 генерируются конкретные `Lecture` на даты.
 `WeekParity` (enum): `ODD` (нечётная неделя) | `EVEN` (чётная) | `BOTH` (каждую неделю).
@@ -384,10 +384,23 @@
 |---|---|---|---|---|
 | GET | `/` | любая роль | — (`?page&size`) | `Page<BellScheduleEntryDto>` |
 | GET | `/university/{universityId}` | любая роль | — (`?page&size`) | `Page<BellScheduleEntryDto>` |
+| GET | `/university/{universityId}/effective` | любая роль | — | `BellScheduleEntryDto[]` |
 | GET | `/{id}` | любая роль | — | `BellScheduleEntryDto` |
 | POST | `/` | `ADMIN` | `BellScheduleEntryDto` | `201` + `BellScheduleEntryDto` |
 | PUT | `/{id}` | `ADMIN` | `BellScheduleEntryDto` | `BellScheduleEntryDto` |
 | DELETE | `/{id}` | `ADMIN` | — | `204` |
+
+- **Записи по умолчанию** (`universityId: null`) действуют для любого университета, у которого нет
+  своей записи на этот номер пары. Заведены на пары 1–8: `08:30–10:00`, `10:10–11:40`, `12:20–13:50`,
+  `14:00–15:30`, `15:40–17:10`, `17:20–18:50`, `19:00–20:30`, `20:40–22:10`. Править их, как и записи
+  университетов, может только `ADMIN`.
+- **`GET /university/{universityId}/effective`** — звонки, действующие для университета: по одной
+  записи на номер пары, массив без пагинации, отсортирован по `pairNumber`. На каждый номер —
+  собственная запись университета, а если её нет — запись по умолчанию (у неё `universityId: null`).
+  Это то время, которое сервер подставит в пару, созданную без `startTime`/`endTime`, — его можно
+  показывать рядом с номером пары. У несуществующего университета — записи по умолчанию, не ошибка.
+- **`GET /university/{universityId}`** — только собственные записи университета; если их нет — пустая
+  страница, записи по умолчанию сюда не попадают.
 
 ## Pairs — `/api/v1/pairs`
 
@@ -414,6 +427,13 @@
 `dayOfWeek`, пересекающуюся `weekParity` (с учётом `BOTH`) и пересекающиеся `[startTime, endTime)`,
 если при этом у них совпадает `teacherId` или `room`. Нарушение — `422`. Защиты от гонки при
 параллельных сохранениях нет (осознанно, для MVP).
+
+**Время пары.** `startTime`/`endTime` в `POST`/`PUT /pairs` необязательны: если хотя бы одно не
+передано, оба подставляются из звонков по `pairNumber` — тех же, что отдаёт
+`GET /bell-schedule-entries/university/{universityId}/effective`. Университет определяется по группе
+пары (группа → семестр → учебный год → факультет), а не по кафедре предмета: у предмета кафедры может
+не быть. Если на этот номер пары нет ни записи университета, ни записи по умолчанию (номер больше 8
+и своей записи нет) — `422`. Переданные явно `startTime` и `endTime` сохраняются как есть.
 
 ## Groups — `/api/v1/groups`
 

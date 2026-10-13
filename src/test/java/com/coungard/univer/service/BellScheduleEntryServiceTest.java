@@ -13,6 +13,7 @@ import com.coungard.univer.repository.BellScheduleEntryRepository;
 import com.coungard.univer.repository.RegionRepository;
 import com.coungard.univer.repository.UniversityRepository;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -132,6 +133,45 @@ class BellScheduleEntryServiceTest {
 
     // Then
     assertThat(entries.getContent()).hasSize(2);
+  }
+
+  @Test
+  void shouldGetDefaultEntriesAsEffectiveWhenUniversityHasNoOwn() {
+    // Given: у университета своих звонков нет
+    bellScheduleEntryService.createEntry(createDto(null, 2, LocalTime.of(10, 10), LocalTime.of(11, 40)));
+    bellScheduleEntryService.createEntry(createDto(null, 1, LocalTime.of(8, 30), LocalTime.of(10, 0)));
+
+    // When
+    List<BellScheduleEntryDto> entries = bellScheduleEntryService.getEffectiveEntries(universityId);
+
+    // Then: записи по умолчанию, по порядку номеров пар
+    assertThat(entries).extracting(BellScheduleEntryDto::pairNumber).containsExactly(1, 2);
+    assertThat(entries).extracting(BellScheduleEntryDto::universityId).containsOnlyNulls();
+    assertThat(entries.get(0).startTime()).isEqualTo(LocalTime.of(8, 30));
+  }
+
+  @Test
+  void shouldOverrideDefaultEntriesWithUniversityOwnPerPairNumber() {
+    // Given: своя запись только на 2-ю пару; у другого университета — на 1-ю
+    bellScheduleEntryService.createEntry(createDto(null, 1, LocalTime.of(8, 30), LocalTime.of(10, 0)));
+    bellScheduleEntryService.createEntry(createDto(null, 2, LocalTime.of(10, 10), LocalTime.of(11, 40)));
+    bellScheduleEntryService.createEntry(createDto(universityId, 2, LocalTime.of(10, 40), LocalTime.of(12, 10)));
+    bellScheduleEntryService.createEntry(createDto(universityId, 3, LocalTime.of(12, 40), LocalTime.of(14, 10)));
+    University other = new University();
+    other.setName("Other University");
+    other.setRegion(TestRegions.create(regionRepository));
+    UUID otherUniversityId = universityRepository.save(other).getId();
+    bellScheduleEntryService.createEntry(createDto(otherUniversityId, 1, LocalTime.of(7, 0), LocalTime.of(8, 30)));
+
+    // When
+    List<BellScheduleEntryDto> entries = bellScheduleEntryService.getEffectiveEntries(universityId);
+
+    // Then: 1-я пара — по умолчанию, 2-я и 3-я — свои; чужая запись не попала
+    assertThat(entries).extracting(BellScheduleEntryDto::pairNumber).containsExactly(1, 2, 3);
+    assertThat(entries).extracting(BellScheduleEntryDto::universityId)
+        .containsExactly(null, universityId, universityId);
+    assertThat(entries).extracting(BellScheduleEntryDto::startTime)
+        .containsExactly(LocalTime.of(8, 30), LocalTime.of(10, 40), LocalTime.of(12, 40));
   }
 
   @Test

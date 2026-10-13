@@ -1,6 +1,7 @@
 package com.coungard.univer.service;
 
 import com.coungard.univer.dto.BellScheduleEntryDto;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -41,6 +42,17 @@ public interface BellScheduleEntryService {
    * @return страница BellScheduleEntryDto
    */
   Page<BellScheduleEntryDto> getEntriesByUniversity(UUID universityId, Pageable pageable);
+
+  /**
+   * Получить звонки, действующие для университета: по одной записи на номер пары — собственная
+   * запись университета, а если её на этот номер нет — запись по умолчанию. По этому же правилу
+   * сервер подставляет время пары, созданной без {@code startTime}/{@code endTime}.
+   *
+   * @param universityId идентификатор университета
+   * @return записи, отсортированные по номеру пары; у несуществующего университета — записи по
+   *     умолчанию
+   */
+  List<BellScheduleEntryDto> getEffectiveEntries(UUID universityId);
 
   /**
    * Обновить запись звонкового расписания.
