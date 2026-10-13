@@ -21,6 +21,7 @@ import com.coungard.univer.repository.PairRepository;
 import com.coungard.univer.repository.StudentRepository;
 import com.coungard.univer.repository.TeacherRepository;
 import com.coungard.univer.repository.WeekScheduleCycleRepository;
+import com.coungard.univer.service.LectureService;
 import com.coungard.univer.service.PairService;
 import java.time.LocalTime;
 import java.util.Comparator;
@@ -47,6 +48,7 @@ public class PairServiceImpl implements PairService {
   private final FacultyRepository facultyRepository;
   private final BellScheduleEntryRepository bellScheduleEntryRepository;
   private final StudentRepository studentRepository;
+  private final LectureService lectureService;
   private final PairMapper pairMapper;
 
   @Override
@@ -135,6 +137,8 @@ public class PairServiceImpl implements PairService {
     existing.setGroups(groups);
 
     Pair updated = pairRepository.save(existing);
+    // Лекции, уже сгенерированные из пары, иначе остались бы на прежнем дне и времени (issue #99)
+    lectureService.syncLecturesWithPair(updated.getId());
     return pairMapper.toDto(updated);
   }
 
@@ -145,6 +149,8 @@ public class PairServiceImpl implements PairService {
         .orElseThrow(() -> new ResourceNotFoundException("Пара не найдена с ID: " + id));
     checkStudentCanEdit(callerStudentId, existing.getWeekScheduleCycle(), existing.getGroups());
 
+    // Иначе в расписании группы остались бы занятия по паре, которой уже нет (issue #99)
+    lectureService.deleteLecturesOfPair(id);
     pairRepository.delete(existing);
   }
 

@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.coungard.univer.TestRegions;
 import com.coungard.univer.UniverApplication;
 import com.coungard.univer.dto.LectureDto;
+import com.coungard.univer.dto.PairDto;
 import com.coungard.univer.dto.SemesterType;
 import com.coungard.univer.dto.WeekParity;
 import com.coungard.univer.dto.request.GenerateLectureRequest;
@@ -13,6 +14,8 @@ import com.coungard.univer.entity.Course;
 import com.coungard.univer.entity.Department;
 import com.coungard.univer.entity.Faculty;
 import com.coungard.univer.entity.Group;
+import com.coungard.univer.entity.Lecture;
+import com.coungard.univer.entity.LectureAttendance;
 import com.coungard.univer.entity.Pair;
 import com.coungard.univer.entity.Person;
 import com.coungard.univer.entity.Semester;
@@ -26,6 +29,7 @@ import com.coungard.univer.repository.CourseRepository;
 import com.coungard.univer.repository.DepartmentRepository;
 import com.coungard.univer.repository.FacultyRepository;
 import com.coungard.univer.repository.GroupRepository;
+import com.coungard.univer.repository.LectureAttendanceRepository;
 import com.coungard.univer.repository.LectureRepository;
 import com.coungard.univer.repository.PairRepository;
 import com.coungard.univer.repository.SemesterRepository;
@@ -80,6 +84,12 @@ class LectureServiceTest {
   private LectureRepository lectureRepository;
 
   @Autowired
+  private LectureAttendanceRepository lectureAttendanceRepository;
+
+  @Autowired
+  private PairService pairService;
+
+  @Autowired
   private PairRepository pairRepository;
 
   @Autowired
@@ -132,6 +142,7 @@ class LectureServiceTest {
 
   @BeforeEach
   void setUp() {
+    lectureAttendanceRepository.deleteAll();
     studentRepository.deleteAll();
     lectureRepository.deleteAll();
     pairRepository.deleteAll();
@@ -594,7 +605,162 @@ class LectureServiceTest {
         .allSatisfy(lecture -> assertThat(lecture.getSourcePair().getId()).isEqualTo(pairId));
   }
 
+  // === Лекции следуют за изменением и удалением пары (issue #99) ===
+
+  @Test
+  void shouldRecreateGeneratedLecturesWhenPairIsMovedToAnotherDay() {
+    // Given: из ODD-пары по понедельникам сгенерированы 2 лекции (07 и 21 сентября)
+    lectureService.generateSemesterLectures(cycleId, null);
+    PairDto pair = pairService.getPairById(pairId);
+
+    // When: пара перенесена на вторник, каждую неделю, в другую аудиторию
+    pairService.updatePair(pairId, pair.toBuilder()
+        .dayOfWeek(DayOfWeek.TUESDAY)
+        .weekParity(WeekParity.BOTH)
+        .room("202")
+        .build(), null);
+
+    // Then: понедельников не осталось, лекции стоят по вторникам семестра (01, 08, 15 сентября)
+    List<LectureDto> lectures = findLecturesOfPair(pairId);
+    assertThat(lectures)
+        .extracting(LectureDto::scheduledTime)
+        .containsExactlyInAnyOrder(
+            LocalDateTime.of(2026, 9, 1, 8, 0),
+            LocalDateTime.of(2026, 9, 8, 8, 0),
+            LocalDateTime.of(2026, 9, 15, 8, 0));
+    assertThat(lectures).extracting(LectureDto::room).containsOnly("202");
+    assertThat(lectureRepository.count()).isEqualTo(3);
+
+    // Повторная генерация ничего не добавляет
+    assertThat(lectureService.generateSemesterLectures(cycleId, null)).isEmpty();
+  }
+
+  @Test
+  void shouldNotLeaveLecturesAtOldTimeWhenPairTimeChanges() {
+    // Given
+    lectureService.generateSemesterLectures(cycleId, null);
+    PairDto pair = pairService.getPairById(pairId);
+
+    // When: тот же день, но другая пара по счёту и группа — уже не поток
+    pairService.updatePair(pairId, pair.toBuilder()
+        .pairNumber(2)
+        .startTime(LocalTime.of(9, 40))
+        .endTime(LocalTime.of(11, 40))
+        .groupIds(Set.of(group1Id))
+        .build(), null);
+
+    // Then: те же даты, новое время, длительность и состав групп
+    List<LectureDto> lectures = findLecturesOfPair(pairId);
+    assertThat(lectures)
+        .extracting(LectureDto::scheduledTime)
+        .containsExactlyInAnyOrder(
+            LocalDateTime.of(FIRST_MONDAY_ODD_WEEK, LocalTime.of(9, 40)),
+            LocalDateTime.of(THIRD_MONDAY_ODD_WEEK, LocalTime.of(9, 40)));
+    assertThat(lectures).extracting(LectureDto::durationMinutes).containsOnly(120);
+    assertThat(lectures).allSatisfy(lecture -> assertThat(lecture.groupIds()).containsExactly(group1Id));
+    assertThat(lectureService.generateSemesterLectures(cycleId, null)).isEmpty();
+  }
+
+  @Test
+  void shouldNotGenerateLecturesOnPairUpdateWhenNoneWereGenerated() {
+    // Given: лекции из пары ещё не генерировались
+    PairDto pair = pairService.getPairById(pairId);
+
+    // When
+    pairService.updatePair(pairId, pair.toBuilder().dayOfWeek(DayOfWeek.TUESDAY).build(), null);
+
+    // Then
+    assertThat(lectureRepository.count()).isZero();
+  }
+
+  @Test
+  void shouldDeleteGeneratedLecturesWhenPairIsDeleted() {
+    // Given: 2 лекции из пары и одна, созданная вручную
+    lectureService.generateSemesterLectures(cycleId, null);
+    LectureDto manual = lectureService.createLecture(createDto(Set.of(group1Id)));
+
+    // When
+    pairService.deletePair(pairId, null);
+
+    // Then: лекции пары удалены вместе с ней, ручная осталась
+    assertThat(lectureRepository.findAll()).extracting(Lecture::getId).containsExactly(manual.id());
+  }
+
+  @Test
+  void shouldKeepLecturesWithAttendanceWhenPairIsUpdatedAndDeleted() {
+    // Given: по первой из двух лекций пары уже отмечена посещаемость
+    lectureService.generateSemesterLectures(cycleId, null);
+    LectureDto attended = findLecturesOfPair(pairId).stream()
+        .filter(lecture -> lecture.scheduledTime().toLocalDate().equals(FIRST_MONDAY_ODD_WEEK))
+        .findFirst()
+        .orElseThrow();
+    markAttendance(attended.id());
+    PairDto pair = pairService.getPairById(pairId);
+
+    // When: пара перенесена на вторник
+    pairService.updatePair(pairId, pair.toBuilder().dayOfWeek(DayOfWeek.TUESDAY).build(), null);
+
+    // Then: отмеченная лекция осталась как была, остальные — по нечётным вторникам (01 и 15 сентября)
+    assertThat(findLecturesOfPair(pairId))
+        .extracting(LectureDto::scheduledTime)
+        .containsExactlyInAnyOrder(
+            attended.scheduledTime(),
+            LocalDateTime.of(2026, 9, 1, 8, 0),
+            LocalDateTime.of(2026, 9, 15, 8, 0));
+    assertThat(lectureService.getLectureById(attended.id()).scheduledTime()).isEqualTo(attended.scheduledTime());
+
+    // When: пара удалена
+    pairService.deletePair(pairId, null);
+
+    // Then: осталась только отмеченная лекция, уже без ссылки на пару
+    assertThat(lectureRepository.findAll()).extracting(Lecture::getId).containsExactly(attended.id());
+    assertThat(lectureService.getLectureById(attended.id()).sourcePairId()).isNull();
+    assertThat(lectureAttendanceRepository.count()).isEqualTo(1);
+  }
+
+  @Test
+  void shouldNotCreateSecondLectureOnDateOfLectureWithAttendance() {
+    // Given: по лекции 07 сентября отмечена посещаемость
+    lectureService.generateSemesterLectures(cycleId, null);
+    LectureDto attended = findLecturesOfPair(pairId).stream()
+        .filter(lecture -> lecture.scheduledTime().toLocalDate().equals(FIRST_MONDAY_ODD_WEEK))
+        .findFirst()
+        .orElseThrow();
+    markAttendance(attended.id());
+    PairDto pair = pairService.getPairById(pairId);
+
+    // When: у пары меняется только время
+    pairService.updatePair(pairId, pair.toBuilder()
+        .startTime(LocalTime.of(9, 40))
+        .endTime(LocalTime.of(11, 10))
+        .build(), null);
+
+    // Then: 07 сентября — прежняя лекция в прежнее время, 21 сентября — пересоздана на новое
+    assertThat(findLecturesOfPair(pairId))
+        .extracting(LectureDto::scheduledTime)
+        .containsExactlyInAnyOrder(
+            LocalDateTime.of(FIRST_MONDAY_ODD_WEEK, LocalTime.of(8, 0)),
+            LocalDateTime.of(THIRD_MONDAY_ODD_WEEK, LocalTime.of(9, 40)));
+    assertThat(lectureService.generateSemesterLectures(cycleId, null)).isEmpty();
+    assertThatThrownBy(() -> lectureService.generateFromPair(
+        new GenerateLectureRequest(pairId, FIRST_MONDAY_ODD_WEEK), null))
+        .isInstanceOf(ValidationException.class);
+  }
+
   // === Вспомогательные методы ===
+
+  private List<LectureDto> findLecturesOfPair(UUID sourcePairId) {
+    return lectureService.getLectures(PageRequest.of(0, 100)).getContent().stream()
+        .filter(lecture -> sourcePairId.equals(lecture.sourcePairId()))
+        .toList();
+  }
+
+  private void markAttendance(UUID lectureId) {
+    LectureAttendance attendance = new LectureAttendance();
+    attendance.setStudentId(createStudent(group1Id));
+    attendance.setLectureId(lectureId);
+    lectureAttendanceRepository.save(attendance);
+  }
 
   private UUID createGroup(String name) {
     Group group = new Group();

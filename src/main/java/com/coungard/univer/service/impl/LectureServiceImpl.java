@@ -10,7 +10,6 @@ import com.coungard.univer.entity.Pair;
 import com.coungard.univer.entity.Semester;
 import com.coungard.univer.entity.Student;
 import com.coungard.univer.entity.Teacher;
-import com.coungard.univer.entity.WeekScheduleCycle;
 import com.coungard.univer.exception.ResourceNotFoundException;
 import com.coungard.univer.exception.ValidationException;
 import com.coungard.univer.mapper.LectureMapper;
@@ -31,6 +30,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -87,8 +87,7 @@ public class LectureServiceImpl implements LectureService {
               + " неделю семестра, а пара рассчитана на " + pair.getWeekParity());
     }
 
-    LocalDateTime scheduledTime = LocalDateTime.of(date, pair.getStartTime());
-    if (lectureRepository.existsBySourcePairIdAndScheduledTime(pair.getId(), scheduledTime)) {
+    if (findGeneratedDates(pair.getId()).contains(date)) {
       throw new ValidationException(
           "Лекция из пары " + pair.getId() + " на дату " + date + " уже сгенерирована");
     }
@@ -100,16 +99,12 @@ public class LectureServiceImpl implements LectureService {
   @Override
   @Transactional
   public List<LectureDto> generateSemesterLectures(UUID weekScheduleCycleId, UUID callerStudentId) {
-    WeekScheduleCycle cycle = weekScheduleCycleRepository.findById(weekScheduleCycleId)
-        .orElseThrow(() -> new ResourceNotFoundException(
-            "Циклическое расписание не найдено с ID: " + weekScheduleCycleId));
+    if (!weekScheduleCycleRepository.existsById(weekScheduleCycleId)) {
+      throw new ResourceNotFoundException("Циклическое расписание не найдено с ID: " + weekScheduleCycleId);
+    }
     // Для ADMIN/TEACHER — null, генерируются лекции по всем Pair цикла, как раньше. Для STUDENT —
     // группа вызывающего, дальше отфильтровываем ею список Pair.
     UUID callerGroupId = resolveCallerGroupId(callerStudentId);
-
-    Semester semester = cycle.getSemester();
-    LocalDate semesterStart = semester.getStartDate();
-    LocalDate semesterEnd = semester.getEndDate();
 
     List<LectureDto> generated = new ArrayList<>();
     for (Pair pair : pairRepository.findByWeekScheduleCycleId(weekScheduleCycleId)) {
@@ -117,20 +112,69 @@ public class LectureServiceImpl implements LectureService {
         continue;
       }
 
-      LocalDate date = semesterStart.with(TemporalAdjusters.nextOrSame(pair.getDayOfWeek()));
-      while (!date.isAfter(semesterEnd)) {
-        WeekParity actualParity = computeWeekParity(semesterStart, date);
-        if (pair.getWeekParity() == WeekParity.BOTH || pair.getWeekParity() == actualParity) {
-          LocalDateTime scheduledTime = LocalDateTime.of(date, pair.getStartTime());
-          if (!lectureRepository.existsBySourcePairIdAndScheduledTime(pair.getId(), scheduledTime)) {
-            Lecture saved = lectureRepository.save(buildLectureFromPair(pair, date));
-            generated.add(lectureMapper.toDto(saved));
-          }
-        }
-        date = date.plusWeeks(1);
+      for (Lecture lecture : generateMissingLectures(pair)) {
+        generated.add(lectureMapper.toDto(lecture));
       }
     }
     return generated;
+  }
+
+  @Override
+  @Transactional
+  public void syncLecturesWithPair(UUID pairId) {
+    Pair pair = pairRepository.findById(pairId)
+        .orElseThrow(() -> new ResourceNotFoundException("Пара не найдена с ID: " + pairId));
+    // Пока лекции из пары не генерировались, изменение пары их и не создаёт
+    if (!lectureRepository.existsBySourcePairId(pairId)) {
+      return;
+    }
+
+    lectureRepository.deleteAll(lectureRepository.findBySourcePairIdWithoutAttendance(pairId));
+    generateMissingLectures(pair);
+  }
+
+  @Override
+  @Transactional
+  public void deleteLecturesOfPair(UUID pairId) {
+    lectureRepository.deleteAll(lectureRepository.findBySourcePairIdWithoutAttendance(pairId));
+    // Остались только лекции с отмеченной посещаемостью — они переживают пару
+    lectureRepository.detachFromSourcePair(pairId);
+  }
+
+  /**
+   * Создать лекции пары на все даты её дня недели в границах семестра, подходящие по чётности
+   * недели и ещё не занятые лекцией из этой же пары.
+   *
+   * @return только вновь созданные лекции
+   */
+  private List<Lecture> generateMissingLectures(Pair pair) {
+    Semester semester = pair.getWeekScheduleCycle().getSemester();
+    LocalDate semesterStart = semester.getStartDate();
+    LocalDate semesterEnd = semester.getEndDate();
+    Set<LocalDate> generatedDates = findGeneratedDates(pair.getId());
+
+    List<Lecture> created = new ArrayList<>();
+    LocalDate date = semesterStart.with(TemporalAdjusters.nextOrSame(pair.getDayOfWeek()));
+    while (!date.isAfter(semesterEnd)) {
+      WeekParity actualParity = computeWeekParity(semesterStart, date);
+      boolean parityMatches = pair.getWeekParity() == WeekParity.BOTH || pair.getWeekParity() == actualParity;
+      if (parityMatches && !generatedDates.contains(date)) {
+        created.add(lectureRepository.save(buildLectureFromPair(pair, date)));
+      }
+      date = date.plusWeeks(1);
+    }
+    return created;
+  }
+
+  /**
+   * Даты, на которые из пары уже сгенерирована лекция. Сравнение по дате, а не по точному времени:
+   * пара бывает не чаще раза в день, а время лекции с отмеченной посещаемостью могло остаться прежним
+   * после изменения пары (см. {@link #syncLecturesWithPair}).
+   */
+  private Set<LocalDate> findGeneratedDates(UUID pairId) {
+    return lectureRepository.findScheduledTimesBySourcePairId(pairId).stream()
+        .map(LocalDateTime::toLocalDate)
+        .collect(Collectors.toSet());
   }
 
   private Lecture buildLectureFromPair(Pair pair, LocalDate date) {
