@@ -55,7 +55,8 @@ public interface PairService {
   Page<PairDto> getPairsByGroup(UUID groupId, Pageable pageable);
 
   /**
-   * Обновить пару.
+   * Обновить пару. Лекции, уже сгенерированные из неё, приводятся в соответствие с новым состоянием
+   * — см. {@link LectureService#syncLecturesWithPair}.
    *
    * @param id              идентификатор пары
    * @param pairDto         новые данные
@@ -68,7 +69,8 @@ public interface PairService {
   PairDto updatePair(UUID id, PairDto pairDto, UUID callerStudentId);
 
   /**
-   * Удалить пару по ID.
+   * Удалить пару по ID. Вместе с ней удаляются сгенерированные из неё лекции, кроме тех, по которым
+   * уже отмечена посещаемость, — см. {@link LectureService#deleteLecturesOfPair}.
    *
    * @param id              идентификатор пары
    * @param callerStudentId {@code null}, если вызывает ADMIN; иначе ID вызывающего STUDENT — пара

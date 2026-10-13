@@ -145,8 +145,9 @@ public class LectureController {
       description = "Для каждой подходящей Pair цикла перебираются все подходящие по дню недели и "
           + "чётности недели даты в границах [Semester.startDate, Semester.endDate]; уже "
           + "сгенерированные пара+дата пропускаются без ошибки — операцию безопасно вызывать "
-          + "повторно. ADMIN/TEACHER — по всем Pair цикла, как раньше; STUDENT — только по Pair "
-          + "своей группы, остальные Pair цикла пропускаются молча."
+          + "повторно. После изменения или удаления Pair вызывать её не нужно: лекции пары сервер "
+          + "приводит в соответствие сам. ADMIN/TEACHER — по всем Pair цикла, как раньше; STUDENT — "
+          + "только по Pair своей группы, остальные Pair цикла пропускаются молча."
   )
   @PostMapping("/generate/semester/{weekScheduleCycleId}")
   @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER') or hasRole('STUDENT')")
