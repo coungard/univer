@@ -17,6 +17,12 @@ public record CourseDto(
 
         UUID departmentId,
 
-        UUID teacherId
+        // Прямая привязка к факультету — для предметов без кафедры (в том числе созданных студентами).
+        UUID facultyId,
+
+        UUID teacherId,
+
+        // Только в ответе: студент, создавший предмет через POST /students/me/course.
+        UUID createdByStudentId
 ) {
 }

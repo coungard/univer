@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import com.coungard.univer.TestRegions;
 import com.coungard.univer.UniverApplication;
+import com.coungard.univer.dto.CourseDto;
 import com.coungard.univer.dto.FacultyDto;
 import com.coungard.univer.dto.GroupDto;
 import com.coungard.univer.dto.SemesterType;
@@ -17,6 +18,7 @@ import com.coungard.univer.dto.WeekScheduleCycleDto;
 import com.coungard.univer.dto.WeekScheduleCycleStatus;
 import com.coungard.univer.dto.registration.RegisterData;
 import com.coungard.univer.dto.registration.RegisterStudentRequest;
+import com.coungard.univer.dto.request.CreateStudentCourseRequest;
 import com.coungard.univer.dto.request.CreateStudentFacultyRequest;
 import com.coungard.univer.dto.request.CreateStudentGroupRequest;
 import com.coungard.univer.dto.request.UpdateStudentProfileRequest;
@@ -30,6 +32,7 @@ import com.coungard.univer.entity.University;
 import com.coungard.univer.exception.ConflictException;
 import com.coungard.univer.exception.ResourceNotFoundException;
 import com.coungard.univer.exception.ValidationException;
+import com.coungard.univer.repository.CourseRepository;
 import com.coungard.univer.repository.FacultyRepository;
 import com.coungard.univer.repository.GroupRepository;
 import com.coungard.univer.repository.SemesterRepository;
@@ -108,6 +111,12 @@ class StudentServiceTest {
   private WeekScheduleCycleRepository weekScheduleCycleRepository;
 
   @Autowired
+  private CourseRepository courseRepository;
+
+  @Autowired
+  private CourseService courseService;
+
+  @Autowired
   private WeekScheduleCycleService weekScheduleCycleService;
 
   @MockBean
@@ -117,6 +126,7 @@ class StudentServiceTest {
 
   @BeforeEach
   void setUp() {
+    courseRepository.deleteAll();
     studentRepository.deleteAll();
     groupRepository.deleteAll();
     weekScheduleCycleRepository.deleteAll();
@@ -813,6 +823,107 @@ class StudentServiceTest {
     assertThatThrownBy(() -> studentService.getOrCreateMyWeekScheduleCycle(studentId))
         .isInstanceOf(ValidationException.class);
     assertThat(weekScheduleCycleRepository.count()).isZero();
+  }
+
+  // === POST /students/me/course ===
+
+  @Test
+  void shouldCreateCourseOnStudentFacultyWithoutChangingProfile() {
+    UUID studentId = createTestStudent("ivan", "Иван", "Иванов", null).id();
+    UUID facultyId = createTestFaculty(universityId);
+    StudentDto before = studentService.updateMyProfile(studentId, profile().faculty(facultyId).year(2).build());
+
+    CourseDto created = studentService.createMyCourse(studentId, new CreateStudentCourseRequest("  Физика "));
+
+    assertThat(created.id()).isNotNull();
+    assertThat(created.title()).isEqualTo("Физика");
+    assertThat(created.facultyId()).isEqualTo(facultyId);
+    assertThat(created.createdByStudentId()).isEqualTo(studentId);
+    assertThat(created.departmentId()).isNull();
+    assertThat(created.teacherId()).isNull();
+
+    // Предмет сразу виден в списке предметов факультета, профиль студента не изменился
+    assertThat(courseService.getCoursesByFaculty(facultyId, PageRequest.of(0, 10)).getContent())
+        .extracting(CourseDto::id)
+        .containsExactly(created.id());
+    StudentDto after = studentService.getStudentById(studentId);
+    assertThat(after.facultyId()).isEqualTo(before.facultyId());
+    assertThat(after.yearNumber()).isEqualTo(before.yearNumber());
+  }
+
+  @Test
+  void shouldReportExistingCourseWhenTitleIsTakenOnFaculty() {
+    UUID facultyId = createTestFaculty(universityId);
+    UUID ivanId = createTestStudent("ivan", "Иван", "Иванов", null).id();
+    UUID petrId = createTestStudent("petr", "Пётр", "Петров", null).id();
+    studentService.updateMyProfile(ivanId, profile().faculty(facultyId).build());
+    studentService.updateMyProfile(petrId, profile().faculty(facultyId).build());
+    UUID existingId = studentService.createMyCourse(ivanId, new CreateStudentCourseRequest("Иностранный язык")).id();
+
+    // Без учёта регистра и крайних пробелов; предмет создал другой студент того же факультета
+    assertThatThrownBy(
+        () -> studentService.createMyCourse(petrId, new CreateStudentCourseRequest(" иностранный ЯЗЫК ")))
+        .isInstanceOfSatisfying(ConflictException.class, ex -> {
+          assertThat(ex.getField()).isEqualTo("title");
+          assertThat(ex.getExistingId()).isEqualTo(existingId);
+        });
+    assertThat(courseRepository.count()).isEqualTo(1);
+  }
+
+  @Test
+  void shouldAllowSameCourseTitleOnAnotherFaculty() {
+    UUID ivanId = createTestStudent("ivan", "Иван", "Иванов", null).id();
+    UUID petrId = createTestStudent("petr", "Пётр", "Петров", null).id();
+    UUID ivanFacultyId = createTestFaculty(universityId);
+    UUID petrFacultyId = facultyService.createFacultyByStudent(universityId, "Faculty of Physics", petrId).id();
+    studentService.updateMyProfile(ivanId, profile().faculty(ivanFacultyId).build());
+    studentService.updateMyProfile(petrId, profile().faculty(petrFacultyId).build());
+
+    UUID ivanCourseId = studentService.createMyCourse(ivanId, new CreateStudentCourseRequest("Физика")).id();
+    UUID petrCourseId = studentService.createMyCourse(petrId, new CreateStudentCourseRequest("Физика")).id();
+
+    // Каждый факультет видит только свой предмет
+    assertThat(courseService.getCoursesByFaculty(ivanFacultyId, PageRequest.of(0, 10)).getContent())
+        .extracting(CourseDto::id)
+        .containsExactly(ivanCourseId);
+    assertThat(courseService.getCoursesByFaculty(petrFacultyId, PageRequest.of(0, 10)).getContent())
+        .extracting(CourseDto::id)
+        .containsExactly(petrCourseId);
+  }
+
+  @Test
+  void shouldRejectCreatingCourseWithoutFaculty() {
+    UUID studentId = createTestStudent("ivan", "Иван", "Иванов", null).id();
+    CreateStudentCourseRequest request = new CreateStudentCourseRequest("Физика");
+
+    // Университет выбран, факультет — ещё нет
+    assertThatThrownBy(() -> studentService.createMyCourse(studentId, request))
+        .isInstanceOf(ValidationException.class);
+
+    assertThat(courseRepository.count()).isZero();
+    assertThatThrownBy(() -> studentService.createMyCourse(UUID.randomUUID(), request))
+        .isInstanceOf(ResourceNotFoundException.class);
+  }
+
+  @Test
+  void shouldLimitNumberOfCoursesCreatedByOneStudent() {
+    UUID studentId = createTestStudent("ivan", "Иван", "Иванов", null).id();
+    UUID facultyId = createTestFaculty(universityId);
+    studentService.updateMyProfile(studentId, profile().faculty(facultyId).build());
+
+    for (int i = 1; i <= StudentService.MAX_CREATED_COURSES; i++) {
+      studentService.createMyCourse(studentId, new CreateStudentCourseRequest("Предмет " + i));
+    }
+
+    assertThatThrownBy(() -> studentService.createMyCourse(studentId, new CreateStudentCourseRequest("Лишний")))
+        .isInstanceOf(ValidationException.class)
+        .hasMessageContaining("не больше " + StudentService.MAX_CREATED_COURSES);
+    assertThat(courseRepository.countByCreatedByStudentId(studentId)).isEqualTo(StudentService.MAX_CREATED_COURSES);
+
+    // Лимит — на студента: другой студент того же факультета создаёт предмет свободно
+    UUID otherId = createTestStudent("petr", "Пётр", "Петров", null).id();
+    studentService.updateMyProfile(otherId, profile().faculty(facultyId).build());
+    assertThat(studentService.createMyCourse(otherId, new CreateStudentCourseRequest("Лишний")).id()).isNotNull();
   }
 
   @Test

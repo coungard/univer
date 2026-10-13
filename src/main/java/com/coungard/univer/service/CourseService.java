@@ -8,12 +8,28 @@ import org.springframework.data.domain.Pageable;
 public interface CourseService {
 
   /**
-   * Создать новый курс. Обязательна привязка к кафедре, преподаватель опционален.
+   * Создать новый курс. Кафедра, факультет и преподаватель опциональны. Если указан факультет,
+   * название должно быть свободно среди предметов этого факультета, а указанная кафедра —
+   * относиться к нему.
    *
    * @param courseDto данные курса
    * @return созданный CourseDto
+   * @throws com.coungard.univer.exception.ConflictException предмет с таким названием на этом
+   *     факультете уже есть — с ID существующего предмета
    */
   CourseDto createCourse(CourseDto courseDto);
+
+  /**
+   * Создать предмет студентом: привязывается к факультету напрямую, без кафедры и преподавателя.
+   *
+   * @param facultyId идентификатор факультета
+   * @param title название предмета
+   * @param createdByStudentId студент, создающий предмет
+   * @return созданный CourseDto
+   * @throws com.coungard.univer.exception.ConflictException предмет с таким названием на этом
+   *     факультете уже есть — с ID существующего предмета
+   */
+  CourseDto createCourseByStudent(UUID facultyId, String title, UUID createdByStudentId);
 
   /**
    * Получить курс по ID.
@@ -39,6 +55,16 @@ public interface CourseService {
    * @return страница CourseDto
    */
   Page<CourseDto> getCoursesByDepartment(UUID departmentId, Pageable pageable);
+
+  /**
+   * Получить страницу предметов факультета, отсортированных по названию: привязанные к факультету
+   * напрямую (в том числе созданные студентами) и привязанные через его кафедры.
+   *
+   * @param facultyId идентификатор факультета
+   * @param pageable параметры пагинации
+   * @return страница CourseDto; пустая, если факультета нет или предметов у него нет
+   */
+  Page<CourseDto> getCoursesByFaculty(UUID facultyId, Pageable pageable);
 
   /**
    * Обновить курс.

@@ -11,7 +11,9 @@ import com.coungard.univer.entity.Faculty;
 import com.coungard.univer.entity.Person;
 import com.coungard.univer.entity.Teacher;
 import com.coungard.univer.entity.University;
+import com.coungard.univer.exception.ConflictException;
 import com.coungard.univer.exception.ResourceNotFoundException;
+import com.coungard.univer.exception.ValidationException;
 import com.coungard.univer.repository.CourseRepository;
 import com.coungard.univer.repository.DepartmentRepository;
 import com.coungard.univer.repository.FacultyRepository;
@@ -71,6 +73,8 @@ class CourseServiceTest {
   @Autowired
   private TeacherRepository teacherRepository;
 
+  private UUID universityId;
+  private UUID facultyId;
   private UUID departmentId;
   private UUID teacherId;
 
@@ -85,13 +89,13 @@ class CourseServiceTest {
     University university = new University();
     university.setName("Test University");
     university.setRegion(TestRegions.create(regionRepository));
-    UUID universityId = universityRepository.save(university).getId();
+    universityId = universityRepository.save(university).getId();
 
     Faculty faculty = Faculty.builder()
         .name("Faculty of Computer Science")
         .university(universityRepository.getReferenceById(universityId))
         .build();
-    UUID facultyId = facultyRepository.save(faculty).getId();
+    facultyId = facultyRepository.save(faculty).getId();
 
     Department department = new Department();
     department.setName("Department of Algorithms");
@@ -255,7 +259,125 @@ class CourseServiceTest {
         .isInstanceOf(ResourceNotFoundException.class);
   }
 
+  // === Привязка к факультету (issue #97) ===
+
+  @Test
+  void shouldCreateCourseBoundToFacultyWithoutDepartment() {
+    // When
+    CourseDto created = courseService.createCourse(
+        CourseDto.builder().title("  Физика ").facultyId(facultyId).build());
+
+    // Then
+    assertThat(created.title()).isEqualTo("Физика");
+    assertThat(created.facultyId()).isEqualTo(facultyId);
+    assertThat(created.departmentId()).isNull();
+    assertThat(created.createdByStudentId()).isNull();
+  }
+
+  @Test
+  void shouldGetCoursesOfFacultyBoundDirectlyAndThroughDepartmentSortedByTitle() {
+    // Given: один предмет привязан через кафедру, второй — напрямую к факультету
+    CourseDto throughDepartment = courseService.createCourse(createDto("Физика"));
+    CourseDto direct = courseService.createCourse(
+        CourseDto.builder().title("Алгебра").facultyId(facultyId).build());
+    // ...и по одному чужому: другого факультета и вовсе без привязки
+    UUID otherFacultyId = createFaculty("Faculty of Physics");
+    courseService.createCourse(CourseDto.builder().title("Механика").facultyId(otherFacultyId).build());
+    courseService.createCourse(CourseDto.builder().title("Философия").build());
+
+    // When
+    Page<CourseDto> page = courseService.getCoursesByFaculty(facultyId, PageRequest.of(0, 10));
+
+    // Then
+    assertThat(page.getContent()).extracting(CourseDto::id)
+        .containsExactly(direct.id(), throughDepartment.id());
+    assertThat(page.getTotalElements()).isEqualTo(2);
+    assertThat(courseService.getCoursesByFaculty(UUID.randomUUID(), PageRequest.of(0, 10)).getContent())
+        .isEmpty();
+  }
+
+  @Test
+  void shouldRejectDuplicateTitleWithinFacultyIgnoringCaseAndSpaces() {
+    // Given: предмет факультета, привязанный через кафедру
+    CourseDto existing = courseService.createCourse(createDto("Математический анализ"));
+
+    // When / Then
+    assertThatThrownBy(() -> courseService.createCourse(
+        CourseDto.builder().title(" математический АНАЛИЗ ").facultyId(facultyId).build()))
+        .isInstanceOfSatisfying(ConflictException.class, ex -> {
+          assertThat(ex.getField()).isEqualTo("title");
+          assertThat(ex.getExistingId()).isEqualTo(existing.id());
+        });
+    assertThat(courseRepository.count()).isEqualTo(1);
+  }
+
+  @Test
+  void shouldAllowSameTitleOnAnotherFacultyAndForCoursesWithoutFaculty() {
+    // Given
+    courseService.createCourse(CourseDto.builder().title("Физика").facultyId(facultyId).build());
+
+    // When: то же название на другом факультете и у предметов без привязки к факультету
+    courseService.createCourse(
+        CourseDto.builder().title("Физика").facultyId(createFaculty("Faculty of Physics")).build());
+    courseService.createCourse(CourseDto.builder().title("Физика").build());
+    courseService.createCourse(CourseDto.builder().title("Физика").build());
+
+    // Then
+    assertThat(courseRepository.count()).isEqualTo(4);
+  }
+
+  @Test
+  void shouldRejectDuplicateTitleWhenUpdatingButAllowKeepingOwnTitle() {
+    // Given
+    CourseDto physics = courseService.createCourse(
+        CourseDto.builder().title("Физика").facultyId(facultyId).build());
+    CourseDto algebra = courseService.createCourse(
+        CourseDto.builder().title("Алгебра").facultyId(facultyId).build());
+
+    // When / Then: чужое название занято...
+    assertThatThrownBy(() -> courseService.updateCourse(algebra.id(),
+        CourseDto.builder().title("физика").facultyId(facultyId).build()))
+        .isInstanceOfSatisfying(ConflictException.class,
+            ex -> assertThat(ex.getExistingId()).isEqualTo(physics.id()));
+
+    // ...а своё остаётся доступным
+    CourseDto updated = courseService.updateCourse(algebra.id(),
+        CourseDto.builder().title("АЛГЕБРА").description("Линейная").facultyId(facultyId).build());
+    assertThat(updated.title()).isEqualTo("АЛГЕБРА");
+    assertThat(updated.description()).isEqualTo("Линейная");
+  }
+
+  @Test
+  void shouldRejectFacultyThatDoesNotMatchDepartment() {
+    // Given: кафедра относится к одному факультету, а в запросе указан другой
+    CourseDto dto = CourseDto.builder()
+        .title("Физика")
+        .departmentId(departmentId)
+        .facultyId(createFaculty("Faculty of Physics"))
+        .build();
+
+    // When / Then
+    assertThatThrownBy(() -> courseService.createCourse(dto))
+        .isInstanceOf(ValidationException.class);
+    assertThat(courseRepository.count()).isZero();
+  }
+
+  @Test
+  void shouldThrowExceptionWhenCreatingCourseWithNonExistentFaculty() {
+    assertThatThrownBy(() -> courseService.createCourse(
+        CourseDto.builder().title("Физика").facultyId(UUID.randomUUID()).build()))
+        .isInstanceOf(ResourceNotFoundException.class);
+  }
+
   // === Вспомогательные методы ===
+
+  private UUID createFaculty(String name) {
+    Faculty faculty = Faculty.builder()
+        .name(name)
+        .university(universityRepository.getReferenceById(universityId))
+        .build();
+    return facultyRepository.save(faculty).getId();
+  }
 
   private CourseDto createDto(String title) {
     return CourseDto.builder()

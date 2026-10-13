@@ -1,11 +1,13 @@
 package com.coungard.univer.controller;
 
+import com.coungard.univer.dto.CourseDto;
 import com.coungard.univer.dto.FacultyDto;
 import com.coungard.univer.dto.GroupDto;
 import com.coungard.univer.dto.StudentDto;
 import com.coungard.univer.dto.UniversityRequestDto;
 import com.coungard.univer.dto.WeekScheduleCycleDto;
 import com.coungard.univer.dto.registration.RegisterStudentRequest;
+import com.coungard.univer.dto.request.CreateStudentCourseRequest;
 import com.coungard.univer.dto.request.CreateStudentFacultyRequest;
 import com.coungard.univer.dto.request.CreateStudentGroupRequest;
 import com.coungard.univer.dto.request.SubmitUniversityRequest;
@@ -253,6 +255,36 @@ public class StudentController {
   public ResponseEntity<WeekScheduleCycleDto> getOrCreateMyWeekScheduleCycle(@AuthenticationPrincipal Jwt jwt) {
     WeekScheduleCycleDto dto = studentService.getOrCreateMyWeekScheduleCycle(UUID.fromString(jwt.getSubject()));
     return ResponseEntity.ok(dto);
+  }
+
+  @Operation(
+      summary = "Создать свой предмет",
+      description = "Для случая, когда нужного предмета нет в GET /courses?facultyId=. Предмет "
+          + "привязывается к факультету из профиля студента и сразу виден в списке предметов этого "
+          + "факультета. Профиль студента не меняется."
+  )
+  @ApiResponses({
+      @ApiResponse(responseCode = "201", description = "Предмет создан"),
+      @ApiResponse(responseCode = "409", description = "Предмет с таким названием на этом факультете уже "
+          + "есть; в теле — field: \"title\" и id существующего предмета"),
+      @ApiResponse(responseCode = "422", description = "В профиле не выбран факультет либо студент уже "
+          + "создал максимум предметов")
+  })
+  @PostMapping("/me/course")
+  @PreAuthorize("hasRole('STUDENT')")
+  public ResponseEntity<CourseDto> createMyCourse(
+      @AuthenticationPrincipal Jwt jwt,
+      @Valid @RequestBody CreateStudentCourseRequest request) {
+
+    CourseDto created = studentService.createMyCourse(UUID.fromString(jwt.getSubject()), request);
+
+    URI location = ServletUriComponentsBuilder
+        .fromCurrentServletMapping()
+        .path("/api/v1/courses/{id}")
+        .buildAndExpand(created.id())
+        .toUri();
+
+    return ResponseEntity.created(location).body(created);
   }
 
   @Operation(summary = "Получить студента по ID")

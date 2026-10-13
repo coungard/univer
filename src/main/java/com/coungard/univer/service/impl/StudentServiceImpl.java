@@ -1,5 +1,6 @@
 package com.coungard.univer.service.impl;
 
+import com.coungard.univer.dto.CourseDto;
 import com.coungard.univer.dto.FacultyDto;
 import com.coungard.univer.dto.GroupDto;
 import com.coungard.univer.dto.StudentDto;
@@ -7,6 +8,7 @@ import com.coungard.univer.dto.WeekScheduleCycleDto;
 import com.coungard.univer.mapper.StudentMapper;
 import com.coungard.univer.dto.registration.RegisterData;
 import com.coungard.univer.dto.registration.RegisterStudentRequest;
+import com.coungard.univer.dto.request.CreateStudentCourseRequest;
 import com.coungard.univer.dto.request.CreateStudentFacultyRequest;
 import com.coungard.univer.dto.request.CreateStudentGroupRequest;
 import com.coungard.univer.dto.request.UpdateStudentProfileRequest;
@@ -19,12 +21,14 @@ import com.coungard.univer.entity.University;
 import com.coungard.univer.exception.ConflictException;
 import com.coungard.univer.exception.ResourceNotFoundException;
 import com.coungard.univer.exception.ValidationException;
+import com.coungard.univer.repository.CourseRepository;
 import com.coungard.univer.repository.FacultyRepository;
 import com.coungard.univer.repository.GroupRepository;
 import com.coungard.univer.repository.StudentRepository;
 import com.coungard.univer.repository.UniversityRepository;
 import com.coungard.univer.security.KeycloakAdminService;
 import com.coungard.univer.security.Role;
+import com.coungard.univer.service.CourseService;
 import com.coungard.univer.service.FacultyService;
 import com.coungard.univer.service.GroupService;
 import com.coungard.univer.service.StudentService;
@@ -50,6 +54,8 @@ public class StudentServiceImpl implements StudentService {
   private final UniversityRepository universityRepository;
   private final FacultyRepository facultyRepository;
   private final GroupRepository groupRepository;
+  private final CourseRepository courseRepository;
+  private final CourseService courseService;
   private final GroupService groupService;
   private final FacultyService facultyService;
   private final UniversityRequestService universityRequestService;
@@ -302,6 +308,22 @@ public class StudentServiceImpl implements StudentService {
     }
 
     return weekScheduleCycleService.getOrCreateDraftCycle(student.getGroup().getSemester().getId());
+  }
+
+  @Override
+  @Transactional
+  public CourseDto createMyCourse(UUID id, CreateStudentCourseRequest request) {
+    Student student = studentRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("Студент не найден с ID: " + id));
+
+    if (student.getFaculty() == null) {
+      throw new ValidationException("Нельзя создать предмет, пока не выбран факультет");
+    }
+    if (courseRepository.countByCreatedByStudentId(id) >= MAX_CREATED_COURSES) {
+      throw new ValidationException("Студент может создать не больше " + MAX_CREATED_COURSES + " предметов");
+    }
+
+    return courseService.createCourseByStudent(student.getFaculty().getId(), request.title(), id);
   }
 
   private void changeUniversity(Student student, UUID universityId) {
