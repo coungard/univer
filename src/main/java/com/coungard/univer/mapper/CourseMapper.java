@@ -16,7 +16,9 @@ public class CourseMapper {
         .title(course.getTitle())
         .description(course.getDescription())
         .departmentId(course.getDepartment() != null ? course.getDepartment().getId() : null)
+        .facultyId(course.getFaculty() != null ? course.getFaculty().getId() : null)
         .teacherId(course.getTeacher() != null ? course.getTeacher().getId() : null)
+        .createdByStudentId(course.getCreatedByStudentId())
         .build();
   }
 

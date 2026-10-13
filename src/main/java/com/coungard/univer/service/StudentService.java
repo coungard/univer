@@ -1,10 +1,12 @@
 package com.coungard.univer.service;
 
+import com.coungard.univer.dto.CourseDto;
 import com.coungard.univer.dto.FacultyDto;
 import com.coungard.univer.dto.GroupDto;
 import com.coungard.univer.dto.StudentDto;
 import com.coungard.univer.dto.WeekScheduleCycleDto;
 import com.coungard.univer.dto.registration.RegisterStudentRequest;
+import com.coungard.univer.dto.request.CreateStudentCourseRequest;
 import com.coungard.univer.dto.request.CreateStudentFacultyRequest;
 import com.coungard.univer.dto.request.CreateStudentGroupRequest;
 import com.coungard.univer.dto.request.UpdateStudentProfileRequest;
@@ -25,6 +27,13 @@ public interface StudentService {
    * {@link #MAX_CREATED_GROUPS}.
    */
   int MAX_CREATED_FACULTIES = 3;
+
+  /**
+   * Сколько предметов один студент может создать сам — по тому же правилу, что и
+   * {@link #MAX_CREATED_GROUPS}. Лимит выше: предметов в расписании одной группы десятки, а не
+   * единицы.
+   */
+  int MAX_CREATED_COURSES = 50;
 
   /**
    * Получить страницу студентов с пагинацией и сортировкой.
@@ -134,6 +143,21 @@ public interface StudentService {
    * @throws com.coungard.univer.exception.ValidationException у студента не выбрана группа
    */
   WeekScheduleCycleDto getOrCreateMyWeekScheduleCycle(UUID id);
+
+  /**
+   * Создать предмет самим студентом — когда нужного предмета нет среди предметов его факультета.
+   * Факультет берётся из профиля; если он не заполнен — {@code ValidationException}. Профиль
+   * студента не меняется.
+   *
+   * @param id идентификатор студента (Keycloak subject вызывающего)
+   * @param request название предмета
+   * @return созданный CourseDto
+   * @throws com.coungard.univer.exception.ConflictException предмет с таким названием на факультете
+   *     студента уже есть — с ID существующего предмета
+   * @throws com.coungard.univer.exception.ValidationException студент уже создал максимум предметов
+   *     ({@link #MAX_CREATED_COURSES})
+   */
+  CourseDto createMyCourse(UUID id, CreateStudentCourseRequest request);
 
   /**
    * Удалить студента по ID. Также удаляет пользователя из Keycloak.

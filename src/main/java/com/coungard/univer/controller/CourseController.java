@@ -3,6 +3,8 @@ package com.coungard.univer.controller;
 import com.coungard.univer.dto.CourseDto;
 import com.coungard.univer.service.CourseService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -34,14 +36,22 @@ public class CourseController {
 
   private final CourseService courseService;
 
-  @Operation(summary = "Получить курсы с пагинацией")
+  @Operation(
+      summary = "Получить курсы с пагинацией",
+      description = "С параметром facultyId — только предметы этого факультета, отсортированные по "
+          + "названию: привязанные к факультету напрямую (в том числе созданные студентами) и "
+          + "привязанные через его кафедры. Без параметра — все курсы."
+  )
   @GetMapping
   public ResponseEntity<Page<CourseDto>> getCourses(
+      @RequestParam(required = false) UUID facultyId,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "10") int size) {
 
     Pageable pageable = PageRequest.of(page, size);
-    Page<CourseDto> courses = courseService.getCourses(pageable);
+    Page<CourseDto> courses = facultyId != null
+        ? courseService.getCoursesByFaculty(facultyId, pageable)
+        : courseService.getCourses(pageable);
     return ResponseEntity.ok(courses);
   }
 
@@ -64,7 +74,17 @@ public class CourseController {
     return ResponseEntity.ok(dto);
   }
 
-  @Operation(summary = "Создать курс")
+  @Operation(
+      summary = "Создать курс",
+      description = "Если указан facultyId, название должно быть свободно среди предметов этого "
+          + "факультета. Студент создаёт предмет через POST /students/me/course."
+  )
+  @ApiResponses({
+      @ApiResponse(responseCode = "201", description = "Курс создан"),
+      @ApiResponse(responseCode = "409", description = "Предмет с таким названием на этом факультете уже "
+          + "есть; в теле — field: \"title\" и id существующего предмета"),
+      @ApiResponse(responseCode = "422", description = "Кафедра не относится к указанному факультету")
+  })
   @PostMapping
   @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER')")
   public ResponseEntity<CourseDto> createCourse(@Valid @RequestBody CourseDto courseDto) {
@@ -80,6 +100,12 @@ public class CourseController {
   }
 
   @Operation(summary = "Обновить курс")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "Курс обновлён"),
+      @ApiResponse(responseCode = "409", description = "Другой предмет с таким названием на этом факультете "
+          + "уже есть; в теле — field: \"title\" и id существующего предмета"),
+      @ApiResponse(responseCode = "422", description = "Кафедра не относится к указанному факультету")
+  })
   @PutMapping("/{id}")
   @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER')")
   public ResponseEntity<CourseDto> updateCourse(

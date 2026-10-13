@@ -32,7 +32,23 @@ public class Course {
   @JoinColumn(name = "department_id")
   private Department department;
 
+  /**
+   * Прямая связь с факультетом — для предметов без кафедры, в том числе созданных студентами
+   * (у факультета, созданного студентом, кафедр нет). У предмета с кафедрой может быть пустой:
+   * тогда его факультет — факультет кафедры.
+   */
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "faculty_id")
+  private Faculty faculty;
+
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "teacher_id")
   private Teacher teacher;
+
+  /**
+   * Студент, создавший предмет сам ({@code POST /students/me/course}); {@code null} у предметов,
+   * заведённых администратором или преподавателем. По нему считается лимит предметов на студента.
+   */
+  @Column(name = "created_by_student_id")
+  private UUID createdByStudentId;
 }
