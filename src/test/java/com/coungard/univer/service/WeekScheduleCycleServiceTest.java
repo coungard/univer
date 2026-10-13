@@ -21,7 +21,14 @@ import com.coungard.univer.repository.RegionRepository;
 import com.coungard.univer.repository.UniversityRepository;
 import com.coungard.univer.repository.WeekScheduleCycleRepository;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -238,6 +245,71 @@ class WeekScheduleCycleServiceTest {
   void shouldThrowExceptionWhenUpdatingStatusOfNonExistentCycle() {
     assertThatThrownBy(
         () -> weekScheduleCycleService.updateStatus(UUID.randomUUID(), WeekScheduleCycleStatus.AGREED))
+        .isInstanceOf(ResourceNotFoundException.class);
+  }
+
+  // === getOrCreateDraftCycle (issue #96) ===
+
+  @Test
+  void shouldCreateDraftCycleWhenSemesterHasNone() {
+    // When
+    WeekScheduleCycleDto created = weekScheduleCycleService.getOrCreateDraftCycle(semesterId);
+
+    // Then
+    assertThat(created.id()).isNotNull();
+    assertThat(created.semesterId()).isEqualTo(semesterId);
+    assertThat(created.status()).isEqualTo(WeekScheduleCycleStatus.DRAFT);
+    assertThat(weekScheduleCycleService.getWeekScheduleCycleBySemester(semesterId).id()).isEqualTo(created.id());
+  }
+
+  @Test
+  void shouldReturnExistingCycleAsIsInsteadOfCreatingSecond() {
+    // Given: цикл уже заведён и согласован администратором
+    WeekScheduleCycleDto existing = weekScheduleCycleService.createWeekScheduleCycle(
+        WeekScheduleCycleDto.builder().semesterId(semesterId).build());
+    weekScheduleCycleService.updateStatus(existing.id(), WeekScheduleCycleStatus.AGREED);
+
+    // When
+    WeekScheduleCycleDto found = weekScheduleCycleService.getOrCreateDraftCycle(semesterId);
+
+    // Then: тот же цикл, статус не сброшен в DRAFT
+    assertThat(found.id()).isEqualTo(existing.id());
+    assertThat(found.status()).isEqualTo(WeekScheduleCycleStatus.AGREED);
+    assertThat(weekScheduleCycleRepository.count()).isEqualTo(1);
+  }
+
+  @Test
+  void shouldCreateSingleCycleOnConcurrentRequests() throws Exception {
+    // Given
+    int threads = 8;
+    ExecutorService executor = Executors.newFixedThreadPool(threads);
+    CountDownLatch start = new CountDownLatch(1);
+
+    // When: все потоки запрашивают цикл одного семестра одновременно
+    List<Future<WeekScheduleCycleDto>> futures = new ArrayList<>();
+    for (int i = 0; i < threads; i++) {
+      futures.add(executor.submit(() -> {
+        start.await();
+        return weekScheduleCycleService.getOrCreateDraftCycle(semesterId);
+      }));
+    }
+    start.countDown();
+
+    // Then: ни один запрос не упал, все получили один и тот же цикл
+    List<UUID> cycleIds = new ArrayList<>();
+    for (Future<WeekScheduleCycleDto> future : futures) {
+      cycleIds.add(future.get(30, TimeUnit.SECONDS).id());
+    }
+    executor.shutdown();
+
+    assertThat(cycleIds).doesNotContainNull();
+    assertThat(cycleIds).containsOnly(cycleIds.get(0));
+    assertThat(weekScheduleCycleRepository.count()).isEqualTo(1);
+  }
+
+  @Test
+  void shouldThrowExceptionWhenGettingOrCreatingCycleForNonExistentSemester() {
+    assertThatThrownBy(() -> weekScheduleCycleService.getOrCreateDraftCycle(UUID.randomUUID()))
         .isInstanceOf(ResourceNotFoundException.class);
   }
 }

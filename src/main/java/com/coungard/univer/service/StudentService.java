@@ -3,6 +3,7 @@ package com.coungard.univer.service;
 import com.coungard.univer.dto.FacultyDto;
 import com.coungard.univer.dto.GroupDto;
 import com.coungard.univer.dto.StudentDto;
+import com.coungard.univer.dto.WeekScheduleCycleDto;
 import com.coungard.univer.dto.registration.RegisterStudentRequest;
 import com.coungard.univer.dto.request.CreateStudentFacultyRequest;
 import com.coungard.univer.dto.request.CreateStudentGroupRequest;
@@ -123,6 +124,16 @@ public interface StudentService {
    * @return обновлённый GroupDto
    */
   GroupDto updateMyGroup(UUID id, CreateStudentGroupRequest request);
+
+  /**
+   * Получить цикл расписания семестра, в котором учится группа студента, а если цикла ещё нет —
+   * создать его в статусе {@code DRAFT}, см. {@link WeekScheduleCycleService#getOrCreateDraftCycle}.
+   *
+   * @param id идентификатор студента (Keycloak subject вызывающего)
+   * @return WeekScheduleCycleDto
+   * @throws com.coungard.univer.exception.ValidationException у студента не выбрана группа
+   */
+  WeekScheduleCycleDto getOrCreateMyWeekScheduleCycle(UUID id);
 
   /**
    * Удалить студента по ID. Также удаляет пользователя из Keycloak.

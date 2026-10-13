@@ -20,6 +20,7 @@ public interface GroupService {
    * учебного года — тот же, из которого группы отдаёт {@link #getGroups(UUID, Integer, Pageable)},
    * поэтому сразу видна в этом списке. Если учебного года {@code (facultyId, yearNumber)} или
    * семестров у него ещё нет — они создаются; даты нового семестра — см. {@link SemesterPeriod}.
+   * Если у семестра нет цикла расписания, он создаётся в статусе {@code DRAFT}.
    *
    * @param facultyId идентификатор факультета
    * @param yearNumber номер курса

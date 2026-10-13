@@ -18,6 +18,17 @@ public interface WeekScheduleCycleService {
   WeekScheduleCycleDto createWeekScheduleCycle(WeekScheduleCycleDto cycleDto);
 
   /**
+   * Получить цикл семестра, а если его ещё нет — создать в статусе {@code DRAFT}. Так цикл появляется
+   * без администратора: при создании группы студентом и по запросу студента для семестра своей
+   * группы. Уже существующий цикл возвращается как есть, в том числе {@code AGREED}. Одновременные
+   * вызовы для одного семестра дают один цикл.
+   *
+   * @param semesterId идентификатор семестра
+   * @return WeekScheduleCycleDto
+   */
+  WeekScheduleCycleDto getOrCreateDraftCycle(UUID semesterId);
+
+  /**
    * Получить цикл по ID.
    *
    * @param id идентификатор цикла

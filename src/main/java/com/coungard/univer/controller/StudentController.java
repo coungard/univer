@@ -4,6 +4,7 @@ import com.coungard.univer.dto.FacultyDto;
 import com.coungard.univer.dto.GroupDto;
 import com.coungard.univer.dto.StudentDto;
 import com.coungard.univer.dto.UniversityRequestDto;
+import com.coungard.univer.dto.WeekScheduleCycleDto;
 import com.coungard.univer.dto.registration.RegisterStudentRequest;
 import com.coungard.univer.dto.request.CreateStudentFacultyRequest;
 import com.coungard.univer.dto.request.CreateStudentGroupRequest;
@@ -235,6 +236,23 @@ public class StudentController {
 
     GroupDto updated = studentService.updateMyGroup(UUID.fromString(jwt.getSubject()), request);
     return ResponseEntity.ok(updated);
+  }
+
+  @Operation(
+      summary = "Получить цикл расписания своего семестра, создав его при отсутствии",
+      description = "Цикл расписания семестра, в котором учится группа студента. Если цикла ещё нет, он "
+          + "создаётся в статусе DRAFT — администратор для этого не нужен. Существующий цикл "
+          + "возвращается как есть, в том числе AGREED. Повторные и одновременные вызовы дают один цикл."
+  )
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "Цикл расписания семестра группы студента"),
+      @ApiResponse(responseCode = "422", description = "У студента не выбрана группа")
+  })
+  @PutMapping("/me/week-schedule-cycle")
+  @PreAuthorize("hasRole('STUDENT')")
+  public ResponseEntity<WeekScheduleCycleDto> getOrCreateMyWeekScheduleCycle(@AuthenticationPrincipal Jwt jwt) {
+    WeekScheduleCycleDto dto = studentService.getOrCreateMyWeekScheduleCycle(UUID.fromString(jwt.getSubject()));
+    return ResponseEntity.ok(dto);
   }
 
   @Operation(summary = "Получить студента по ID")
