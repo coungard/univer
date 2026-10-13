@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -54,6 +55,18 @@ public class BellScheduleEntryController {
 
     Pageable pageable = PageRequest.of(page, size);
     Page<BellScheduleEntryDto> entries = bellScheduleEntryService.getEntriesByUniversity(universityId, pageable);
+    return ResponseEntity.ok(entries);
+  }
+
+  @Operation(
+      summary = "Получить звонки, действующие для университета",
+      description = "По одной записи на номер пары, отсортированы по номеру: собственная запись "
+          + "университета, а если её на этот номер нет — запись по умолчанию (universityId = null). По "
+          + "этому же правилу сервер подставляет время пары, созданной без startTime/endTime."
+  )
+  @GetMapping("/university/{universityId}/effective")
+  public ResponseEntity<List<BellScheduleEntryDto>> getEffectiveEntries(@PathVariable UUID universityId) {
+    List<BellScheduleEntryDto> entries = bellScheduleEntryService.getEffectiveEntries(universityId);
     return ResponseEntity.ok(entries);
   }
 

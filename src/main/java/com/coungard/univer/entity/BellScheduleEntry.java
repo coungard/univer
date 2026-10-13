@@ -28,6 +28,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
  * <p>Это только источник для заполнения {@link Pair#getStartTime()}/{@link Pair#getEndTime()} при
  * создании пары, а не жёсткая связь — сами {@code Pair.startTime}/{@code endTime} остаются
  * самостоятельными редактируемыми колонками (см. {@code PairServiceImpl.resolveSchedule}).
+ * Университет пары определяется по её группе, а не по кафедре предмета: кафедры у предмета может не
+ * быть.
  */
 @Entity
 @Table(name = "bell_schedule_entries")

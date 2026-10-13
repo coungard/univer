@@ -15,6 +15,7 @@ import com.coungard.univer.exception.ValidationException;
 import com.coungard.univer.mapper.PairMapper;
 import com.coungard.univer.repository.BellScheduleEntryRepository;
 import com.coungard.univer.repository.CourseRepository;
+import com.coungard.univer.repository.FacultyRepository;
 import com.coungard.univer.repository.GroupRepository;
 import com.coungard.univer.repository.PairRepository;
 import com.coungard.univer.repository.StudentRepository;
@@ -22,6 +23,7 @@ import com.coungard.univer.repository.TeacherRepository;
 import com.coungard.univer.repository.WeekScheduleCycleRepository;
 import com.coungard.univer.service.PairService;
 import java.time.LocalTime;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -42,6 +44,7 @@ public class PairServiceImpl implements PairService {
   private final CourseRepository courseRepository;
   private final TeacherRepository teacherRepository;
   private final GroupRepository groupRepository;
+  private final FacultyRepository facultyRepository;
   private final BellScheduleEntryRepository bellScheduleEntryRepository;
   private final StudentRepository studentRepository;
   private final PairMapper pairMapper;
@@ -56,8 +59,8 @@ public class PairServiceImpl implements PairService {
     Course course = courseRepository.findById(pairDto.courseId())
         .orElseThrow(() -> new ResourceNotFoundException("Учебный курс не найден с ID: " + pairDto.courseId()));
 
-    ResolvedSchedule schedule = resolveSchedule(pairDto, course);
     Set<Group> groups = resolveGroups(pairDto.groupIds());
+    ResolvedSchedule schedule = resolveSchedule(pairDto, groups);
     checkStudentCanEdit(callerStudentId, cycle, groups);
     checkForConflicts(cycle, pairDto, schedule, null);
 
@@ -114,8 +117,8 @@ public class PairServiceImpl implements PairService {
     Course course = courseRepository.findById(pairDto.courseId())
         .orElseThrow(() -> new ResourceNotFoundException("Учебный курс не найден с ID: " + pairDto.courseId()));
 
-    ResolvedSchedule schedule = resolveSchedule(pairDto, course);
     Set<Group> groups = resolveGroups(pairDto.groupIds());
+    ResolvedSchedule schedule = resolveSchedule(pairDto, groups);
     // ...и новое (нельзя перенести пару в чужой цикл/группу или в уже согласованный цикл).
     checkStudentCanEdit(callerStudentId, cycle, groups);
     checkForConflicts(cycle, pairDto, schedule, id);
@@ -233,15 +236,15 @@ public class PairServiceImpl implements PairService {
    * Разрешает день недели и время пары. Если {@code startTime}/{@code endTime} явно заданы в DTO —
    * используются как есть (явный override, например перенос конкретного занятия). Если хотя бы
    * одно не задано — подставляются из справочника звонкового расписания {@link BellScheduleEntry}
-   * по университету курса и номеру пары, с fallback на системную запись по умолчанию
+   * по университету группы пары и номеру пары, с fallback на системную запись по умолчанию
    * ({@code university == null}). Справочник — только источник для заполнения, не жёсткая связь:
    * ничего не форсирует совпадение, если время задано явно.
    */
-  private ResolvedSchedule resolveSchedule(PairDto pairDto, Course course) {
+  private ResolvedSchedule resolveSchedule(PairDto pairDto, Set<Group> groups) {
     LocalTime startTime = pairDto.startTime();
     LocalTime endTime = pairDto.endTime();
     if (startTime == null || endTime == null) {
-      BellScheduleEntry entry = resolveBellScheduleEntry(course, pairDto.pairNumber());
+      BellScheduleEntry entry = resolveBellScheduleEntry(groups, pairDto.pairNumber());
       startTime = entry.getStartTime();
       endTime = entry.getEndTime();
     }
@@ -252,10 +255,8 @@ public class PairServiceImpl implements PairService {
     return new ResolvedSchedule(startTime, endTime);
   }
 
-  private BellScheduleEntry resolveBellScheduleEntry(Course course, Integer pairNumber) {
-    UUID universityId = course.getDepartment() != null
-        ? course.getDepartment().getFaculty().getUniversity().getId()
-        : null;
+  private BellScheduleEntry resolveBellScheduleEntry(Set<Group> groups, Integer pairNumber) {
+    UUID universityId = resolveUniversityId(groups);
 
     Optional<BellScheduleEntry> entry = universityId != null
         ? bellScheduleEntryRepository.findByUniversityIdAndPairNumber(universityId, pairNumber)
@@ -266,6 +267,20 @@ public class PairServiceImpl implements PairService {
         .orElseThrow(() -> new ValidationException(
             "Время пары не указано и не найдено в справочнике звонкового расписания для номера пары "
                 + pairNumber));
+  }
+
+  /**
+   * Университет пары — по её группе (группа → семестр → учебный год → факультет), а не по кафедре
+   * предмета: у предмета кафедры может не быть (issue #98). Поток идёт группам одного университета,
+   * поэтому достаточно любой группы; берётся с наименьшим ID, чтобы результат не зависел от порядка
+   * обхода множества.
+   */
+  private UUID resolveUniversityId(Set<Group> groups) {
+    return groups.stream()
+        .min(Comparator.comparing(Group::getId))
+        .flatMap(group -> facultyRepository.findById(group.getSemester().getStudyYear().getFacultyId()))
+        .map(faculty -> faculty.getUniversity().getId())
+        .orElse(null);
   }
 
   private record ResolvedSchedule(LocalTime startTime, LocalTime endTime) {

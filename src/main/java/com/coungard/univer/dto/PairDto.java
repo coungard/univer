@@ -27,7 +27,7 @@ public record PairDto(
     Integer pairNumber,
 
     // Опционально: если не задано, подставляется из справочника звонкового расписания
-    // (BellScheduleEntry) по университету курса и pairNumber — см. PairServiceImpl.resolveSchedule.
+    // (BellScheduleEntry) по университету группы и pairNumber — см. PairServiceImpl.resolveSchedule.
     LocalTime startTime,
 
     LocalTime endTime,

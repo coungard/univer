@@ -388,6 +388,78 @@ class PairServiceTest {
   }
 
   @Test
+  void shouldResolveBellScheduleByGroupUniversityWhenCourseHasNoDepartment() {
+    // Given: звонки заведены у университета группы, а у предмета кафедры нет (issue #98)
+    saveBellScheduleEntry(universityId, 1, LocalTime.of(8, 30), LocalTime.of(10, 0));
+    Course course = new Course();
+    course.setTitle("Математика");
+    UUID courseWithoutDepartmentId = courseRepository.save(course).getId();
+    PairDto dto = createDto(Set.of(group1Id)).toBuilder()
+        .courseId(courseWithoutDepartmentId)
+        .startTime(null)
+        .endTime(null)
+        .build();
+
+    // When
+    PairDto created = pairService.createPair(dto, null);
+
+    // Then
+    assertThat(created.startTime()).isEqualTo(LocalTime.of(8, 30));
+    assertThat(created.endTime()).isEqualTo(LocalTime.of(10, 0));
+  }
+
+  @Test
+  void shouldResolveBellScheduleByGroupUniversityNotByCourseDepartmentUniversity() {
+    // Given: предмет заведён на кафедре другого университета, у каждого университета свои звонки
+    University otherUniversity = new University();
+    otherUniversity.setName("Other University");
+    otherUniversity.setRegion(TestRegions.create(regionRepository));
+    UUID otherUniversityId = universityRepository.save(otherUniversity).getId();
+    UUID otherFacultyId = facultyRepository.save(Faculty.builder()
+        .name("Faculty of Physics")
+        .university(universityRepository.getReferenceById(otherUniversityId))
+        .build()).getId();
+    Department otherDepartment = new Department();
+    otherDepartment.setName("Department of Physics");
+    otherDepartment.setFaculty(facultyRepository.getReferenceById(otherFacultyId));
+    Course course = new Course();
+    course.setTitle("Физика");
+    course.setDepartment(departmentRepository.save(otherDepartment));
+    UUID foreignCourseId = courseRepository.save(course).getId();
+
+    saveBellScheduleEntry(universityId, 1, LocalTime.of(8, 30), LocalTime.of(10, 0));
+    saveBellScheduleEntry(otherUniversityId, 1, LocalTime.of(9, 0), LocalTime.of(10, 30));
+    PairDto dto = createDto(Set.of(group1Id)).toBuilder()
+        .courseId(foreignCourseId)
+        .startTime(null)
+        .endTime(null)
+        .build();
+
+    // When
+    PairDto created = pairService.createPair(dto, null);
+
+    // Then: время — по звонкам университета группы
+    assertThat(created.startTime()).isEqualTo(LocalTime.of(8, 30));
+    assertThat(created.endTime()).isEqualTo(LocalTime.of(10, 0));
+  }
+
+  @Test
+  void shouldUseDefaultEntryForPairNumberMissingInUniversityBellSchedule() {
+    // Given: у университета своя запись только на 1-ю пару, на 2-ю — только по умолчанию
+    saveBellScheduleEntry(universityId, 1, LocalTime.of(9, 0), LocalTime.of(10, 30));
+    saveBellScheduleEntry(null, 1, LocalTime.of(8, 30), LocalTime.of(10, 0));
+    saveBellScheduleEntry(null, 2, LocalTime.of(10, 10), LocalTime.of(11, 40));
+    PairDto dto = createDto(Set.of(group1Id)).toBuilder().pairNumber(2).startTime(null).endTime(null).build();
+
+    // When
+    PairDto created = pairService.createPair(dto, null);
+
+    // Then
+    assertThat(created.startTime()).isEqualTo(LocalTime.of(10, 10));
+    assertThat(created.endTime()).isEqualTo(LocalTime.of(11, 40));
+  }
+
+  @Test
   void shouldThrowValidationExceptionWhenTimesOmittedAndNoBellScheduleEntryExists() {
     // Given: справочник пуст
     PairDto dto = createDto(Set.of(group1Id)).toBuilder().startTime(null).endTime(null).build();

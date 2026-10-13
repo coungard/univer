@@ -9,7 +9,10 @@ import com.coungard.univer.mapper.BellScheduleEntryMapper;
 import com.coungard.univer.repository.BellScheduleEntryRepository;
 import com.coungard.univer.repository.UniversityRepository;
 import com.coungard.univer.service.BellScheduleEntryService;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.TreeMap;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -55,6 +58,19 @@ public class BellScheduleEntryServiceImpl implements BellScheduleEntryService {
   @Transactional(readOnly = true)
   public Page<BellScheduleEntryDto> getEntriesByUniversity(UUID universityId, Pageable pageable) {
     return bellScheduleEntryRepository.findByUniversityId(universityId, pageable).map(bellScheduleEntryMapper::toDto);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<BellScheduleEntryDto> getEffectiveEntries(UUID universityId) {
+    Map<Integer, BellScheduleEntry> byPairNumber = new TreeMap<>();
+    bellScheduleEntryRepository.findByUniversityIsNull()
+        .forEach(entry -> byPairNumber.put(entry.getPairNumber(), entry));
+    // Собственная запись университета перекрывает запись по умолчанию на тот же номер пары
+    bellScheduleEntryRepository.findByUniversityId(universityId)
+        .forEach(entry -> byPairNumber.put(entry.getPairNumber(), entry));
+
+    return byPairNumber.values().stream().map(bellScheduleEntryMapper::toDto).toList();
   }
 
   @Override
