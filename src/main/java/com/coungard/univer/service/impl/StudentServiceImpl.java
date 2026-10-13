@@ -3,6 +3,7 @@ package com.coungard.univer.service.impl;
 import com.coungard.univer.dto.FacultyDto;
 import com.coungard.univer.dto.GroupDto;
 import com.coungard.univer.dto.StudentDto;
+import com.coungard.univer.dto.WeekScheduleCycleDto;
 import com.coungard.univer.mapper.StudentMapper;
 import com.coungard.univer.dto.registration.RegisterData;
 import com.coungard.univer.dto.registration.RegisterStudentRequest;
@@ -28,6 +29,7 @@ import com.coungard.univer.service.FacultyService;
 import com.coungard.univer.service.GroupService;
 import com.coungard.univer.service.StudentService;
 import com.coungard.univer.service.UniversityRequestService;
+import com.coungard.univer.service.WeekScheduleCycleService;
 import com.coungard.univer.validation.StudentValidator;
 import java.util.Objects;
 import java.util.UUID;
@@ -51,6 +53,7 @@ public class StudentServiceImpl implements StudentService {
   private final GroupService groupService;
   private final FacultyService facultyService;
   private final UniversityRequestService universityRequestService;
+  private final WeekScheduleCycleService weekScheduleCycleService;
   private final StudentMapper studentMapper;
   private final StudentValidator studentValidator;
 
@@ -286,6 +289,19 @@ public class StudentServiceImpl implements StudentService {
     }
 
     return groupService.renameGroup(group.getId(), request.name(), request.fullName());
+  }
+
+  @Override
+  @Transactional
+  public WeekScheduleCycleDto getOrCreateMyWeekScheduleCycle(UUID id) {
+    Student student = studentRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("Студент не найден с ID: " + id));
+
+    if (student.getGroup() == null) {
+      throw new ValidationException("У студента не выбрана группа");
+    }
+
+    return weekScheduleCycleService.getOrCreateDraftCycle(student.getGroup().getSemester().getId());
   }
 
   private void changeUniversity(Student student, UUID universityId) {

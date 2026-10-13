@@ -13,6 +13,7 @@ import com.coungard.univer.repository.SemesterRepository;
 import com.coungard.univer.repository.StudyYearRepository;
 import com.coungard.univer.service.GroupService;
 import com.coungard.univer.service.SemesterPeriod;
+import com.coungard.univer.service.WeekScheduleCycleService;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
@@ -33,6 +34,7 @@ public class GroupServiceImpl implements GroupService {
   private final SemesterRepository semesterRepository;
   private final StudyYearRepository studyYearRepository;
   private final FacultyRepository facultyRepository;
+  private final WeekScheduleCycleService weekScheduleCycleService;
   private final GroupMapper groupMapper;
 
   @Override
@@ -74,6 +76,8 @@ public class GroupServiceImpl implements GroupService {
         });
 
     Group saved = saveNewGroup(semester, name, fullName, createdByStudentId);
+    // Чтобы студент мог сразу заполнять расписание группы, не дожидаясь администратора (issue #96)
+    weekScheduleCycleService.getOrCreateDraftCycle(semester.getId());
     return groupMapper.toDto(saved);
   }
 

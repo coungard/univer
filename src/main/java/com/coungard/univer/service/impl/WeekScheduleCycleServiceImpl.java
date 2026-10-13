@@ -46,6 +46,23 @@ public class WeekScheduleCycleServiceImpl implements WeekScheduleCycleService {
   }
 
   @Override
+  @Transactional
+  public WeekScheduleCycleDto getOrCreateDraftCycle(UUID semesterId) {
+    if (!semesterRepository.existsById(semesterId)) {
+      throw new ResourceNotFoundException("Семестр не найден с ID: " + semesterId);
+    }
+
+    WeekScheduleCycle cycle = weekScheduleCycleRepository.findBySemesterId(semesterId)
+        .orElseGet(() -> {
+          weekScheduleCycleRepository.insertDraftIfAbsent(semesterId);
+          return weekScheduleCycleRepository.findBySemesterId(semesterId)
+              .orElseThrow(() -> new ResourceNotFoundException(
+                  "Циклическое расписание не найдено для семестра с ID: " + semesterId));
+        });
+    return weekScheduleCycleMapper.toDto(cycle);
+  }
+
+  @Override
   @Transactional(readOnly = true)
   public WeekScheduleCycleDto getWeekScheduleCycleById(UUID id) {
     WeekScheduleCycle cycle = weekScheduleCycleRepository.findById(id)

@@ -13,6 +13,8 @@ import com.coungard.univer.dto.FacultyDto;
 import com.coungard.univer.dto.GroupDto;
 import com.coungard.univer.dto.SemesterType;
 import com.coungard.univer.dto.StudentDto;
+import com.coungard.univer.dto.WeekScheduleCycleDto;
+import com.coungard.univer.dto.WeekScheduleCycleStatus;
 import com.coungard.univer.dto.registration.RegisterData;
 import com.coungard.univer.dto.registration.RegisterStudentRequest;
 import com.coungard.univer.dto.request.CreateStudentFacultyRequest;
@@ -35,6 +37,7 @@ import com.coungard.univer.repository.StudentRepository;
 import com.coungard.univer.repository.StudyYearRepository;
 import com.coungard.univer.repository.RegionRepository;
 import com.coungard.univer.repository.UniversityRepository;
+import com.coungard.univer.repository.WeekScheduleCycleRepository;
 import com.coungard.univer.security.KeycloakAdminService;
 import com.coungard.univer.security.Role;
 import java.time.LocalDate;
@@ -101,6 +104,12 @@ class StudentServiceTest {
   @Autowired
   private GroupRepository groupRepository;
 
+  @Autowired
+  private WeekScheduleCycleRepository weekScheduleCycleRepository;
+
+  @Autowired
+  private WeekScheduleCycleService weekScheduleCycleService;
+
   @MockBean
   private KeycloakAdminService keycloakAdminService;
 
@@ -110,6 +119,7 @@ class StudentServiceTest {
   void setUp() {
     studentRepository.deleteAll();
     groupRepository.deleteAll();
+    weekScheduleCycleRepository.deleteAll();
     semesterRepository.deleteAll();
     studyYearRepository.deleteAll();
     facultyRepository.deleteAll();
@@ -731,6 +741,10 @@ class StudentServiceTest {
     assertThat(semester.getStartDate()).isEqualTo(period.startDate());
     assertThat(semester.getEndDate()).isEqualTo(period.endDate());
 
+    // Вместе с семестром заведён цикл расписания — студент может сразу добавлять пары
+    assertThat(weekScheduleCycleService.getWeekScheduleCycleBySemester(semester.getId()).status())
+        .isEqualTo(WeekScheduleCycleStatus.DRAFT);
+
     // Группа сразу видна в списке групп курса
     assertThat(groupService.getGroups(facultyId, 3, PageRequest.of(0, 10)).getContent())
         .extracting(GroupDto::id)
@@ -751,6 +765,54 @@ class StudentServiceTest {
     assertThat(created.getFullName()).isNull();
     assertThat(studyYearRepository.count()).isEqualTo(1);
     assertThat(semesterRepository.count()).isEqualTo(1);
+    // У семестра, заведённого без цикла расписания, цикл появляется при создании группы студентом
+    assertThat(weekScheduleCycleService.getWeekScheduleCycleBySemester(existing.getSemester().getId()).status())
+        .isEqualTo(WeekScheduleCycleStatus.DRAFT);
+  }
+
+  @Test
+  void shouldKeepExistingCycleWhenCreatingGroupInSemesterWithAgreedCycle() {
+    UUID studentId = createTestStudent("ivan", "Иван", "Иванов", null).id();
+    UUID facultyId = createTestFaculty(universityId);
+    UUID semesterId = createTestGroup("У231", facultyId, 2).getSemester().getId();
+    WeekScheduleCycleDto agreed = weekScheduleCycleService.getOrCreateDraftCycle(semesterId);
+    weekScheduleCycleService.updateStatus(agreed.id(), WeekScheduleCycleStatus.AGREED);
+    studentService.updateMyProfile(studentId, profile().faculty(facultyId).year(2).build());
+
+    studentService.createMyGroup(studentId, new CreateStudentGroupRequest("У232", null));
+
+    WeekScheduleCycleDto found = weekScheduleCycleService.getWeekScheduleCycleBySemester(semesterId);
+    assertThat(found.id()).isEqualTo(agreed.id());
+    assertThat(found.status()).isEqualTo(WeekScheduleCycleStatus.AGREED);
+  }
+
+  // === PUT /students/me/week-schedule-cycle ===
+
+  @Test
+  void shouldCreateDraftCycleForSemesterOfStudentGroup() {
+    UUID studentId = createTestStudent("ivan", "Иван", "Иванов", null).id();
+    // Группа заведена администратором, цикла расписания у её семестра нет
+    Group group = createTestGroup("У231");
+    studentService.updateMyProfile(studentId, profile().group(group.getId()).build());
+    assertThat(weekScheduleCycleRepository.count()).isZero();
+
+    WeekScheduleCycleDto created = studentService.getOrCreateMyWeekScheduleCycle(studentId);
+
+    assertThat(created.semesterId()).isEqualTo(group.getSemester().getId());
+    assertThat(created.status()).isEqualTo(WeekScheduleCycleStatus.DRAFT);
+
+    // Повторный запрос отдаёт тот же цикл
+    assertThat(studentService.getOrCreateMyWeekScheduleCycle(studentId).id()).isEqualTo(created.id());
+    assertThat(weekScheduleCycleRepository.count()).isEqualTo(1);
+  }
+
+  @Test
+  void shouldRejectWeekScheduleCycleRequestWithoutGroup() {
+    UUID studentId = createTestStudent("ivan", "Иван", "Иванов", null).id();
+
+    assertThatThrownBy(() -> studentService.getOrCreateMyWeekScheduleCycle(studentId))
+        .isInstanceOf(ValidationException.class);
+    assertThat(weekScheduleCycleRepository.count()).isZero();
   }
 
   @Test
