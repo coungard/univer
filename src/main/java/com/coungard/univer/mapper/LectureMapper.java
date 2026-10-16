@@ -21,6 +21,9 @@ public class LectureMapper {
         .durationMinutes(lecture.getDurationMinutes())
         .courseId(lecture.getCourse().getId())
         .teacherId(lecture.getTeacher() != null ? lecture.getTeacher().getId() : null)
+        .teacherName(lecture.getTeacher() != null
+            ? lecture.getTeacher().getPerson().getFullname()
+            : lecture.getTeacherName())
         .room(lecture.getRoom())
         .sourcePairId(lecture.getSourcePair() != null ? lecture.getSourcePair().getId() : null)
         .groupIds(lecture.getGroups().stream().map(Group::getId).collect(Collectors.toSet()))

@@ -41,16 +41,20 @@ public class TeacherController {
 
   @Operation(
       summary = "Получить всех преподавателей",
-      description = "Поддерживает поиск по имени, университету"
+      description = "Необязательный отбор по факультету (facultyId) или университету (universityId) — "
+          + "например, чтобы предложить преподавателей факультета в форме пары. При обоих параметрах "
+          + "отбор идёт по факультету"
   )
   @GetMapping
 //  @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<Page<TeacherDto>> getTeachers(
+      @RequestParam(required = false) UUID facultyId,
+      @RequestParam(required = false) UUID universityId,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "10") int size) {
 
     Pageable pageable = PageRequest.of(page, size);
-    Page<TeacherDto> teachers = teacherService.getTeachers(pageable);
+    Page<TeacherDto> teachers = teacherService.getTeachers(facultyId, universityId, pageable);
     return ResponseEntity.ok(teachers);
   }
 

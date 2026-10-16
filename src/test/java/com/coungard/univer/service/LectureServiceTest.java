@@ -747,6 +747,30 @@ class LectureServiceTest {
         .isInstanceOf(ValidationException.class);
   }
 
+  // === Преподаватель текстом переносится из пары в занятия (issue #104) ===
+
+  @Test
+  void shouldCopyTeacherNameFromPairToGeneratedLectures() {
+    PairDto pair = pairService.getPairById(pairId);
+    pairService.updatePair(pairId, pair.toBuilder().teacherName("Иванов И. И.").build(), null);
+
+    List<LectureDto> generated = lectureService.generateSemesterLectures(cycleId, null);
+
+    assertThat(generated).isNotEmpty();
+    assertThat(generated).extracting(LectureDto::teacherName).containsOnly("Иванов И. И.");
+  }
+
+  @Test
+  void shouldUpdateTeacherNameOfGeneratedLecturesWhenPairChanges() {
+    lectureService.generateSemesterLectures(cycleId, null);
+    PairDto pair = pairService.getPairById(pairId);
+
+    pairService.updatePair(pairId, pair.toBuilder().teacherName("Сидорова А. В.").build(), null);
+
+    assertThat(findLecturesOfPair(pairId)).isNotEmpty();
+    assertThat(findLecturesOfPair(pairId)).extracting(LectureDto::teacherName).containsOnly("Сидорова А. В.");
+  }
+
   // === Вспомогательные методы ===
 
   private List<LectureDto> findLecturesOfPair(UUID sourcePairId) {

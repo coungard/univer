@@ -68,6 +68,13 @@ public class Pair {
   private Teacher teacher;
 
   /**
+   * Преподаватель текстом («Иванов И. И.»), если его нет среди зарегистрированных {@link Teacher}
+   * (issue #104). При заданном {@link #teacher} не хранится — имя берётся из него. Опционально.
+   */
+  @Column(name = "teacher_name", length = 100)
+  private String teacherName;
+
+  /**
    * Аудитория — свободная строка (например, "125"), не отдельная сущность (см. TARGET.md, где
    * {@code Room} задумана как полноценная связь {@code Pair }o--o| Room}). Опциональна.
    */
