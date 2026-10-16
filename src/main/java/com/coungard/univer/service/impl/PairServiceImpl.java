@@ -70,6 +70,7 @@ public class PairServiceImpl implements PairService {
     pair.setWeekScheduleCycle(cycle);
     pair.setCourse(course);
     pair.setTeacher(resolveTeacher(pairDto.teacherId()));
+    pair.setTeacherName(resolveTeacherName(pairDto.teacherId(), pairDto.teacherName()));
     pair.setGroups(groups);
     pair.setStartTime(schedule.startTime());
     pair.setEndTime(schedule.endTime());
@@ -128,6 +129,7 @@ public class PairServiceImpl implements PairService {
     existing.setWeekScheduleCycle(cycle);
     existing.setCourse(course);
     existing.setTeacher(resolveTeacher(pairDto.teacherId()));
+    existing.setTeacherName(resolveTeacherName(pairDto.teacherId(), pairDto.teacherName()));
     existing.setDayOfWeek(pairDto.dayOfWeek());
     existing.setWeekParity(pairDto.weekParity());
     existing.setPairNumber(pairDto.pairNumber());
@@ -298,6 +300,17 @@ public class PairServiceImpl implements PairService {
     }
     return teacherRepository.findById(teacherId)
         .orElseThrow(() -> new ResourceNotFoundException("Преподаватель не найден с ID: " + teacherId));
+  }
+
+  /**
+   * Имя преподавателя текстом хранится, только если он не выбран из зарегистрированных: при заданном
+   * {@code teacherId} имя берётся из {@link Teacher} (issue #104). Пустая строка — то же, что не задано.
+   */
+  private String resolveTeacherName(UUID teacherId, String teacherName) {
+    if (teacherId != null || teacherName == null || teacherName.isBlank()) {
+      return null;
+    }
+    return teacherName.strip();
   }
 
   private Set<Group> resolveGroups(Set<UUID> groupIds) {

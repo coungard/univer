@@ -59,6 +59,7 @@ public class LectureServiceImpl implements LectureService {
     Lecture lecture = lectureMapper.toEntity(lectureDto);
     lecture.setCourse(course);
     lecture.setTeacher(resolveTeacher(lectureDto.teacherId()));
+    lecture.setTeacherName(resolveTeacherName(lectureDto.teacherId(), lectureDto.teacherName()));
     lecture.setGroups(resolveGroups(lectureDto.groupIds()));
 
     Lecture saved = lectureRepository.save(lecture);
@@ -184,6 +185,7 @@ public class LectureServiceImpl implements LectureService {
     lecture.setDurationMinutes((int) ChronoUnit.MINUTES.between(pair.getStartTime(), pair.getEndTime()));
     lecture.setCourse(pair.getCourse());
     lecture.setTeacher(pair.getTeacher());
+    lecture.setTeacherName(pair.getTeacherName());
     lecture.setRoom(pair.getRoom());
     lecture.setSourcePair(pair);
     lecture.setGroups(new HashSet<>(pair.getGroups()));
@@ -245,6 +247,7 @@ public class LectureServiceImpl implements LectureService {
     existing.setDurationMinutes(lectureDto.durationMinutes() != null ? lectureDto.durationMinutes() : 90);
     existing.setCourse(course);
     existing.setTeacher(resolveTeacher(lectureDto.teacherId()));
+    existing.setTeacherName(resolveTeacherName(lectureDto.teacherId(), lectureDto.teacherName()));
     existing.setRoom(lectureDto.room());
     existing.setGroups(resolveGroups(lectureDto.groupIds()));
 
@@ -305,6 +308,17 @@ public class LectureServiceImpl implements LectureService {
     }
     return teacherRepository.findById(teacherId)
         .orElseThrow(() -> new ResourceNotFoundException("Преподаватель не найден с ID: " + teacherId));
+  }
+
+  /**
+   * Имя преподавателя текстом хранится, только если он не выбран из зарегистрированных: при заданном
+   * {@code teacherId} имя берётся из {@link Teacher} (issue #104). Пустая строка — то же, что не задано.
+   */
+  private String resolveTeacherName(UUID teacherId, String teacherName) {
+    if (teacherId != null || teacherName == null || teacherName.isBlank()) {
+      return null;
+    }
+    return teacherName.strip();
   }
 
   private Set<Group> resolveGroups(Set<UUID> groupIds) {

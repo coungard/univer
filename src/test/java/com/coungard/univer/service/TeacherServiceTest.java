@@ -133,7 +133,7 @@ class TeacherServiceTest {
     Pageable pageable = PageRequest.of(0, 10);
 
     // When
-    Page<TeacherDto> result = teacherService.getTeachers(pageable);
+    Page<TeacherDto> result = teacherService.getTeachers(null, null, pageable);
 
     // Then
     assertThat(result.getContent()).hasSize(2);
@@ -381,9 +381,42 @@ class TeacherServiceTest {
     assertThat(teacherRepository.findById(UUID.fromString(mockKeycloakId))).isEmpty();
   }
 
+  @Test
+  void shouldFilterTeachersByFacultyAndUniversity() {
+    // Given: факультет из setUp, второй факультет того же университета и факультет другого
+    UUID universityId = facultyRepository.findById(facultyId).orElseThrow().getUniversity().getId();
+    UUID sameUniversityFacultyId = createFaculty("Faculty of Physics", universityId);
+
+    University otherUniversity = new University();
+    otherUniversity.setName("Other University");
+    otherUniversity.setRegion(TestRegions.create(regionRepository));
+    UUID otherFacultyId = createFaculty("Faculty of Law", universityRepository.save(otherUniversity).getId());
+
+    UUID ivanovId = createTestTeacher("ivanov", "Иван", "Иванов", "ivanov@example.com").id();
+    UUID petrovId = createTestTeacher("petrov", "Петр", "Петров", "petrov@example.com", sameUniversityFacultyId).id();
+    UUID sidorovId = createTestTeacher("sidorov", "Сидор", "Сидоров", "sidorov@example.com", otherFacultyId).id();
+    Pageable pageable = PageRequest.of(0, 10);
+
+    // When & Then
+    assertThat(teacherService.getTeachers(facultyId, null, pageable).getContent())
+        .extracting(TeacherDto::id).containsExactly(ivanovId);
+    assertThat(teacherService.getTeachers(null, universityId, pageable).getContent())
+        .extracting(TeacherDto::id).containsExactlyInAnyOrder(ivanovId, petrovId);
+    // Факультет точнее университета — при обоих параметрах отбор по факультету
+    assertThat(teacherService.getTeachers(sameUniversityFacultyId, universityId, pageable).getContent())
+        .extracting(TeacherDto::id).containsExactly(petrovId);
+    assertThat(teacherService.getTeachers(null, null, pageable).getContent())
+        .extracting(TeacherDto::id).containsExactlyInAnyOrder(ivanovId, petrovId, sidorovId);
+  }
+
   // === Вспомогательные методы ===
 
   private TeacherDto createTestTeacher(String username, String firstName, String lastName, String email) {
+    return createTestTeacher(username, firstName, lastName, email, facultyId);
+  }
+
+  private TeacherDto createTestTeacher(
+      String username, String firstName, String lastName, String email, UUID teacherFacultyId) {
     Teacher teacher = new Teacher();
 
     Person person = new Person();
@@ -395,7 +428,7 @@ class TeacherServiceTest {
     teacher.setPerson(person);
     teacher.setPosition("Доцент");
     teacher.setRegistered(false);
-    teacher.setFaculty(facultyRepository.getReferenceById(facultyId));
+    teacher.setFaculty(facultyRepository.getReferenceById(teacherFacultyId));
 
     Teacher saved = teacherRepository.save(teacher);
 
@@ -409,5 +442,13 @@ class TeacherServiceTest {
         .position(saved.getPosition())
         .registered(saved.isRegistered())
         .build();
+  }
+
+  private UUID createFaculty(String name, UUID universityId) {
+    Faculty faculty = Faculty.builder()
+        .name(name)
+        .university(universityRepository.getReferenceById(universityId))
+        .build();
+    return facultyRepository.save(faculty).getId();
   }
 }

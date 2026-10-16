@@ -697,6 +697,51 @@ class PairServiceTest {
         .hasMessageContaining("Конфликт расписания");
   }
 
+  // === Преподаватель текстом (issue #104) ===
+
+  @Test
+  void shouldStoreTeacherNameWhenTeacherIsNotRegistered() {
+    PairDto created = pairService.createPair(
+        createDto(Set.of(group1Id)).toBuilder().teacherName("  Иванов И. И. ").build(), null);
+
+    PairDto found = pairService.getPairById(created.id());
+    assertThat(found.teacherId()).isNull();
+    assertThat(found.teacherName()).isEqualTo("Иванов И. И.");
+  }
+
+  @Test
+  void shouldTakeTeacherNameFromRegisteredTeacherAndIgnorePassedName() {
+    UUID teacherId = createTeacher();
+
+    PairDto created = pairService.createPair(createDto(Set.of(group1Id)).toBuilder()
+        .teacherId(teacherId)
+        .teacherName("Иванов И. И.")
+        .build(), null);
+
+    assertThat(created.teacherId()).isEqualTo(teacherId);
+    assertThat(created.teacherName()).isEqualTo("Пётр Петров");
+    assertThat(pairRepository.findById(created.id()).orElseThrow().getTeacherName()).isNull();
+  }
+
+  @Test
+  void shouldTreatBlankTeacherNameAsAbsent() {
+    PairDto created = pairService.createPair(
+        createDto(Set.of(group1Id)).toBuilder().teacherName("   ").build(), null);
+
+    assertThat(created.teacherName()).isNull();
+  }
+
+  @Test
+  void shouldAllowStudentToSetTeacherNameOnOwnDraftPair() {
+    UUID studentId = createStudent(group1Id);
+    PairDto created = pairService.createPair(createDto(Set.of(group1Id)), studentId);
+
+    PairDto updated = pairService.updatePair(
+        created.id(), created.toBuilder().teacherName("Сидорова А. В.").build(), studentId);
+
+    assertThat(updated.teacherName()).isEqualTo("Сидорова А. В.");
+  }
+
   // === Вспомогательные методы ===
 
   private UUID createTeacher() {

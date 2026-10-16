@@ -10,7 +10,11 @@ public interface TeacherService {
 
   TeacherDto getTeacherById(UUID id);
 
-  Page<TeacherDto> getTeachers(Pageable pageable);
+  /**
+   * Преподаватели постранично, с необязательным отбором: по факультету или, если он не задан, по
+   * университету. Без обоих параметров — все преподаватели.
+   */
+  Page<TeacherDto> getTeachers(UUID facultyId, UUID universityId, Pageable pageable);
 
   TeacherDto registerTeacher(RegisterTeacherRequest registerDto);
 

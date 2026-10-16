@@ -14,4 +14,8 @@ public interface TeacherRepository extends JpaRepository<Teacher, UUID> {
 
   boolean existsByPersonUsername(String username);
 
+  Page<Teacher> findByFacultyId(UUID facultyId, Pageable pageable);
+
+  Page<Teacher> findByFacultyUniversityId(UUID universityId, Pageable pageable);
+
 }

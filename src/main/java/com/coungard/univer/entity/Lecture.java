@@ -48,6 +48,13 @@ public class Lecture {
   @JoinColumn(name = "teacher_id")
   private Teacher teacher;
 
+  /**
+   * Преподаватель текстом, если он не зарегистрирован (issue #104); при генерации из {@link Pair}
+   * копируется из {@code Pair.teacherName}. При заданном {@link #teacher} не хранится.
+   */
+  @Column(name = "teacher_name", length = 100)
+  private String teacherName;
+
   /** Аудитория — свободная строка, при генерации из {@link Pair} копируется из {@code Pair.room}. */
   @Column(name = "room", length = 32)
   private String room;

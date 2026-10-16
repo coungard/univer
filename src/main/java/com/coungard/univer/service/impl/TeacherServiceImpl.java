@@ -46,8 +46,16 @@ public class TeacherServiceImpl implements TeacherService {
   }
 
   @Override
-  public Page<TeacherDto> getTeachers(Pageable pageable) {
-    Page<Teacher> teachers = teacherRepository.findAll(pageable);
+  public Page<TeacherDto> getTeachers(UUID facultyId, UUID universityId, Pageable pageable) {
+    // Факультет точнее университета, поэтому при обоих параметрах отбор идёт по факультету
+    Page<Teacher> teachers;
+    if (facultyId != null) {
+      teachers = teacherRepository.findByFacultyId(facultyId, pageable);
+    } else if (universityId != null) {
+      teachers = teacherRepository.findByFacultyUniversityId(universityId, pageable);
+    } else {
+      teachers = teacherRepository.findAll(pageable);
+    }
     return teachers.map(teacherMapper::toDto);
   }
 

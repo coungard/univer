@@ -3,6 +3,7 @@ package com.coungard.univer.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
@@ -26,6 +27,11 @@ public record LectureDto(
     UUID courseId,
 
     UUID teacherId,
+
+    // Преподаватель текстом, если его нет среди зарегистрированных (issue #104). В ответе при заданном
+    // teacherId — полное имя этого Teacher; на входе при заданном teacherId игнорируется.
+    @Size(max = 100, message = "Имя преподавателя не может быть длиннее 100 символов")
+    String teacherName,
 
     String room,
 

@@ -24,6 +24,9 @@ public class PairMapper {
         .endTime(pair.getEndTime())
         .courseId(pair.getCourse().getId())
         .teacherId(pair.getTeacher() != null ? pair.getTeacher().getId() : null)
+        .teacherName(pair.getTeacher() != null
+            ? pair.getTeacher().getPerson().getFullname()
+            : pair.getTeacherName())
         .room(pair.getRoom())
         .groupIds(pair.getGroups().stream().map(Group::getId).collect(Collectors.toSet()))
         .build();
