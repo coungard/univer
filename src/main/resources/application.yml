@@ -1,5 +1,13 @@
 server:
   port: 8023
+  # Реальный IP клиента и схема за обратным прокси (X-Forwarded-*), issue #110. Без прокси перед
+  # приложением эти заголовки может подделать сам клиент — учитывать при разборе ip= в логах.
+  forward-headers-strategy: framework
+
+logging:
+  pattern:
+    # requestId из MDC (RequestIdFilter) — в каждой строке лога запроса, issue #110
+    level: "%5p [%X{requestId:-}]"
 
 spring:
   datasource:

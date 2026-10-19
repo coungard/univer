@@ -1,6 +1,8 @@
 package com.coungard.univer.config;
 
 import com.coungard.univer.security.KeycloakRoleConverter;
+import com.coungard.univer.security.LoggingAccessDeniedHandler;
+import com.coungard.univer.security.LoggingAuthenticationEntryPoint;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -60,6 +62,13 @@ public class SecurityConfig {
             .jwt(jwt -> jwt
                 .jwtAuthenticationConverter(grantedAuthoritiesExtractor())
             )
+            .authenticationEntryPoint(new LoggingAuthenticationEntryPoint())
+            .accessDeniedHandler(new LoggingAccessDeniedHandler())
+        )
+        // Те же обработчики и для запросов без токена — иначе их 401/403 не попадут в лог (issue #110)
+        .exceptionHandling(exceptions -> exceptions
+            .authenticationEntryPoint(new LoggingAuthenticationEntryPoint())
+            .accessDeniedHandler(new LoggingAccessDeniedHandler())
         )
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .csrf(AbstractHttpConfigurer::disable)

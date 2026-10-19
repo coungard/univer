@@ -96,10 +96,9 @@ public class TeacherServiceImpl implements TeacherService {
       // Откат: пользователь в Keycloak уже создан, но роль или запись в БД не удались
       try {
         keycloakAdminService.deleteUser(keycloakId);
-        log.info("Пользователь в Keycloak удалён после сбоя регистрации: " + keycloakId);
+        log.info("Пользователь в Keycloak удалён после сбоя регистрации: {}", keycloakId);
       } catch (Exception cleanupEx) {
-        log.warn("Не удалось удалить пользователя в Keycloak: " + keycloakId);
-        log.error(cleanupEx.getMessage(), cleanupEx);
+        log.error("Не удалось удалить пользователя в Keycloak: {}", keycloakId, cleanupEx);
       }
       throw ex;
     }

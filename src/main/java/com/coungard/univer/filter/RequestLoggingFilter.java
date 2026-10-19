@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,12 +25,17 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * Намеренно НЕ логирует тело запроса/ответа и заголовки (в частности {@code Authorization}) —
  * там могут быть пароли (см. флоу регистрации, {@code RegisterStudentRequest}/
  * {@code RegisterTeacherRequest}) и сами JWT. См. issue #69.
+ * <p>
+ * Запросы, отклонённые самой цепочкой Spring Security (401/403), сюда не доходят — их логируют
+ * {@code LoggingAuthenticationEntryPoint}/{@code LoggingAccessDeniedHandler}. Идентификатор запроса
+ * в каждой строке — из MDC, его кладёт {@link RequestIdFilter} (issue #110).
  */
 @Slf4j
 @Component
 public class RequestLoggingFilter extends OncePerRequestFilter {
 
   private static final String ANONYMOUS_PRINCIPAL = "anonymous";
+  private static final List<String> SWAGGER_PATH_PREFIXES = List.of("/swagger-ui", "/v3/api-docs", "/webjars");
 
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
@@ -39,14 +45,26 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
       filterChain.doFilter(request, response);
     } finally {
       long durationMs = System.currentTimeMillis() - startedAtMs;
-      log.info("{} {} -> {} ({} ms) user={} ip={}",
+      String format = "{} {} -> {} ({} ms) user={} ip={}";
+      Object[] args = {
           request.getMethod(),
           requestUriWithQuery(request),
           response.getStatus(),
           durationMs,
           resolvePrincipal(),
-          request.getRemoteAddr());
+          request.getRemoteAddr()};
+      // Swagger UI тянет десятки статических ресурсов на одно открытие — на INFO это шум (issue #110)
+      if (isSwaggerRequest(request)) {
+        log.debug(format, args);
+      } else {
+        log.info(format, args);
+      }
     }
+  }
+
+  private boolean isSwaggerRequest(HttpServletRequest request) {
+    String uri = request.getRequestURI();
+    return SWAGGER_PATH_PREFIXES.stream().anyMatch(uri::startsWith);
   }
 
   private String requestUriWithQuery(HttpServletRequest request) {
