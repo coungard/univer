@@ -80,8 +80,13 @@ public class LectureServiceImpl implements LectureService {
               + pair.getDayOfWeek());
     }
 
-    LocalDate semesterStart = pair.getWeekScheduleCycle().getSemester().getStartDate();
-    WeekParity actualParity = computeWeekParity(semesterStart, date);
+    Semester semester = pair.getWeekScheduleCycle().getSemester();
+    if (date.isBefore(semester.getStartDate()) || date.isAfter(semester.getEndDate())) {
+      throw new ValidationException(
+          "Дата " + date + " вне семестра: " + semester.getStartDate() + " — " + semester.getEndDate());
+    }
+
+    WeekParity actualParity = WeekParity.of(semester.getStartDate(), date);
     if (pair.getWeekParity() != WeekParity.BOTH && pair.getWeekParity() != actualParity) {
       throw new ValidationException(
           "Дата " + date + " приходится на " + actualParity
@@ -157,7 +162,7 @@ public class LectureServiceImpl implements LectureService {
     List<Lecture> created = new ArrayList<>();
     LocalDate date = semesterStart.with(TemporalAdjusters.nextOrSame(pair.getDayOfWeek()));
     while (!date.isAfter(semesterEnd)) {
-      WeekParity actualParity = computeWeekParity(semesterStart, date);
+      WeekParity actualParity = WeekParity.of(semesterStart, date);
       boolean parityMatches = pair.getWeekParity() == WeekParity.BOTH || pair.getWeekParity() == actualParity;
       if (parityMatches && !generatedDates.contains(date)) {
         created.add(lectureRepository.save(buildLectureFromPair(pair, date)));
@@ -294,12 +299,6 @@ public class LectureServiceImpl implements LectureService {
       throw new ValidationException("Студент не привязан к группе — генерация расписания недоступна");
     }
     return student.getGroup().getId();
-  }
-
-  private WeekParity computeWeekParity(LocalDate semesterStart, LocalDate date) {
-    long daysBetween = ChronoUnit.DAYS.between(semesterStart, date);
-    long weekNumber = Math.floorDiv(daysBetween, 7) + 1;
-    return weekNumber % 2 == 1 ? WeekParity.ODD : WeekParity.EVEN;
   }
 
   private Teacher resolveTeacher(UUID teacherId) {

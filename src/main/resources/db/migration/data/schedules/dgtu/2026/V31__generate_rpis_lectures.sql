@@ -7,8 +7,8 @@
 -- расписания».
 --
 -- Повторяет LectureServiceImpl#generateSemesterLectures для цикла РПиС: по каждой Pair — все даты
--- семестра с её днём недели и чётностью недели (номер недели считается от Semester.start_date, первая
--- неделя — нечётная). Пара + дата, для которых лекция уже есть (сгенерирована через API), пропускаются,
+-- семестра с её днём недели и чётностью недели (недели календарные, пн–вс: неделя, в которую попадает
+-- Semester.start_date, — первая, нечётная, см. WeekParity.of, issue #106). Пара + дата, для которых лекция уже есть (сгенерирована через API), пропускаются,
 -- как и в сервисе.
 WITH generated AS (
     INSERT INTO lectures (id, title, scheduled_time, duration_minutes, course_id, teacher_id, room, source_pair_id)
@@ -28,7 +28,7 @@ WITH generated AS (
     WHERE wsc.id = 'fa6a23a1-620c-45e8-813c-87ada5836a9c' -- WeekScheduleCycle РПиС (V14)
       AND TRIM(TO_CHAR(d, 'DAY')) = p.day_of_week
       AND (p.week_parity = 'BOTH'
-          OR p.week_parity = CASE WHEN ((d::date - s.start_date) / 7 + 1) % 2 = 1 THEN 'ODD' ELSE 'EVEN' END)
+          OR p.week_parity = CASE WHEN ((d::date - date_trunc('week', s.start_date)::date) / 7 + 1) % 2 = 1 THEN 'ODD' ELSE 'EVEN' END)
       AND NOT EXISTS (
           SELECT 1 FROM lectures l
           WHERE l.source_pair_id = p.id AND l.scheduled_time = d::date + p.start_time)
