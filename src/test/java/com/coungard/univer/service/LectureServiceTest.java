@@ -122,11 +122,12 @@ class LectureServiceTest {
   @Autowired
   private StudentRepository studentRepository;
 
-  // Семестр начинается во вторник 2026-09-01. Неделя считается 7-дневными блоками от этой даты:
-  // 1-7 сент. - неделя 1 (нечётная), 8-14 сент. - неделя 2 (чётная). Первый понедельник семестра —
-  // 2026-09-07 (нечётная неделя), второй — 2026-09-14 (чётная), третий — 2026-09-21 (снова нечётная).
-  // Семестр заканчивается 2026-09-21 — ровно три понедельника в диапазоне для тестов массовой генерации.
-  private static final LocalDate SEMESTER_START = LocalDate.of(2026, 9, 1);
+  // Семестр начинается в понедельник 2026-09-07. Недели календарные (пн–вс): 7-13 сент. - неделя 1
+  // (нечётная), 14-20 сент. - неделя 2 (чётная). Первый понедельник семестра — 2026-09-07 (нечётная
+  // неделя), второй — 2026-09-14 (чётная), третий — 2026-09-21 (снова нечётная). Семестр заканчивается
+  // 2026-09-21 — ровно три понедельника в диапазоне для тестов массовой генерации. Семестр, начавшийся не
+  // в понедельник, — см. тесты «семестр со среды» ниже.
+  private static final LocalDate SEMESTER_START = LocalDate.of(2026, 9, 7);
   private static final LocalDate SEMESTER_END = LocalDate.of(2026, 9, 21);
   private static final LocalDate FIRST_MONDAY_ODD_WEEK = LocalDate.of(2026, 9, 7);
   private static final LocalDate SECOND_MONDAY_EVEN_WEEK = LocalDate.of(2026, 9, 14);
@@ -530,6 +531,64 @@ class LectureServiceTest {
         .isInstanceOf(ResourceNotFoundException.class);
   }
 
+  // === Чётность по календарным неделям, семестр не с понедельника (issue #106) ===
+
+  @Test
+  void shouldGenerateSemesterLecturesByCalendarWeeksWhenSemesterStartsOnWednesday() {
+    // Given: семестр со среды 2026-09-02 — неделя 1 (нечётная) — 31 авг.–6 сент., пн–вт которой в семестр
+    // не входят; неделя 2 (чётная) — 7-13 сент., неделя 3 (нечётная) — 14-20 сент.
+    moveSemesterStart(LocalDate.of(2026, 9, 2));
+    createPair(DayOfWeek.WEDNESDAY, WeekParity.ODD, 2);
+    createPair(DayOfWeek.SUNDAY, WeekParity.ODD, 3);
+
+    // When
+    List<LectureDto> generated = lectureService.generateSemesterLectures(cycleId, null);
+
+    // Then: ODD-пара по понедельникам — только 14 сент. (07 и 21 сент. — чётные недели); по средам —
+    // 02 и 16 сент.; по воскресеньям — 06 и 20 сент.
+    assertThat(generated)
+        .extracting(lecture -> lecture.scheduledTime().toLocalDate())
+        .containsExactlyInAnyOrder(
+            LocalDate.of(2026, 9, 14),
+            LocalDate.of(2026, 9, 2),
+            LocalDate.of(2026, 9, 16),
+            LocalDate.of(2026, 9, 6),
+            LocalDate.of(2026, 9, 20));
+  }
+
+  @Test
+  void shouldSwitchWeekParityBetweenSundayAndMonday() {
+    // Given: семестр со среды; воскресенье 06 сент. — ещё первая (нечётная) неделя, понедельник
+    // 07 сент. — уже вторая (чётная)
+    moveSemesterStart(LocalDate.of(2026, 9, 2));
+    UUID sundayPairId = createPair(DayOfWeek.SUNDAY, WeekParity.ODD, 2);
+
+    // When & Then
+    assertThat(lectureService.generateFromPair(
+        new GenerateLectureRequest(sundayPairId, LocalDate.of(2026, 9, 6)), null).sourcePairId())
+        .isEqualTo(sundayPairId);
+    assertThatThrownBy(() -> lectureService.generateFromPair(
+        new GenerateLectureRequest(pairId, LocalDate.of(2026, 9, 7)), null))
+        .isInstanceOf(ValidationException.class)
+        .hasMessageContaining("EVEN");
+  }
+
+  @Test
+  void shouldRejectGeneratingFromPairForDateOutsideSemester() {
+    // Given: семестр со среды — понедельник 31 авг. той же недели в семестр не входит
+    moveSemesterStart(LocalDate.of(2026, 9, 2));
+
+    // When & Then
+    assertThatThrownBy(() -> lectureService.generateFromPair(
+        new GenerateLectureRequest(pairId, LocalDate.of(2026, 8, 31)), null))
+        .isInstanceOf(ValidationException.class)
+        .hasMessageContaining("вне семестра");
+    assertThatThrownBy(() -> lectureService.generateFromPair(
+        new GenerateLectureRequest(pairId, SEMESTER_END.plusWeeks(2)), null))
+        .isInstanceOf(ValidationException.class)
+        .hasMessageContaining("вне семестра");
+  }
+
   // === STUDENT-ограничения генерации: своя группа (issue #61) ===
 
   @Test
@@ -620,16 +679,15 @@ class LectureServiceTest {
         .room("202")
         .build(), null);
 
-    // Then: понедельников не осталось, лекции стоят по вторникам семестра (01, 08, 15 сентября)
+    // Then: понедельников не осталось, лекции стоят по вторникам семестра (08 и 15 сентября)
     List<LectureDto> lectures = findLecturesOfPair(pairId);
     assertThat(lectures)
         .extracting(LectureDto::scheduledTime)
         .containsExactlyInAnyOrder(
-            LocalDateTime.of(2026, 9, 1, 8, 0),
             LocalDateTime.of(2026, 9, 8, 8, 0),
             LocalDateTime.of(2026, 9, 15, 8, 0));
     assertThat(lectures).extracting(LectureDto::room).containsOnly("202");
-    assertThat(lectureRepository.count()).isEqualTo(3);
+    assertThat(lectureRepository.count()).isEqualTo(2);
 
     // Повторная генерация ничего не добавляет
     assertThat(lectureService.generateSemesterLectures(cycleId, null)).isEmpty();
@@ -700,13 +758,12 @@ class LectureServiceTest {
     // When: пара перенесена на вторник
     pairService.updatePair(pairId, pair.toBuilder().dayOfWeek(DayOfWeek.TUESDAY).build(), null);
 
-    // Then: отмеченная лекция осталась как была, остальные — по нечётным вторникам (01 и 15 сентября)
+    // Then: отмеченная лекция осталась как была, остальные — по нечётным вторникам (08 сентября)
     assertThat(findLecturesOfPair(pairId))
         .extracting(LectureDto::scheduledTime)
         .containsExactlyInAnyOrder(
             attended.scheduledTime(),
-            LocalDateTime.of(2026, 9, 1, 8, 0),
-            LocalDateTime.of(2026, 9, 15, 8, 0));
+            LocalDateTime.of(2026, 9, 8, 8, 0));
     assertThat(lectureService.getLectureById(attended.id()).scheduledTime()).isEqualTo(attended.scheduledTime());
 
     // When: пара удалена
@@ -772,6 +829,25 @@ class LectureServiceTest {
   }
 
   // === Вспомогательные методы ===
+
+  private void moveSemesterStart(LocalDate startDate) {
+    Semester semester = semesterRepository.findById(semesterId).orElseThrow();
+    semester.setStartDate(startDate);
+    semesterRepository.save(semester);
+  }
+
+  private UUID createPair(DayOfWeek dayOfWeek, WeekParity weekParity, int pairNumber) {
+    Pair pair = new Pair();
+    pair.setWeekScheduleCycle(weekScheduleCycleRepository.getReferenceById(cycleId));
+    pair.setDayOfWeek(dayOfWeek);
+    pair.setWeekParity(weekParity);
+    pair.setPairNumber(pairNumber);
+    pair.setStartTime(LocalTime.of(8, 0));
+    pair.setEndTime(LocalTime.of(9, 30));
+    pair.setCourse(courseRepository.getReferenceById(courseId));
+    pair.setGroups(Set.of(groupRepository.findById(group1Id).orElseThrow()));
+    return pairRepository.save(pair).getId();
+  }
 
   private List<LectureDto> findLecturesOfPair(UUID sourcePairId) {
     return lectureService.getLectures(PageRequest.of(0, 100)).getContent().stream()

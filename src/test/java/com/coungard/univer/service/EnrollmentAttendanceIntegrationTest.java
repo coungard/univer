@@ -115,7 +115,7 @@ class EnrollmentAttendanceIntegrationTest {
   @Autowired
   private PairRepository pairRepository;
 
-  private static final LocalDate SEMESTER_START = LocalDate.of(2026, 9, 1);
+  private static final LocalDate SEMESTER_START = LocalDate.of(2026, 9, 7);
   private static final LocalDate FIRST_MONDAY_ODD_WEEK = LocalDate.of(2026, 9, 7);
 
   private UUID universityId;

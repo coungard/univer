@@ -1,8 +1,14 @@
 package com.coungard.univer.dto;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAdjusters;
+
 /**
- * Чётность недели циклического расписания ({@code WeekScheduleCycle}). Номер недели считается от
- * {@code Semester.startDate}, а не от календарной недели года — см. TARGET.md, раздел
+ * Чётность недели циклического расписания ({@code WeekScheduleCycle}). Недели семестра — календарные
+ * (пн–вс): неделя, в которую попадает {@code Semester.startDate}, — первая, нечётная, даже если семестр
+ * начался не в понедельник; дальше недели меняются по понедельникам — см. TARGET.md, раздел
  * «Циклическое расписание: чётность недели».
  */
 public enum WeekParity {
@@ -14,5 +20,15 @@ public enum WeekParity {
   EVEN,
 
   /** Каждую неделю, независимо от чётности. */
-  BOTH
+  BOTH;
+
+  /**
+   * Чётность недели семестра, на которую приходится {@code date} (issue #106). Границы семестра не
+   * проверяются: это задача вызывающего.
+   */
+  public static WeekParity of(LocalDate semesterStart, LocalDate date) {
+    LocalDate firstMonday = semesterStart.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+    long weekNumber = Math.floorDiv(ChronoUnit.DAYS.between(firstMonday, date), 7) + 1;
+    return weekNumber % 2 == 1 ? ODD : EVEN;
+  }
 }
