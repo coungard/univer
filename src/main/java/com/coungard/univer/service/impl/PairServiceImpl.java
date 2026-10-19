@@ -1,5 +1,7 @@
 package com.coungard.univer.service.impl;
 
+import com.coungard.univer.dto.AuditAction;
+import com.coungard.univer.dto.AuditEntityType;
 import com.coungard.univer.dto.PairDto;
 import com.coungard.univer.dto.WeekParity;
 import com.coungard.univer.dto.WeekScheduleCycleStatus;
@@ -21,12 +23,15 @@ import com.coungard.univer.repository.PairRepository;
 import com.coungard.univer.repository.StudentRepository;
 import com.coungard.univer.repository.TeacherRepository;
 import com.coungard.univer.repository.WeekScheduleCycleRepository;
+import com.coungard.univer.service.AuditService;
 import com.coungard.univer.service.LectureService;
+import com.coungard.univer.service.PairLecturesChange;
 import com.coungard.univer.service.PairService;
 import java.time.LocalTime;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -50,6 +55,7 @@ public class PairServiceImpl implements PairService {
   private final StudentRepository studentRepository;
   private final LectureService lectureService;
   private final PairMapper pairMapper;
+  private final AuditService auditService;
 
   @Override
   @Transactional
@@ -76,6 +82,7 @@ public class PairServiceImpl implements PairService {
     pair.setEndTime(schedule.endTime());
 
     Pair saved = pairRepository.save(pair);
+    auditService.record(AuditAction.CREATE, AuditEntityType.PAIR, saved.getId(), snapshot(saved));
     return pairMapper.toDto(saved);
   }
 
@@ -112,6 +119,7 @@ public class PairServiceImpl implements PairService {
         .orElseThrow(() -> new ResourceNotFoundException("Пара не найдена с ID: " + id));
     // Проверяем и текущее состояние (нельзя тронуть чужую/согласованную пару)...
     checkStudentCanEdit(callerStudentId, existing.getWeekScheduleCycle(), existing.getGroups());
+    Map<String, Object> before = snapshot(existing);
 
     WeekScheduleCycle cycle = weekScheduleCycleRepository.findById(pairDto.weekScheduleCycleId())
         .orElseThrow(() -> new ResourceNotFoundException(
@@ -140,7 +148,12 @@ public class PairServiceImpl implements PairService {
 
     Pair updated = pairRepository.save(existing);
     // Лекции, уже сгенерированные из пары, иначе остались бы на прежнем дне и времени (issue #99)
-    lectureService.syncLecturesWithPair(updated.getId());
+    PairLecturesChange lectures = lectureService.syncLecturesWithPair(updated.getId());
+    auditService.record(AuditAction.UPDATE, AuditEntityType.PAIR, id, AuditService.details(
+        "before", before,
+        "after", snapshot(updated),
+        "lecturesDeleted", lectures.deleted(),
+        "lecturesCreated", lectures.created()));
     return pairMapper.toDto(updated);
   }
 
@@ -150,10 +163,32 @@ public class PairServiceImpl implements PairService {
     Pair existing = pairRepository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("Пара не найдена с ID: " + id));
     checkStudentCanEdit(callerStudentId, existing.getWeekScheduleCycle(), existing.getGroups());
+    Map<String, Object> before = snapshot(existing);
 
     // Иначе в расписании группы остались бы занятия по паре, которой уже нет (issue #99)
-    lectureService.deleteLecturesOfPair(id);
+    PairLecturesChange lectures = lectureService.deleteLecturesOfPair(id);
     pairRepository.delete(existing);
+    auditService.record(AuditAction.DELETE, AuditEntityType.PAIR, id, AuditService.details(
+        "before", before,
+        "lecturesDeleted", lectures.deleted()));
+  }
+
+  /**
+   * Состояние пары для журнала аудита: всё, что влияет на расписание, без имени преподавателя
+   * текстом — это персональные данные.
+   */
+  private Map<String, Object> snapshot(Pair pair) {
+    return AuditService.details(
+        "weekScheduleCycleId", pair.getWeekScheduleCycle().getId(),
+        "courseId", pair.getCourse().getId(),
+        "teacherId", pair.getTeacher() != null ? pair.getTeacher().getId() : null,
+        "groupIds", pair.getGroups().stream().map(Group::getId).map(UUID::toString).sorted().toList(),
+        "dayOfWeek", pair.getDayOfWeek(),
+        "weekParity", pair.getWeekParity(),
+        "pairNumber", pair.getPairNumber(),
+        "startTime", String.valueOf(pair.getStartTime()),
+        "endTime", String.valueOf(pair.getEndTime()),
+        "room", pair.getRoom());
   }
 
   /**

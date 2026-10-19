@@ -1,5 +1,7 @@
 package com.coungard.univer.service.impl;
 
+import com.coungard.univer.dto.AuditAction;
+import com.coungard.univer.dto.AuditEntityType;
 import com.coungard.univer.dto.TeacherDto;
 import com.coungard.univer.dto.registration.RegisterData;
 import com.coungard.univer.dto.registration.RegisterTeacherRequest;
@@ -15,6 +17,7 @@ import com.coungard.univer.repository.FacultyRepository;
 import com.coungard.univer.repository.TeacherRepository;
 import com.coungard.univer.security.KeycloakAdminService;
 import com.coungard.univer.security.Role;
+import com.coungard.univer.service.AuditService;
 import com.coungard.univer.service.TeacherService;
 import com.coungard.univer.validation.TeacherValidator;
 import java.util.UUID;
@@ -37,6 +40,7 @@ public class TeacherServiceImpl implements TeacherService {
   private final KeycloakAdminService keycloakAdminService;
   private final TeacherValidator teacherValidator;
   private final TeacherMapper teacherMapper;
+  private final AuditService auditService;
 
   @Override
   public TeacherDto getTeacherById(UUID id) {
@@ -90,6 +94,8 @@ public class TeacherServiceImpl implements TeacherService {
       // saveAndFlush, а не save: у преподавателя заранее заданный ID, поэтому INSERT иначе
       // откладывается до коммита транзакции — уже за пределами этого try
       Teacher saved = teacherRepository.saveAndFlush(teacher);
+      // Регистрация анонимна: автора у события нет, новый преподаватель — это сущность
+      auditService.record(AuditAction.REGISTER, AuditEntityType.TEACHER, saved.getId());
       return teacherMapper.toDto(saved);
     } catch (Exception ex) {
       log.error(ex.getMessage(), ex);
@@ -159,6 +165,7 @@ public class TeacherServiceImpl implements TeacherService {
       throw new ResourceNotFoundException("Преподаватель не найден с ID: " + id);
     }
     teacherRepository.deleteById(id);
+    auditService.record(AuditAction.DELETE, AuditEntityType.TEACHER, id);
     keycloakAdminService.deleteUser(id.toString());
   }
 }

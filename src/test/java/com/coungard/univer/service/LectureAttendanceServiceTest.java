@@ -2,13 +2,17 @@ package com.coungard.univer.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.assertj.core.data.Offset.offset;
 
 import com.coungard.univer.TestRegions;
 import com.coungard.univer.UniverApplication;
 import com.coungard.univer.dto.AttendanceStatsDto;
+import com.coungard.univer.dto.AuditAction;
+import com.coungard.univer.dto.AuditEntityType;
 import com.coungard.univer.dto.EnrollmentStatus;
 import com.coungard.univer.dto.LectureAttendanceDto;
+import com.coungard.univer.entity.AuditEvent;
 import com.coungard.univer.entity.Course;
 import com.coungard.univer.entity.Department;
 import com.coungard.univer.entity.Enrollment;
@@ -19,6 +23,7 @@ import com.coungard.univer.entity.Student;
 import com.coungard.univer.entity.University;
 import com.coungard.univer.exception.ResourceNotFoundException;
 import com.coungard.univer.exception.ValidationException;
+import com.coungard.univer.repository.AuditEventRepository;
 import com.coungard.univer.repository.CourseRepository;
 import com.coungard.univer.repository.DepartmentRepository;
 import com.coungard.univer.repository.EnrollmentRepository;
@@ -30,6 +35,7 @@ import com.coungard.univer.repository.RegionRepository;
 import com.coungard.univer.repository.UniversityRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -92,6 +98,9 @@ class LectureAttendanceServiceTest {
   @Autowired
   private RegionRepository regionRepository;
 
+  @Autowired
+  private AuditEventRepository auditEventRepository;
+
   private UUID universityId;
   private UUID courseId;
   private UUID lectureId;
@@ -101,6 +110,7 @@ class LectureAttendanceServiceTest {
 
   @BeforeEach
   void setUp() {
+    auditEventRepository.deleteAll();
     attendanceRepository.deleteAll();
     enrollmentRepository.deleteAll();
     lectureRepository.deleteAll();
@@ -192,6 +202,27 @@ class LectureAttendanceServiceTest {
     // Then
     assertThat(updated.attended()).isTrue();
     assertThat(attendanceRepository.countByLectureId(lectureId)).isEqualTo(1);
+  }
+
+  @Test
+  void shouldRecordEachAttendanceMarkWithPreviousValueInAuditLog() {
+    // When: сначала «не был», затем исправлено на «был»; отметка не зачисленного студента не проходит
+    attendanceService.markAttendance(attendanceDto(enrolledStudentId, lectureId, false));
+    attendanceService.markAttendance(attendanceDto(enrolledStudentId, lectureId, true));
+    assertThatThrownBy(() -> attendanceService.markAttendance(attendanceDto(notEnrolledStudentId, lectureId, true)))
+        .isInstanceOf(ValidationException.class);
+
+    // Then
+    List<AuditEvent> events = auditEventRepository.findAll();
+    assertThat(events).hasSize(2).allSatisfy(event -> {
+      assertThat(event.getAction()).isEqualTo(AuditAction.MARK);
+      assertThat(event.getEntityType()).isEqualTo(AuditEntityType.LECTURE_ATTENDANCE);
+      assertThat(event.getEntityId()).isEqualTo(lectureId);
+      assertThat(event.getDetails()).containsEntry("studentId", enrolledStudentId.toString());
+    });
+    assertThat(events)
+        .extracting(event -> event.getDetails().get("attended"), event -> event.getDetails().get("previous"))
+        .containsExactlyInAnyOrder(tuple(false, null), tuple(true, false));
   }
 
   @Test

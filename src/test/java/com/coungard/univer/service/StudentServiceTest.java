@@ -9,6 +9,8 @@ import static org.mockito.Mockito.when;
 
 import com.coungard.univer.TestRegions;
 import com.coungard.univer.UniverApplication;
+import com.coungard.univer.dto.AuditAction;
+import com.coungard.univer.dto.AuditEntityType;
 import com.coungard.univer.dto.CourseDto;
 import com.coungard.univer.dto.FacultyDto;
 import com.coungard.univer.dto.GroupDto;
@@ -32,6 +34,7 @@ import com.coungard.univer.entity.University;
 import com.coungard.univer.exception.ConflictException;
 import com.coungard.univer.exception.ResourceNotFoundException;
 import com.coungard.univer.exception.ValidationException;
+import com.coungard.univer.repository.AuditEventRepository;
 import com.coungard.univer.repository.CourseRepository;
 import com.coungard.univer.repository.FacultyRepository;
 import com.coungard.univer.repository.GroupRepository;
@@ -114,6 +117,9 @@ class StudentServiceTest {
   private CourseRepository courseRepository;
 
   @Autowired
+  private AuditEventRepository auditEventRepository;
+
+  @Autowired
   private CourseService courseService;
 
   @Autowired
@@ -126,6 +132,7 @@ class StudentServiceTest {
 
   @BeforeEach
   void setUp() {
+    auditEventRepository.deleteAll();
     courseRepository.deleteAll();
     studentRepository.deleteAll();
     groupRepository.deleteAll();
@@ -171,6 +178,15 @@ class StudentServiceTest {
 
     verify(keycloakAdminService).createUser(any(RegisterData.class));
     verify(keycloakAdminService).assignRole(eq(mockKeycloakId), eq(Role.ROLE_STUDENT));
+
+    // Регистрация анонимна: автора у события нет, персональные данные в журнал не попадают
+    assertThat(auditEventRepository.findAll()).singleElement().satisfies(event -> {
+      assertThat(event.getAction()).isEqualTo(AuditAction.REGISTER);
+      assertThat(event.getEntityType()).isEqualTo(AuditEntityType.STUDENT);
+      assertThat(event.getEntityId()).isEqualTo(UUID.fromString(mockKeycloakId));
+      assertThat(event.getActorId()).isNull();
+      assertThat(event.getDetails()).isNull();
+    });
   }
 
   @Test
@@ -849,6 +865,17 @@ class StudentServiceTest {
     StudentDto after = studentService.getStudentById(studentId);
     assertThat(after.facultyId()).isEqualTo(before.facultyId());
     assertThat(after.yearNumber()).isEqualTo(before.yearNumber());
+
+    assertThat(auditEventRepository.findAll())
+        .filteredOn(event -> event.getEntityType() == AuditEntityType.COURSE)
+        .singleElement()
+        .satisfies(event -> {
+          assertThat(event.getAction()).isEqualTo(AuditAction.CREATE);
+          assertThat(event.getEntityId()).isEqualTo(created.id());
+          assertThat(event.getDetails())
+              .containsEntry("facultyId", facultyId.toString())
+              .containsEntry("title", "Физика");
+        });
   }
 
   @Test

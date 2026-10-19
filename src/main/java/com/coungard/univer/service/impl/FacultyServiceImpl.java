@@ -1,5 +1,7 @@
 package com.coungard.univer.service.impl;
 
+import com.coungard.univer.dto.AuditAction;
+import com.coungard.univer.dto.AuditEntityType;
 import com.coungard.univer.dto.FacultyDto;
 import com.coungard.univer.entity.Faculty;
 import com.coungard.univer.entity.University;
@@ -8,6 +10,7 @@ import com.coungard.univer.exception.ResourceNotFoundException;
 import com.coungard.univer.mapper.FacultyMapper;
 import com.coungard.univer.repository.FacultyRepository;
 import com.coungard.univer.repository.UniversityRepository;
+import com.coungard.univer.service.AuditService;
 import com.coungard.univer.service.FacultyService;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +26,7 @@ public class FacultyServiceImpl implements FacultyService {
   private final FacultyRepository facultyRepository;
   private final UniversityRepository universityRepository;
   private final FacultyMapper facultyMapper;
+  private final AuditService auditService;
 
   @Override
   @Transactional
@@ -115,6 +119,7 @@ public class FacultyServiceImpl implements FacultyService {
       throw new ResourceNotFoundException("Faculty not found with id: " + id);
     }
     facultyRepository.deleteById(id);
+    auditService.record(AuditAction.DELETE, AuditEntityType.FACULTY, id);
   }
 
   /**

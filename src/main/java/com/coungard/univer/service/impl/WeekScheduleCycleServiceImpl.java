@@ -1,5 +1,7 @@
 package com.coungard.univer.service.impl;
 
+import com.coungard.univer.dto.AuditAction;
+import com.coungard.univer.dto.AuditEntityType;
 import com.coungard.univer.dto.WeekScheduleCycleDto;
 import com.coungard.univer.dto.WeekScheduleCycleStatus;
 import com.coungard.univer.entity.Semester;
@@ -9,6 +11,7 @@ import com.coungard.univer.exception.ValidationException;
 import com.coungard.univer.mapper.WeekScheduleCycleMapper;
 import com.coungard.univer.repository.SemesterRepository;
 import com.coungard.univer.repository.WeekScheduleCycleRepository;
+import com.coungard.univer.service.AuditService;
 import com.coungard.univer.service.WeekScheduleCycleService;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +26,7 @@ public class WeekScheduleCycleServiceImpl implements WeekScheduleCycleService {
 
   private final WeekScheduleCycleRepository weekScheduleCycleRepository;
   private final SemesterRepository semesterRepository;
+  private final AuditService auditService;
   private final WeekScheduleCycleMapper weekScheduleCycleMapper;
 
   @Override
@@ -92,6 +96,7 @@ public class WeekScheduleCycleServiceImpl implements WeekScheduleCycleService {
       throw new ResourceNotFoundException("Циклическое расписание не найдено с ID: " + id);
     }
     weekScheduleCycleRepository.deleteById(id);
+    auditService.record(AuditAction.DELETE, AuditEntityType.WEEK_SCHEDULE_CYCLE, id);
   }
 
   @Override
@@ -100,9 +105,14 @@ public class WeekScheduleCycleServiceImpl implements WeekScheduleCycleService {
     WeekScheduleCycle cycle = weekScheduleCycleRepository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("Циклическое расписание не найдено с ID: " + id));
 
+    WeekScheduleCycleStatus previous = cycle.getStatus();
     cycle.setStatus(status);
 
     WeekScheduleCycle updated = weekScheduleCycleRepository.save(cycle);
+    if (previous != status) {
+      auditService.record(AuditAction.STATUS_CHANGE, AuditEntityType.WEEK_SCHEDULE_CYCLE, id,
+          AuditService.details("from", previous, "to", status));
+    }
     return weekScheduleCycleMapper.toDto(updated);
   }
 }

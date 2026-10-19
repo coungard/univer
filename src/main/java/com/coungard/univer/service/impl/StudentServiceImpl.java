@@ -1,5 +1,7 @@
 package com.coungard.univer.service.impl;
 
+import com.coungard.univer.dto.AuditAction;
+import com.coungard.univer.dto.AuditEntityType;
 import com.coungard.univer.dto.CourseDto;
 import com.coungard.univer.dto.FacultyDto;
 import com.coungard.univer.dto.GroupDto;
@@ -28,6 +30,7 @@ import com.coungard.univer.repository.StudentRepository;
 import com.coungard.univer.repository.UniversityRepository;
 import com.coungard.univer.security.KeycloakAdminService;
 import com.coungard.univer.security.Role;
+import com.coungard.univer.service.AuditService;
 import com.coungard.univer.service.CourseService;
 import com.coungard.univer.service.FacultyService;
 import com.coungard.univer.service.GroupService;
@@ -62,6 +65,7 @@ public class StudentServiceImpl implements StudentService {
   private final WeekScheduleCycleService weekScheduleCycleService;
   private final StudentMapper studentMapper;
   private final StudentValidator studentValidator;
+  private final AuditService auditService;
 
   private final KeycloakAdminService keycloakAdminService;
 
@@ -126,6 +130,8 @@ public class StudentServiceImpl implements StudentService {
       // saveAndFlush, а не save: у студента заранее заданный ID, поэтому INSERT иначе откладывается до
       // коммита транзакции — уже за пределами этого try, и откат пользователя в Keycloak не срабатывает
       Student saved = studentRepository.saveAndFlush(student);
+      // Регистрация анонимна: автора у события нет, новый студент — это сущность
+      auditService.record(AuditAction.REGISTER, AuditEntityType.STUDENT, saved.getId());
       return studentMapper.toDto(saved);
     } catch (ConflictException ex) {
       // Логин или email занят в Keycloak: пользователь не создан, откатывать нечего — отдаём 409 как есть
@@ -222,6 +228,9 @@ public class StudentServiceImpl implements StudentService {
 
     UUID facultyId = facultyService.createFacultyByStudent(
         student.getUniversity().getId(), request.name(), id).id();
+    auditService.record(AuditAction.CREATE, AuditEntityType.FACULTY, facultyId, AuditService.details(
+        "universityId", student.getUniversity().getId(),
+        "name", request.name().strip()));
 
     // Как при смене факультета в PATCH /students/me: курс и группа относились к прежнему
     student.setFaculty(facultyRepository.getReferenceById(facultyId));
@@ -269,6 +278,10 @@ public class StudentServiceImpl implements StudentService {
 
     UUID groupId = groupService.createGroupInCurrentSemester(
         student.getFaculty().getId(), student.getYearNumber(), request.name(), request.fullName(), id).id();
+    auditService.record(AuditAction.CREATE, AuditEntityType.GROUP, groupId, AuditService.details(
+        "facultyId", student.getFaculty().getId(),
+        "yearNumber", student.getYearNumber(),
+        "name", request.name().strip()));
     student.setGroup(groupRepository.getReferenceById(groupId));
 
     Student updated = studentRepository.save(student);
@@ -322,7 +335,11 @@ public class StudentServiceImpl implements StudentService {
       throw new ValidationException("Студент может создать не больше " + MAX_CREATED_COURSES + " предметов");
     }
 
-    return courseService.createCourseByStudent(student.getFaculty().getId(), request.title(), id);
+    CourseDto created = courseService.createCourseByStudent(student.getFaculty().getId(), request.title(), id);
+    auditService.record(AuditAction.CREATE, AuditEntityType.COURSE, created.id(), AuditService.details(
+        "facultyId", student.getFaculty().getId(),
+        "title", created.title()));
+    return created;
   }
 
   private void changeUniversity(Student student, UUID universityId) {
@@ -421,6 +438,7 @@ public class StudentServiceImpl implements StudentService {
       throw new ResourceNotFoundException("Student not found with id: " + id);
     }
     studentRepository.deleteById(id);
+    auditService.record(AuditAction.DELETE, AuditEntityType.STUDENT, id);
     keycloakAdminService.deleteUser(id.toString());
   }
 }

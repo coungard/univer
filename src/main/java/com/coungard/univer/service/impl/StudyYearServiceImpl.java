@@ -1,5 +1,7 @@
 package com.coungard.univer.service.impl;
 
+import com.coungard.univer.dto.AuditAction;
+import com.coungard.univer.dto.AuditEntityType;
 import com.coungard.univer.dto.StudyYearDto;
 import com.coungard.univer.entity.StudyYear;
 import com.coungard.univer.exception.ResourceNotFoundException;
@@ -7,6 +9,7 @@ import com.coungard.univer.exception.ValidationException;
 import com.coungard.univer.mapper.StudyYearMapper;
 import com.coungard.univer.repository.FacultyRepository;
 import com.coungard.univer.repository.StudyYearRepository;
+import com.coungard.univer.service.AuditService;
 import com.coungard.univer.service.StudyYearService;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +25,7 @@ public class StudyYearServiceImpl implements StudyYearService {
   private final StudyYearRepository studyYearRepository;
   private final FacultyRepository facultyRepository;
   private final StudyYearMapper studyYearMapper;
+  private final AuditService auditService;
 
   @Override
   @Transactional
@@ -84,6 +88,7 @@ public class StudyYearServiceImpl implements StudyYearService {
       throw new ResourceNotFoundException("Курс обучения не найден с ID: " + id);
     }
     studyYearRepository.deleteById(id);
+    auditService.record(AuditAction.DELETE, AuditEntityType.STUDY_YEAR, id);
   }
 
   private void validateFacultyExists(UUID facultyId) {

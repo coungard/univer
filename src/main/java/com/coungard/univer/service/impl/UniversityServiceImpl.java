@@ -1,5 +1,7 @@
 package com.coungard.univer.service.impl;
 
+import com.coungard.univer.dto.AuditAction;
+import com.coungard.univer.dto.AuditEntityType;
 import com.coungard.univer.dto.UniversityDto;
 import com.coungard.univer.entity.Address;
 import com.coungard.univer.entity.Region;
@@ -12,6 +14,7 @@ import com.coungard.univer.repository.FacultyRepository;
 import com.coungard.univer.repository.FacultyRepository.UniversityFacultyCount;
 import com.coungard.univer.repository.RegionRepository;
 import com.coungard.univer.repository.UniversityRepository;
+import com.coungard.univer.service.AuditService;
 import com.coungard.univer.service.UniversityService;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +36,7 @@ public class UniversityServiceImpl implements UniversityService {
   private final RegionRepository regionRepository;
   private final FacultyRepository facultyRepository;
   private final UniversityMapper universityMapper;
+  private final AuditService auditService;
 
   @Override
   @Transactional(readOnly = true)
@@ -133,5 +137,6 @@ public class UniversityServiceImpl implements UniversityService {
       throw new ResourceNotFoundException("University not found with id: " + id);
     }
     universityRepository.deleteById(id);
+    auditService.record(AuditAction.DELETE, AuditEntityType.UNIVERSITY, id);
   }
 }

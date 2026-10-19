@@ -54,16 +54,18 @@ public interface LectureService {
    * лекции ещё не генерировались, ничего не происходит.
    *
    * @param pairId идентификатор изменённой пары
+   * @return сколько лекций удалено и создано заново
    */
-  void syncLecturesWithPair(UUID pairId);
+  PairLecturesChange syncLecturesWithPair(UUID pairId);
 
   /**
    * Удалить лекции, сгенерированные из пары, — перед удалением самой пары. Лекции, по которым
    * посещаемость уже отмечена, остаются: после удаления пары у них пустой {@code sourcePairId}.
    *
    * @param pairId идентификатор удаляемой пары
+   * @return сколько лекций удалено ({@code created} всегда 0)
    */
-  void deleteLecturesOfPair(UUID pairId);
+  PairLecturesChange deleteLecturesOfPair(UUID pairId);
 
   /**
    * Получить лекцию по ID.

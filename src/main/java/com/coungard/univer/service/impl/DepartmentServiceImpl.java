@@ -1,11 +1,14 @@
 package com.coungard.univer.service.impl;
 
+import com.coungard.univer.dto.AuditAction;
+import com.coungard.univer.dto.AuditEntityType;
 import com.coungard.univer.dto.DepartmentDto;
 import com.coungard.univer.entity.Faculty;
 import com.coungard.univer.exception.ResourceNotFoundException;
 import com.coungard.univer.entity.Department;
 import com.coungard.univer.repository.DepartmentRepository;
 import com.coungard.univer.repository.FacultyRepository;
+import com.coungard.univer.service.AuditService;
 import com.coungard.univer.service.DepartmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -24,6 +27,9 @@ public class DepartmentServiceImpl implements DepartmentService {
 
   @Autowired
   private FacultyRepository facultyRepository;
+
+  @Autowired
+  private AuditService auditService;
 
   @Override
   public DepartmentDto createDepartment(DepartmentDto departmentDto) {
@@ -86,6 +92,7 @@ public class DepartmentServiceImpl implements DepartmentService {
       throw new ResourceNotFoundException("Кафедра с ID: " + id + " не найдена");
     }
     departmentRepository.deleteById(id);
+    auditService.record(AuditAction.DELETE, AuditEntityType.DEPARTMENT, id);
   }
 
   private DepartmentDto toDto(Department department) {

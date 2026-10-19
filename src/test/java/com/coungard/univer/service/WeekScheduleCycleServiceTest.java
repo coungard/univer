@@ -5,15 +5,20 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.coungard.univer.TestRegions;
 import com.coungard.univer.UniverApplication;
+import com.coungard.univer.dto.AuditAction;
+import com.coungard.univer.dto.AuditEntityType;
 import com.coungard.univer.dto.SemesterType;
 import com.coungard.univer.dto.WeekScheduleCycleDto;
 import com.coungard.univer.dto.WeekScheduleCycleStatus;
+import com.coungard.univer.entity.AuditEvent;
 import com.coungard.univer.entity.Faculty;
 import com.coungard.univer.entity.Semester;
 import com.coungard.univer.entity.StudyYear;
 import com.coungard.univer.entity.University;
 import com.coungard.univer.exception.ResourceNotFoundException;
 import com.coungard.univer.exception.ValidationException;
+import com.coungard.univer.filter.RequestIdFilter;
+import com.coungard.univer.repository.AuditEventRepository;
 import com.coungard.univer.repository.FacultyRepository;
 import com.coungard.univer.repository.SemesterRepository;
 import com.coungard.univer.repository.StudyYearRepository;
@@ -29,13 +34,17 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.authentication.TestingAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -81,10 +90,20 @@ class WeekScheduleCycleServiceTest {
   @Autowired
   private RegionRepository regionRepository;
 
+  @Autowired
+  private AuditEventRepository auditEventRepository;
+
   private UUID semesterId;
+
+  @AfterEach
+  void clearRequestContext() {
+    SecurityContextHolder.clearContext();
+    MDC.remove(RequestIdFilter.MDC_KEY);
+  }
 
   @BeforeEach
   void setUp() {
+    auditEventRepository.deleteAll();
     weekScheduleCycleRepository.deleteAll();
     semesterRepository.deleteAll();
     studyYearRepository.deleteAll();
@@ -239,6 +258,54 @@ class WeekScheduleCycleServiceTest {
 
     // Then
     assertThat(backToDraft.status()).isEqualTo(WeekScheduleCycleStatus.DRAFT);
+  }
+
+  @Test
+  void shouldRecordStatusChangeWithActorAndRequestIdInAuditLog() {
+    // Given: действует администратор, у которого есть и роль студента; запрос с известным request id
+    UUID adminId = UUID.randomUUID();
+    SecurityContextHolder.getContext().setAuthentication(
+        new TestingAuthenticationToken(adminId.toString(), null, "ROLE_STUDENT", "ROLE_ADMIN"));
+    MDC.put(RequestIdFilter.MDC_KEY, "req-cycle-1");
+    WeekScheduleCycleDto cycle = weekScheduleCycleService.createWeekScheduleCycle(
+        WeekScheduleCycleDto.builder().semesterId(semesterId).build());
+
+    // When: перевод в AGREED и повторный перевод в тот же статус
+    weekScheduleCycleService.updateStatus(cycle.id(), WeekScheduleCycleStatus.AGREED);
+    weekScheduleCycleService.updateStatus(cycle.id(), WeekScheduleCycleStatus.AGREED);
+
+    // Then: одно событие — повтор статус не меняет; роль — старшая из ролей автора
+    List<AuditEvent> events = auditEventRepository.findAll();
+    assertThat(events).hasSize(1);
+    AuditEvent event = events.get(0);
+    assertThat(event.getAction()).isEqualTo(AuditAction.STATUS_CHANGE);
+    assertThat(event.getEntityType()).isEqualTo(AuditEntityType.WEEK_SCHEDULE_CYCLE);
+    assertThat(event.getEntityId()).isEqualTo(cycle.id());
+    assertThat(event.getActorId()).isEqualTo(adminId);
+    assertThat(event.getActorRole()).isEqualTo("ADMIN");
+    assertThat(event.getRequestId()).isEqualTo("req-cycle-1");
+    assertThat(event.getOccurredAt()).isNotNull();
+    assertThat(event.getDetails()).containsEntry("from", "DRAFT").containsEntry("to", "AGREED");
+  }
+
+  @Test
+  void shouldRecordCycleDeletionWithoutActorOutsideRequest() {
+    // Given
+    WeekScheduleCycleDto cycle = weekScheduleCycleService.createWeekScheduleCycle(
+        WeekScheduleCycleDto.builder().semesterId(semesterId).build());
+
+    // When
+    weekScheduleCycleService.deleteWeekScheduleCycle(cycle.id());
+
+    // Then
+    assertThat(auditEventRepository.findAll()).singleElement().satisfies(event -> {
+      assertThat(event.getAction()).isEqualTo(AuditAction.DELETE);
+      assertThat(event.getEntityId()).isEqualTo(cycle.id());
+      assertThat(event.getActorId()).isNull();
+      assertThat(event.getActorRole()).isNull();
+      assertThat(event.getRequestId()).isNull();
+      assertThat(event.getDetails()).isNull();
+    });
   }
 
   @Test

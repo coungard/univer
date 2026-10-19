@@ -1,5 +1,7 @@
 package com.coungard.univer.service.impl;
 
+import com.coungard.univer.dto.AuditAction;
+import com.coungard.univer.dto.AuditEntityType;
 import com.coungard.univer.dto.UniversityRequestDto;
 import com.coungard.univer.dto.UniversityRequestStatus;
 import com.coungard.univer.dto.request.SubmitUniversityRequest;
@@ -14,6 +16,7 @@ import com.coungard.univer.repository.RegionRepository;
 import com.coungard.univer.repository.StudentRepository;
 import com.coungard.univer.repository.UniversityRepository;
 import com.coungard.univer.repository.UniversityRequestRepository;
+import com.coungard.univer.service.AuditService;
 import com.coungard.univer.service.UniversityRequestService;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +38,7 @@ public class UniversityRequestServiceImpl implements UniversityRequestService {
   private final RegionRepository regionRepository;
   private final UniversityRequestMapper universityRequestMapper;
   private final TransactionTemplate transactionTemplate;
+  private final AuditService auditService;
 
   @Override
   public UniversityRequestDto submitMyRequest(UUID studentId, SubmitUniversityRequest request) {
@@ -119,6 +123,9 @@ public class UniversityRequestServiceImpl implements UniversityRequestService {
     }
 
     UniversityRequest saved = universityRequestRepository.save(universityRequest);
+    auditService.record(AuditAction.COMPLETE, AuditEntityType.UNIVERSITY_REQUEST, id, AuditService.details(
+        "studentId", student.getId(),
+        "universityId", universityId));
     return universityRequestMapper.toDto(saved);
   }
 
@@ -130,6 +137,9 @@ public class UniversityRequestServiceImpl implements UniversityRequestService {
     universityRequest.setComment(StringUtils.hasText(comment) ? comment.strip() : null);
 
     UniversityRequest saved = universityRequestRepository.save(universityRequest);
+    auditService.record(AuditAction.REJECT, AuditEntityType.UNIVERSITY_REQUEST, id, AuditService.details(
+        "studentId", universityRequest.getStudent().getId(),
+        "comment", saved.getComment()));
     return universityRequestMapper.toDto(saved);
   }
 
@@ -144,6 +154,12 @@ public class UniversityRequestServiceImpl implements UniversityRequestService {
           universityRequest.setStatus(UniversityRequestStatus.COMPLETED);
           universityRequest.setUniversity(student.getUniversity());
           universityRequestRepository.save(universityRequest);
+          // Заявку закрыл не администратор, а сам студент выбором университета
+          auditService.record(AuditAction.COMPLETE, AuditEntityType.UNIVERSITY_REQUEST, universityRequest.getId(),
+              AuditService.details(
+                  "studentId", student.getId(),
+                  "universityId", student.getUniversity().getId(),
+                  "chosenByStudent", true));
         });
   }
 
