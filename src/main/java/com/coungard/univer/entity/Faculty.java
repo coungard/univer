@@ -27,7 +27,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Faculty {
+public class Faculty extends AuditableEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)

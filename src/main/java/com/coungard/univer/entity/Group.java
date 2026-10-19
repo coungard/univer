@@ -30,7 +30,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @EqualsAndHashCode(of = "id")
-public class Group {
+public class Group extends AuditableEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)

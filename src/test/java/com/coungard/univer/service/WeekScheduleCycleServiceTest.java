@@ -15,6 +15,7 @@ import com.coungard.univer.entity.Faculty;
 import com.coungard.univer.entity.Semester;
 import com.coungard.univer.entity.StudyYear;
 import com.coungard.univer.entity.University;
+import com.coungard.univer.entity.WeekScheduleCycle;
 import com.coungard.univer.exception.ResourceNotFoundException;
 import com.coungard.univer.exception.ValidationException;
 import com.coungard.univer.filter.RequestIdFilter;
@@ -327,6 +328,33 @@ class WeekScheduleCycleServiceTest {
     assertThat(created.semesterId()).isEqualTo(semesterId);
     assertThat(created.status()).isEqualTo(WeekScheduleCycleStatus.DRAFT);
     assertThat(weekScheduleCycleService.getWeekScheduleCycleBySemester(semesterId).id()).isEqualTo(created.id());
+  }
+
+  @Test
+  void shouldStampAuthorOfDraftCycleCreatedByNativeInsert() {
+    // Given: цикл заводит студент — через нативный INSERT, мимо JPA auditing (issue #112)
+    UUID studentId = UUID.randomUUID();
+    SecurityContextHolder.getContext().setAuthentication(
+        new TestingAuthenticationToken(studentId.toString(), null, "ROLE_STUDENT"));
+
+    // When
+    UUID cycleId = weekScheduleCycleService.getOrCreateDraftCycle(semesterId).id();
+
+    // Then
+    WeekScheduleCycle cycle = weekScheduleCycleRepository.findById(cycleId).orElseThrow();
+    assertThat(cycle.getCreatedBy()).isEqualTo(studentId);
+    assertThat(cycle.getUpdatedBy()).isEqualTo(studentId);
+    assertThat(cycle.getCreatedAt()).isNotNull();
+    assertThat(cycle.getUpdatedAt()).isNotNull();
+  }
+
+  @Test
+  void shouldCreateDraftCycleWithoutAuthorOutsideRequest() {
+    UUID cycleId = weekScheduleCycleService.getOrCreateDraftCycle(semesterId).id();
+
+    WeekScheduleCycle cycle = weekScheduleCycleRepository.findById(cycleId).orElseThrow();
+    assertThat(cycle.getCreatedBy()).isNull();
+    assertThat(cycle.getCreatedAt()).isNotNull();
   }
 
   @Test

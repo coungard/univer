@@ -17,7 +17,7 @@ import lombok.Data;
     @UniqueConstraint(columnNames = {"name", "faculty_id"})
 })
 @Data
-public class Department {
+public class Department extends AuditableEntity {
 
   @Id
   @GeneratedValue

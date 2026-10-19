@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @IdClass(LectureAttendanceId.class)
 @NoArgsConstructor
 @Data
-public class LectureAttendance {
+public class LectureAttendance extends AuditableEntity {
 
   @Id
   @Column(name = "student_id")

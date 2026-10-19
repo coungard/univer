@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Data
 @Builder
-public class Address {
+public class Address extends AuditableEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
