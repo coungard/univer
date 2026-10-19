@@ -1,17 +1,20 @@
 package com.coungard.univer.controller;
 
 import com.coungard.univer.dto.SemesterDto;
+import com.coungard.univer.dto.SemesterWeekDto;
 import com.coungard.univer.service.SemesterService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -61,6 +64,16 @@ public class SemesterController {
   @GetMapping("/{id}")
   public ResponseEntity<SemesterDto> getSemesterById(@PathVariable UUID id) {
     SemesterDto dto = semesterService.getSemesterById(id);
+    return ResponseEntity.ok(dto);
+  }
+
+  @Operation(summary = "Номер и чётность календарной недели семестра для даты (по умолчанию — сегодня)")
+  @GetMapping("/{id}/week")
+  public ResponseEntity<SemesterWeekDto> getSemesterWeek(
+      @PathVariable UUID id,
+      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+
+    SemesterWeekDto dto = semesterService.getSemesterWeek(id, date);
     return ResponseEntity.ok(dto);
   }
 
