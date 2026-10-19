@@ -348,9 +348,18 @@
 | GET | `/` | любая роль | — (`?page&size`) | `Page<SemesterDto>` |
 | GET | `/study-year/{studyYearId}` | любая роль | — (`?page&size`) | `Page<SemesterDto>` |
 | GET | `/{id}` | любая роль | — | `SemesterDto` |
+| GET | `/{id}/week` | любая роль | — (`?date=YYYY-MM-DD`, по умолчанию — сегодня) | `SemesterWeekDto` |
 | POST | `/` | `ADMIN` | `SemesterDto` | `201` + `SemesterDto` |
 | PUT | `/{id}` | `ADMIN` | `SemesterDto` | `SemesterDto` |
 | DELETE | `/{id}` | `ADMIN` | — | `204` |
+
+- **`GET /{id}/week`** — номер и чётность календарной недели (пн–вс) семестра, на которую приходится
+  `date`. Правило то же, что при генерации занятий (см. «Чётность недели» в разделе `Lectures`); клиентам
+  не нужно повторять его у себя. `SemesterWeekDto`: `semesterId`, `date`, `weekStart` (понедельник),
+  `weekEnd` (воскресенье), `inSemester`, `weekNumber`, `weekParity` (`ODD`/`EVEN`). `inSemester` — неделя
+  пересекается с семестром, а не дата внутри него: при начале семестра в среду понедельник той же недели —
+  уже `weekNumber: 1`. Для недель вне семестра — `200` с `inSemester: false`, `weekNumber` и `weekParity`
+  — `null`, чтобы расписание можно было листать за границы семестра.
 
 ## WeekScheduleCycles — `/api/v1/week-schedule-cycles`
 

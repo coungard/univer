@@ -1,6 +1,8 @@
 package com.coungard.univer.service.impl;
 
 import com.coungard.univer.dto.SemesterDto;
+import com.coungard.univer.dto.SemesterWeekDto;
+import com.coungard.univer.dto.WeekParity;
 import com.coungard.univer.entity.Semester;
 import com.coungard.univer.entity.StudyYear;
 import com.coungard.univer.exception.ResourceNotFoundException;
@@ -9,6 +11,7 @@ import com.coungard.univer.mapper.SemesterMapper;
 import com.coungard.univer.repository.SemesterRepository;
 import com.coungard.univer.repository.StudyYearRepository;
 import com.coungard.univer.service.SemesterService;
+import java.time.LocalDate;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -46,6 +49,29 @@ public class SemesterServiceImpl implements SemesterService {
     Semester semester = semesterRepository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("Семестр не найден с ID: " + id));
     return semesterMapper.toDto(semester);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public SemesterWeekDto getSemesterWeek(UUID id, LocalDate date) {
+    Semester semester = semesterRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("Семестр не найден с ID: " + id));
+
+    LocalDate day = date != null ? date : LocalDate.now();
+    LocalDate weekStart = WeekParity.weekStart(day);
+    LocalDate weekEnd = weekStart.plusDays(6);
+    // Неделя, а не сама дата: понедельник первой недели семестра, начавшегося в среду, — тоже неделя 1
+    boolean inSemester = !weekStart.isAfter(semester.getEndDate()) && !weekEnd.isBefore(semester.getStartDate());
+
+    return SemesterWeekDto.builder()
+        .semesterId(id)
+        .date(day)
+        .weekStart(weekStart)
+        .weekEnd(weekEnd)
+        .inSemester(inSemester)
+        .weekNumber(inSemester ? WeekParity.weekNumber(semester.getStartDate(), day) : null)
+        .weekParity(inSemester ? WeekParity.of(semester.getStartDate(), day) : null)
+        .build();
   }
 
   @Override

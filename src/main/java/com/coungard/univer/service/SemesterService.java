@@ -1,6 +1,8 @@
 package com.coungard.univer.service;
 
 import com.coungard.univer.dto.SemesterDto;
+import com.coungard.univer.dto.SemesterWeekDto;
+import java.time.LocalDate;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +24,15 @@ public interface SemesterService {
    * @return SemesterDto
    */
   SemesterDto getSemesterById(UUID id);
+
+  /**
+   * Получить номер и чётность календарной недели семестра, на которую приходится дата.
+   *
+   * @param id идентификатор семестра
+   * @param date дата; {@code null} — сегодня
+   * @return SemesterWeekDto
+   */
+  SemesterWeekDto getSemesterWeek(UUID id, LocalDate date);
 
   /**
    * Получить страницу семестров с пагинацией.

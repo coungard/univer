@@ -37,4 +37,23 @@ class WeekParityTest {
     assertThat(WeekParity.of(sunday, sunday)).isEqualTo(WeekParity.ODD);
     assertThat(WeekParity.of(sunday, sunday.plusDays(1))).isEqualTo(WeekParity.EVEN);
   }
+
+  @Test
+  void shouldCountWeekNumberByCalendarWeeks() {
+    LocalDate wednesday = MONDAY.plusDays(2);
+
+    assertThat(WeekParity.weekNumber(wednesday, MONDAY)).isEqualTo(1);
+    assertThat(WeekParity.weekNumber(wednesday, MONDAY.plusDays(6))).isEqualTo(1);
+    assertThat(WeekParity.weekNumber(wednesday, MONDAY.plusDays(7))).isEqualTo(2);
+    assertThat(WeekParity.weekNumber(wednesday, MONDAY.plusDays(70))).isEqualTo(11);
+    // До первой недели — 0 и меньше
+    assertThat(WeekParity.weekNumber(wednesday, MONDAY.minusDays(1))).isEqualTo(0);
+  }
+
+  @Test
+  void shouldReturnMondayOfWeekAsWeekStart() {
+    assertThat(WeekParity.weekStart(MONDAY)).isEqualTo(MONDAY);
+    assertThat(WeekParity.weekStart(MONDAY.plusDays(6))).isEqualTo(MONDAY);
+    assertThat(WeekParity.weekStart(MONDAY.plusDays(7))).isEqualTo(MONDAY.plusDays(7));
+  }
 }

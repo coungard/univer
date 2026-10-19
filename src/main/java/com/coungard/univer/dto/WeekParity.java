@@ -27,8 +27,19 @@ public enum WeekParity {
    * проверяются: это задача вызывающего.
    */
   public static WeekParity of(LocalDate semesterStart, LocalDate date) {
-    LocalDate firstMonday = semesterStart.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
-    long weekNumber = Math.floorDiv(ChronoUnit.DAYS.between(firstMonday, date), 7) + 1;
-    return weekNumber % 2 == 1 ? ODD : EVEN;
+    return Math.floorMod(weekNumber(semesterStart, date), 2) == 1 ? ODD : EVEN;
+  }
+
+  /**
+   * Номер недели семестра, на которую приходится {@code date}: 1 — календарная неделя {@code
+   * semesterStart}. Для дат раньше этой недели — 0 и меньше; границы семестра не проверяются.
+   */
+  public static int weekNumber(LocalDate semesterStart, LocalDate date) {
+    return (int) Math.floorDiv(ChronoUnit.DAYS.between(weekStart(semesterStart), date), 7) + 1;
+  }
+
+  /** Понедельник календарной недели, на которую приходится {@code date}. */
+  public static LocalDate weekStart(LocalDate date) {
+    return date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
   }
 }

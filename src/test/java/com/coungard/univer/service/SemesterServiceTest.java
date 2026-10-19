@@ -7,6 +7,8 @@ import com.coungard.univer.TestRegions;
 import com.coungard.univer.UniverApplication;
 import com.coungard.univer.dto.SemesterDto;
 import com.coungard.univer.dto.SemesterType;
+import com.coungard.univer.dto.SemesterWeekDto;
+import com.coungard.univer.dto.WeekParity;
 import com.coungard.univer.entity.Faculty;
 import com.coungard.univer.entity.StudyYear;
 import com.coungard.univer.entity.University;
@@ -140,6 +142,83 @@ class SemesterServiceTest {
 
     assertThatThrownBy(() -> semesterService.createSemester(dto))
         .isInstanceOf(ValidationException.class);
+  }
+
+  // === Номер и чётность недели семестра (issue #107) ===
+
+  @Test
+  void shouldReturnSemesterWeekByCalendarWeeks() {
+    // Given: семестр со среды 2026-09-02 по 2026-09-30
+    UUID semesterId = createSemesterFromWednesday();
+
+    // When: пятница 11 сент. — вторая календарная неделя семестра
+    SemesterWeekDto week = semesterService.getSemesterWeek(semesterId, LocalDate.of(2026, 9, 11));
+
+    // Then
+    assertThat(week.semesterId()).isEqualTo(semesterId);
+    assertThat(week.date()).isEqualTo(LocalDate.of(2026, 9, 11));
+    assertThat(week.weekStart()).isEqualTo(LocalDate.of(2026, 9, 7));
+    assertThat(week.weekEnd()).isEqualTo(LocalDate.of(2026, 9, 13));
+    assertThat(week.inSemester()).isTrue();
+    assertThat(week.weekNumber()).isEqualTo(2);
+    assertThat(week.weekParity()).isEqualTo(WeekParity.EVEN);
+  }
+
+  @Test
+  void shouldTreatWholeStartWeekAsFirstWeekOfSemester() {
+    // Given: семестр со среды — понедельник той же недели раньше startDate, но неделя уже первая
+    UUID semesterId = createSemesterFromWednesday();
+
+    // When
+    SemesterWeekDto week = semesterService.getSemesterWeek(semesterId, LocalDate.of(2026, 8, 31));
+
+    // Then
+    assertThat(week.inSemester()).isTrue();
+    assertThat(week.weekNumber()).isEqualTo(1);
+    assertThat(week.weekParity()).isEqualTo(WeekParity.ODD);
+  }
+
+  @Test
+  void shouldReturnWeekWithoutNumberWhenWeekIsOutsideSemester() {
+    // Given
+    UUID semesterId = createSemesterFromWednesday();
+
+    // When: воскресенье перед первой неделей и понедельник после последней
+    SemesterWeekDto before = semesterService.getSemesterWeek(semesterId, LocalDate.of(2026, 8, 30));
+    SemesterWeekDto after = semesterService.getSemesterWeek(semesterId, LocalDate.of(2026, 10, 5));
+
+    // Then
+    assertThat(before.inSemester()).isFalse();
+    assertThat(before.weekStart()).isEqualTo(LocalDate.of(2026, 8, 24));
+    assertThat(before.weekNumber()).isNull();
+    assertThat(before.weekParity()).isNull();
+    assertThat(after.inSemester()).isFalse();
+    assertThat(after.weekNumber()).isNull();
+    assertThat(after.weekParity()).isNull();
+  }
+
+  @Test
+  void shouldReturnSemesterWeekForTodayWhenDateIsNotGiven() {
+    UUID semesterId = createSemesterFromWednesday();
+
+    SemesterWeekDto week = semesterService.getSemesterWeek(semesterId, null);
+
+    assertThat(week.date()).isEqualTo(LocalDate.now());
+  }
+
+  @Test
+  void shouldThrowExceptionWhenGettingWeekOfNonExistentSemester() {
+    assertThatThrownBy(() -> semesterService.getSemesterWeek(UUID.randomUUID(), LocalDate.of(2026, 9, 11)))
+        .isInstanceOf(ResourceNotFoundException.class);
+  }
+
+  private UUID createSemesterFromWednesday() {
+    return semesterService.createSemester(SemesterDto.builder()
+        .studyYearId(studyYearId)
+        .type(SemesterType.AUTUMN)
+        .startDate(LocalDate.of(2026, 9, 2))
+        .endDate(LocalDate.of(2026, 9, 30))
+        .build()).id();
   }
 
   @Test
