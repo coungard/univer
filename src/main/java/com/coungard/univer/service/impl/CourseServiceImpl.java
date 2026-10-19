@@ -1,5 +1,7 @@
 package com.coungard.univer.service.impl;
 
+import com.coungard.univer.dto.AuditAction;
+import com.coungard.univer.dto.AuditEntityType;
 import com.coungard.univer.dto.CourseDto;
 import com.coungard.univer.entity.Course;
 import com.coungard.univer.entity.Department;
@@ -13,6 +15,7 @@ import com.coungard.univer.repository.CourseRepository;
 import com.coungard.univer.repository.DepartmentRepository;
 import com.coungard.univer.repository.FacultyRepository;
 import com.coungard.univer.repository.TeacherRepository;
+import com.coungard.univer.service.AuditService;
 import com.coungard.univer.service.CourseService;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +33,7 @@ public class CourseServiceImpl implements CourseService {
   private final FacultyRepository facultyRepository;
   private final TeacherRepository teacherRepository;
   private final CourseMapper courseMapper;
+  private final AuditService auditService;
 
   @Override
   @Transactional
@@ -117,6 +121,7 @@ public class CourseServiceImpl implements CourseService {
       throw new ResourceNotFoundException("Курс не найден с ID: " + id);
     }
     courseRepository.deleteById(id);
+    auditService.record(AuditAction.DELETE, AuditEntityType.COURSE, id);
   }
 
   private Department resolveDepartment(UUID departmentId) {

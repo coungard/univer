@@ -1,5 +1,7 @@
 package com.coungard.univer.service.impl;
 
+import com.coungard.univer.dto.AuditAction;
+import com.coungard.univer.dto.AuditEntityType;
 import com.coungard.univer.dto.BellScheduleEntryDto;
 import com.coungard.univer.entity.BellScheduleEntry;
 import com.coungard.univer.entity.University;
@@ -8,6 +10,7 @@ import com.coungard.univer.exception.ValidationException;
 import com.coungard.univer.mapper.BellScheduleEntryMapper;
 import com.coungard.univer.repository.BellScheduleEntryRepository;
 import com.coungard.univer.repository.UniversityRepository;
+import com.coungard.univer.service.AuditService;
 import com.coungard.univer.service.BellScheduleEntryService;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +30,7 @@ public class BellScheduleEntryServiceImpl implements BellScheduleEntryService {
   private final BellScheduleEntryRepository bellScheduleEntryRepository;
   private final UniversityRepository universityRepository;
   private final BellScheduleEntryMapper bellScheduleEntryMapper;
+  private final AuditService auditService;
 
   @Override
   @Transactional
@@ -102,6 +106,7 @@ public class BellScheduleEntryServiceImpl implements BellScheduleEntryService {
       throw new ResourceNotFoundException("Запись звонкового расписания не найдена с ID: " + id);
     }
     bellScheduleEntryRepository.deleteById(id);
+    auditService.record(AuditAction.DELETE, AuditEntityType.BELL_SCHEDULE_ENTRY, id);
   }
 
   private void checkNotDuplicate(UUID universityId, Integer pairNumber) {

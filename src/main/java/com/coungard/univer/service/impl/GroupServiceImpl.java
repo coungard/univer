@@ -1,5 +1,7 @@
 package com.coungard.univer.service.impl;
 
+import com.coungard.univer.dto.AuditAction;
+import com.coungard.univer.dto.AuditEntityType;
 import com.coungard.univer.dto.GroupDto;
 import com.coungard.univer.entity.Group;
 import com.coungard.univer.entity.Semester;
@@ -11,6 +13,7 @@ import com.coungard.univer.repository.FacultyRepository;
 import com.coungard.univer.repository.GroupRepository;
 import com.coungard.univer.repository.SemesterRepository;
 import com.coungard.univer.repository.StudyYearRepository;
+import com.coungard.univer.service.AuditService;
 import com.coungard.univer.service.GroupService;
 import com.coungard.univer.service.SemesterPeriod;
 import com.coungard.univer.service.WeekScheduleCycleService;
@@ -36,6 +39,7 @@ public class GroupServiceImpl implements GroupService {
   private final FacultyRepository facultyRepository;
   private final WeekScheduleCycleService weekScheduleCycleService;
   private final GroupMapper groupMapper;
+  private final AuditService auditService;
 
   @Override
   @Transactional
@@ -154,6 +158,7 @@ public class GroupServiceImpl implements GroupService {
       throw new ResourceNotFoundException("Группа не найдена с ID: " + id);
     }
     groupRepository.deleteById(id);
+    auditService.record(AuditAction.DELETE, AuditEntityType.GROUP, id);
   }
 
   private Group saveNewGroup(Semester semester, String rawName, String fullName, UUID createdByStudentId) {

@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.coungard.univer.TestRegions;
 import com.coungard.univer.UniverApplication;
+import com.coungard.univer.dto.AuditAction;
+import com.coungard.univer.dto.AuditEntityType;
 import com.coungard.univer.dto.StudentDto;
 import com.coungard.univer.dto.UniversityRequestDto;
 import com.coungard.univer.dto.UniversityRequestStatus;
@@ -17,6 +19,7 @@ import com.coungard.univer.entity.Student;
 import com.coungard.univer.entity.University;
 import com.coungard.univer.exception.ResourceNotFoundException;
 import com.coungard.univer.exception.ValidationException;
+import com.coungard.univer.repository.AuditEventRepository;
 import com.coungard.univer.repository.FacultyRepository;
 import com.coungard.univer.repository.RegionRepository;
 import com.coungard.univer.repository.StudentRepository;
@@ -89,6 +92,9 @@ class UniversityRequestServiceTest {
   private RegionRepository regionRepository;
 
   @Autowired
+  private AuditEventRepository auditEventRepository;
+
+  @Autowired
   private JdbcTemplate jdbcTemplate;
 
   @MockBean
@@ -102,6 +108,7 @@ class UniversityRequestServiceTest {
 
   @BeforeEach
   void setUp() {
+    auditEventRepository.deleteAll();
     universityRequestRepository.deleteAll();
     studentRepository.deleteAll();
     facultyRepository.deleteAll();
@@ -196,6 +203,16 @@ class UniversityRequestServiceTest {
     UniversityRequestDto mine = universityRequestService.getMyRequest(studentId);
     assertThat(mine.status()).isEqualTo(UniversityRequestStatus.COMPLETED);
     assertThat(mine.universityId()).isEqualTo(universityId);
+
+    assertThat(auditEventRepository.findAll()).singleElement().satisfies(event -> {
+      assertThat(event.getAction()).isEqualTo(AuditAction.COMPLETE);
+      assertThat(event.getEntityType()).isEqualTo(AuditEntityType.UNIVERSITY_REQUEST);
+      assertThat(event.getEntityId()).isEqualTo(request.id());
+      assertThat(event.getDetails())
+          .containsEntry("studentId", studentId.toString())
+          .containsEntry("universityId", universityId.toString())
+          .doesNotContainKey("chosenByStudent");
+    });
   }
 
   @Test
@@ -211,6 +228,12 @@ class UniversityRequestServiceTest {
     assertThat(rejected.comment()).isEqualTo("Это не университет");
     assertThat(studentService.getStudentById(studentId).universityId()).isNull();
     assertThat(universityRequestService.getMyRequest(studentId).comment()).isEqualTo("Это не университет");
+
+    assertThat(auditEventRepository.findAll()).singleElement().satisfies(event -> {
+      assertThat(event.getAction()).isEqualTo(AuditAction.REJECT);
+      assertThat(event.getEntityId()).isEqualTo(request.id());
+      assertThat(event.getDetails()).containsEntry("comment", "Это не университет");
+    });
   }
 
   @Test
@@ -337,6 +360,13 @@ class UniversityRequestServiceTest {
     assertThat(closed.universityId()).isEqualTo(universityId);
     assertThatThrownBy(() -> universityRequestService.rejectRequest(requestId, null))
         .isInstanceOf(ValidationException.class);
+
+    // В журнале — закрытие самим студентом; неудачное отклонение не записано
+    assertThat(auditEventRepository.findAll()).singleElement().satisfies(event -> {
+      assertThat(event.getAction()).isEqualTo(AuditAction.COMPLETE);
+      assertThat(event.getEntityId()).isEqualTo(requestId);
+      assertThat(event.getDetails()).containsEntry("chosenByStudent", true);
+    });
   }
 
   @Test

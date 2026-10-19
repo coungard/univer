@@ -1,5 +1,7 @@
 package com.coungard.univer.service.impl;
 
+import com.coungard.univer.dto.AuditAction;
+import com.coungard.univer.dto.AuditEntityType;
 import com.coungard.univer.dto.LectureDto;
 import com.coungard.univer.dto.WeekParity;
 import com.coungard.univer.dto.request.GenerateLectureRequest;
@@ -20,7 +22,9 @@ import com.coungard.univer.repository.PairRepository;
 import com.coungard.univer.repository.StudentRepository;
 import com.coungard.univer.repository.TeacherRepository;
 import com.coungard.univer.repository.WeekScheduleCycleRepository;
+import com.coungard.univer.service.AuditService;
 import com.coungard.univer.service.LectureService;
+import com.coungard.univer.service.PairLecturesChange;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -49,6 +53,7 @@ public class LectureServiceImpl implements LectureService {
   private final StudentRepository studentRepository;
   private final WeekScheduleCycleRepository weekScheduleCycleRepository;
   private final LectureMapper lectureMapper;
+  private final AuditService auditService;
 
   @Override
   @Transactional
@@ -127,24 +132,27 @@ public class LectureServiceImpl implements LectureService {
 
   @Override
   @Transactional
-  public void syncLecturesWithPair(UUID pairId) {
+  public PairLecturesChange syncLecturesWithPair(UUID pairId) {
     Pair pair = pairRepository.findById(pairId)
         .orElseThrow(() -> new ResourceNotFoundException("Пара не найдена с ID: " + pairId));
     // Пока лекции из пары не генерировались, изменение пары их и не создаёт
     if (!lectureRepository.existsBySourcePairId(pairId)) {
-      return;
+      return PairLecturesChange.NONE;
     }
 
-    lectureRepository.deleteAll(lectureRepository.findBySourcePairIdWithoutAttendance(pairId));
-    generateMissingLectures(pair);
+    List<Lecture> stale = lectureRepository.findBySourcePairIdWithoutAttendance(pairId);
+    lectureRepository.deleteAll(stale);
+    return new PairLecturesChange(stale.size(), generateMissingLectures(pair).size());
   }
 
   @Override
   @Transactional
-  public void deleteLecturesOfPair(UUID pairId) {
-    lectureRepository.deleteAll(lectureRepository.findBySourcePairIdWithoutAttendance(pairId));
+  public PairLecturesChange deleteLecturesOfPair(UUID pairId) {
+    List<Lecture> lectures = lectureRepository.findBySourcePairIdWithoutAttendance(pairId);
+    lectureRepository.deleteAll(lectures);
     // Остались только лекции с отмеченной посещаемостью — они переживают пару
     lectureRepository.detachFromSourcePair(pairId);
+    return new PairLecturesChange(lectures.size(), 0);
   }
 
   /**
@@ -267,6 +275,7 @@ public class LectureServiceImpl implements LectureService {
       throw new ResourceNotFoundException("Лекция не найдена с ID: " + id);
     }
     lectureRepository.deleteById(id);
+    auditService.record(AuditAction.DELETE, AuditEntityType.LECTURE, id);
   }
 
   /**

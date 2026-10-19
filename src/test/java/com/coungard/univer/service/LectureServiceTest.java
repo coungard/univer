@@ -5,11 +5,14 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.coungard.univer.TestRegions;
 import com.coungard.univer.UniverApplication;
+import com.coungard.univer.dto.AuditAction;
+import com.coungard.univer.dto.AuditEntityType;
 import com.coungard.univer.dto.LectureDto;
 import com.coungard.univer.dto.PairDto;
 import com.coungard.univer.dto.SemesterType;
 import com.coungard.univer.dto.WeekParity;
 import com.coungard.univer.dto.request.GenerateLectureRequest;
+import com.coungard.univer.entity.AuditEvent;
 import com.coungard.univer.entity.Course;
 import com.coungard.univer.entity.Department;
 import com.coungard.univer.entity.Faculty;
@@ -25,6 +28,7 @@ import com.coungard.univer.entity.University;
 import com.coungard.univer.entity.WeekScheduleCycle;
 import com.coungard.univer.exception.ResourceNotFoundException;
 import com.coungard.univer.exception.ValidationException;
+import com.coungard.univer.repository.AuditEventRepository;
 import com.coungard.univer.repository.CourseRepository;
 import com.coungard.univer.repository.DepartmentRepository;
 import com.coungard.univer.repository.FacultyRepository;
@@ -45,6 +49,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,6 +87,9 @@ class LectureServiceTest {
 
   @Autowired
   private LectureRepository lectureRepository;
+
+  @Autowired
+  private AuditEventRepository auditEventRepository;
 
   @Autowired
   private LectureAttendanceRepository lectureAttendanceRepository;
@@ -143,6 +151,7 @@ class LectureServiceTest {
 
   @BeforeEach
   void setUp() {
+    auditEventRepository.deleteAll();
     lectureAttendanceRepository.deleteAll();
     studentRepository.deleteAll();
     lectureRepository.deleteAll();
@@ -773,6 +782,45 @@ class LectureServiceTest {
     assertThat(lectureRepository.findAll()).extracting(Lecture::getId).containsExactly(attended.id());
     assertThat(lectureService.getLectureById(attended.id()).sourcePairId()).isNull();
     assertThat(lectureAttendanceRepository.count()).isEqualTo(1);
+  }
+
+  @Test
+  void shouldRecordLectureCountsOfPairUpdateAndDeleteInAuditLog() {
+    // Given: 2 лекции пары (07 и 21 сентября), по первой отмечена посещаемость
+    lectureService.generateSemesterLectures(cycleId, null);
+    findLecturesOfPair(pairId).stream()
+        .filter(lecture -> lecture.scheduledTime().toLocalDate().equals(FIRST_MONDAY_ODD_WEEK))
+        .findFirst()
+        .ifPresent(lecture -> markAttendance(lecture.id()));
+    PairDto pair = pairService.getPairById(pairId);
+
+    // When: пара перенесена на вторник, затем удалена
+    pairService.updatePair(pairId, pair.toBuilder().dayOfWeek(DayOfWeek.TUESDAY).build(), null);
+    AuditEvent updated = findSingleAuditEvent(AuditAction.UPDATE);
+    pairService.deletePair(pairId, null);
+    AuditEvent deleted = findSingleAuditEvent(AuditAction.DELETE);
+
+    // Then: при переносе удалена лекция 21 сентября и создана 08 сентября; при удалении — удалена она
+    assertThat(updated.getEntityType()).isEqualTo(AuditEntityType.PAIR);
+    assertThat(updated.getEntityId()).isEqualTo(pairId);
+    assertThat(updated.getDetails())
+        .containsEntry("lecturesDeleted", 1)
+        .containsEntry("lecturesCreated", 1);
+    assertThat(updated.getDetails().get("before")).asInstanceOf(InstanceOfAssertFactories.MAP)
+        .containsEntry("dayOfWeek", "MONDAY");
+    assertThat(updated.getDetails().get("after")).asInstanceOf(InstanceOfAssertFactories.MAP)
+        .containsEntry("dayOfWeek", "TUESDAY");
+
+    assertThat(deleted.getEntityId()).isEqualTo(pairId);
+    assertThat(deleted.getDetails()).containsEntry("lecturesDeleted", 1);
+  }
+
+  private AuditEvent findSingleAuditEvent(AuditAction action) {
+    List<AuditEvent> events = auditEventRepository.findAll().stream()
+        .filter(event -> event.getAction() == action)
+        .toList();
+    assertThat(events).hasSize(1);
+    return events.get(0);
   }
 
   @Test

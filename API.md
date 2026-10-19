@@ -238,6 +238,16 @@ id в этом же заголовке (до 64 символов: латиниц
 ### AttendanceStatsDto (только ответ)
 `totalMarked` (`long`), `attendedCount` (`long`), `attendanceRate` (`double`, `0..1`).
 
+### AuditEventDto (только ответ)
+`id`, `occurredAt` (`Instant`), `actorId` (subject JWT автора; `null` у анонимных действий — регистрации),
+`actorRole` (старшая роль автора: `ADMIN` | `TEACHER` | `STUDENT`), `action: AuditAction`,
+`entityType: AuditEntityType`, `entityId`, `requestId` (`X-Request-Id` запроса), `details` (объект, набор
+полей зависит от действия; может быть `null`).
+`AuditAction` (enum): `REGISTER` | `CREATE` | `UPDATE` | `DELETE` | `STATUS_CHANGE` | `MARK` | `COMPLETE` |
+`REJECT`. `AuditEntityType` (enum): `BELL_SCHEDULE_ENTRY` | `COURSE` | `DEPARTMENT` | `FACULTY` | `GROUP` |
+`LECTURE` | `LECTURE_ATTENDANCE` | `PAIR` | `SEMESTER` | `STUDENT` | `STUDY_YEAR` | `TEACHER` | `UNIVERSITY` |
+`UNIVERSITY_REQUEST` | `WEEK_SCHEDULE_CYCLE`.
+
 ---
 
 ## Universities — `/api/v1/universities`
@@ -764,6 +774,35 @@ id в этом же заголовке (до 64 символов: латиниц
   ожидаемых/зачисленных (`totalMarked`, `attendedCount`, `attendanceRate`).
 - **`GET /student/{studentId}/course/{courseId}/stats`** — статистика по студенту в рамках курса: сколько
   лекций курса он посетил из уже отмеченных.
+
+## AuditEvents — `/api/v1/audit-events`
+
+Журнал бизнес-событий: кто, когда и что сделал (issue #111). Событие записывается в той же транзакции,
+что и само действие: если действие не удалось, события нет.
+
+| Метод | Путь | Auth | Тело запроса | Тело ответа |
+|---|---|---|---|---|
+| GET | `/` | `ADMIN` | — (`?entityType&entityId&actorId&from&to&page&size`) | `Page<AuditEventDto>` |
+
+- Сначала новые события, `size` по умолчанию `20`. Все фильтры необязательны и объединяются через «и».
+  `from` (включительно) и `to` (не включительно) — ISO-8601 с зоной, например `2026-10-01T00:00:00Z`.
+- Что записывается и что лежит в `details`:
+
+| Действие | `entityType` / `action` | `details` |
+|---|---|---|
+| Регистрация студента/преподавателя | `STUDENT`/`TEACHER`, `REGISTER` | — (автора нет) |
+| Студент создал факультет/группу/предмет | `FACULTY`/`GROUP`/`COURSE`, `CREATE` | где создано и название |
+| Создание пары | `PAIR`, `CREATE` | состояние пары |
+| Изменение пары | `PAIR`, `UPDATE` | `before`, `after`, `lecturesDeleted`, `lecturesCreated` |
+| Удаление пары | `PAIR`, `DELETE` | `before`, `lecturesDeleted` |
+| Смена статуса цикла | `WEEK_SCHEDULE_CYCLE`, `STATUS_CHANGE` | `from`, `to` |
+| Отметка посещаемости | `LECTURE_ATTENDANCE`, `MARK` (`entityId` — лекция) | `studentId`, `attended`, `previous` |
+| Закрытие заявки на университет | `UNIVERSITY_REQUEST`, `COMPLETE` | `studentId`, `universityId`; `chosenByStudent: true`, если университет выбрал сам студент |
+| Отклонение заявки | `UNIVERSITY_REQUEST`, `REJECT` | `studentId`, `comment` |
+| Любое удаление через `DELETE` | тип сущности, `DELETE` | — |
+
+> ФИО, email и телефон в `details` не пишутся. Ссылок на сущности у события нет, поэтому запись
+> остаётся после удаления сущности и автора.
 
 ---
 

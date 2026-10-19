@@ -1,5 +1,7 @@
 package com.coungard.univer.service.impl;
 
+import com.coungard.univer.dto.AuditAction;
+import com.coungard.univer.dto.AuditEntityType;
 import com.coungard.univer.dto.SemesterDto;
 import com.coungard.univer.dto.SemesterWeekDto;
 import com.coungard.univer.dto.WeekParity;
@@ -10,6 +12,7 @@ import com.coungard.univer.exception.ValidationException;
 import com.coungard.univer.mapper.SemesterMapper;
 import com.coungard.univer.repository.SemesterRepository;
 import com.coungard.univer.repository.StudyYearRepository;
+import com.coungard.univer.service.AuditService;
 import com.coungard.univer.service.SemesterService;
 import java.time.LocalDate;
 import java.util.UUID;
@@ -26,6 +29,7 @@ public class SemesterServiceImpl implements SemesterService {
   private final SemesterRepository semesterRepository;
   private final StudyYearRepository studyYearRepository;
   private final SemesterMapper semesterMapper;
+  private final AuditService auditService;
 
   @Override
   @Transactional
@@ -114,6 +118,7 @@ public class SemesterServiceImpl implements SemesterService {
       throw new ResourceNotFoundException("Семестр не найден с ID: " + id);
     }
     semesterRepository.deleteById(id);
+    auditService.record(AuditAction.DELETE, AuditEntityType.SEMESTER, id);
   }
 
   private void validateDateOrder(SemesterDto semesterDto) {

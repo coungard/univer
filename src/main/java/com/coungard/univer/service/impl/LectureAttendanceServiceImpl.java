@@ -1,6 +1,8 @@
 package com.coungard.univer.service.impl;
 
 import com.coungard.univer.dto.AttendanceStatsDto;
+import com.coungard.univer.dto.AuditAction;
+import com.coungard.univer.dto.AuditEntityType;
 import com.coungard.univer.dto.EnrollmentStatus;
 import com.coungard.univer.dto.LectureAttendanceDto;
 import com.coungard.univer.entity.Lecture;
@@ -14,7 +16,9 @@ import com.coungard.univer.repository.EnrollmentRepository;
 import com.coungard.univer.repository.LectureAttendanceRepository;
 import com.coungard.univer.repository.LectureRepository;
 import com.coungard.univer.repository.StudentRepository;
+import com.coungard.univer.service.AuditService;
 import com.coungard.univer.service.LectureAttendanceService;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -32,6 +36,7 @@ public class LectureAttendanceServiceImpl implements LectureAttendanceService {
   private final CourseRepository courseRepository;
   private final EnrollmentRepository enrollmentRepository;
   private final LectureAttendanceMapper attendanceMapper;
+  private final AuditService auditService;
 
   @Override
   @Transactional
@@ -48,19 +53,26 @@ public class LectureAttendanceServiceImpl implements LectureAttendanceService {
               + " этой лекции — отметить посещение нельзя");
     }
 
-    LectureAttendance attendance = attendanceRepository
-        .findByStudentIdAndLectureId(student.getId(), lecture.getId())
-        .orElseGet(() -> {
-          LectureAttendance created = new LectureAttendance();
-          created.setStudentId(student.getId());
-          created.setLectureId(lecture.getId());
-          created.setStudent(student);
-          created.setLecture(lecture);
-          return created;
-        });
+    Optional<LectureAttendance> existing = attendanceRepository
+        .findByStudentIdAndLectureId(student.getId(), lecture.getId());
+    // Прежняя отметка — в журнал: видно, кто и когда исправил «был» на «не был»
+    Boolean previous = existing.map(LectureAttendance::isAttended).orElse(null);
+    LectureAttendance attendance = existing.orElseGet(() -> {
+      LectureAttendance created = new LectureAttendance();
+      created.setStudentId(student.getId());
+      created.setLectureId(lecture.getId());
+      created.setStudent(student);
+      created.setLecture(lecture);
+      return created;
+    });
     attendance.setAttended(attendanceDto.attended());
 
     LectureAttendance saved = attendanceRepository.save(attendance);
+    auditService.record(AuditAction.MARK, AuditEntityType.LECTURE_ATTENDANCE, lecture.getId(),
+        AuditService.details(
+            "studentId", student.getId(),
+            "attended", attendanceDto.attended(),
+            "previous", previous));
     return attendanceMapper.toDto(saved);
   }
 
