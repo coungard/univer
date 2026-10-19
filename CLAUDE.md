@@ -56,9 +56,12 @@ mvn test -Dtest=StudentServiceTest#shouldUpdateStudent   # запуск одно
 - `repository` — обычные интерфейсы `JpaRepository<Entity, UUID>`, кастомных реализаций пока нет.
 - `entity` — JPA-сущности. ID — `UUID`, самостоятельно генерируется в `@PrePersist` (см.
   `Student.generateId()`), кроме случаев, когда в качестве ID сущности переиспользуется ID пользователя,
-  выданный Keycloak (см. флоу регистрации ниже). Аудит (`createdAt`/`updatedAt`) реализован через
-  `Auditable` + `@EntityListeners(AuditingEntityListener.class)` + `@CreatedDate`/`@LastModifiedDate` —
-  реализуйте `Auditable` для любой новой сущности, которой нужны временные метки.
+  выданный Keycloak (см. флоу регистрации ниже). Кто и когда создал и изменил запись
+  (`createdAt`/`updatedAt`/`createdBy`/`updatedBy`) — общий `@MappedSuperclass` `AuditableEntity`, поля
+  заполняет Spring Data JPA auditing, автор — subject JWT (`CurrentActor`, `JpaAuditingConfig`). Любую новую
+  изменяемую сущность наследуйте от `AuditableEntity` и добавляйте её таблице эти четыре столбца в
+  миграции. Нативные `INSERT`/`UPDATE` и bulk-`@Modifying` минуют auditing — заполняйте поля в них сами
+  (issue #112).
 - `dto` — Java `record`'ы (в стиле builder, например `StudentDto.builder()...build()`), включая подпакет
   `dto.registration` для форм запросов/ответов регистрации и `dto.request` для прочих request-only DTO.
 - `mapper` — написанные вручную `@Component`-мапперы (entity ↔ DTO), *не* сгенерированные через MapStruct,

@@ -32,7 +32,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "pairs")
 @NoArgsConstructor
 @Data
-public class Pair {
+public class Pair extends AuditableEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)

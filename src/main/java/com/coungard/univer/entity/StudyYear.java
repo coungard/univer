@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 })
 @NoArgsConstructor
 @Data
-public class StudyYear {
+public class StudyYear extends AuditableEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)

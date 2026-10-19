@@ -11,6 +11,7 @@ import com.coungard.univer.exception.ValidationException;
 import com.coungard.univer.mapper.WeekScheduleCycleMapper;
 import com.coungard.univer.repository.SemesterRepository;
 import com.coungard.univer.repository.WeekScheduleCycleRepository;
+import com.coungard.univer.security.CurrentActor;
 import com.coungard.univer.service.AuditService;
 import com.coungard.univer.service.WeekScheduleCycleService;
 import java.util.UUID;
@@ -58,7 +59,8 @@ public class WeekScheduleCycleServiceImpl implements WeekScheduleCycleService {
 
     WeekScheduleCycle cycle = weekScheduleCycleRepository.findBySemesterId(semesterId)
         .orElseGet(() -> {
-          weekScheduleCycleRepository.insertDraftIfAbsent(semesterId);
+          weekScheduleCycleRepository.insertDraftIfAbsent(
+              semesterId, CurrentActor.id().map(UUID::toString).orElse(null));
           return weekScheduleCycleRepository.findBySemesterId(semesterId)
               .orElseThrow(() -> new ResourceNotFoundException(
                   "Циклическое расписание не найдено для семестра с ID: " + semesterId));

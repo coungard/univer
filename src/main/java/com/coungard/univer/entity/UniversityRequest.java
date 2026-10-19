@@ -3,7 +3,6 @@ package com.coungard.univer.entity;
 import com.coungard.univer.dto.UniversityRequestStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
@@ -13,13 +12,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.time.Instant;
 import java.util.UUID;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 /**
  * Заявка студента на добавление университета, которого нет в справочнике. Сам студент университеты
@@ -28,10 +23,9 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
  */
 @Entity
 @Table(name = "university_requests")
-@EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor
 @Data
-public class UniversityRequest implements Auditable {
+public class UniversityRequest extends AuditableEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
@@ -72,12 +66,4 @@ public class UniversityRequest implements Auditable {
    */
   @Column(length = 500)
   private String comment;
-
-  @CreatedDate
-  @Column(name = "created_at")
-  private Instant createdAt;
-
-  @LastModifiedDate
-  @Column(name = "updated_at")
-  private Instant updatedAt;
 }

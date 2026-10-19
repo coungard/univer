@@ -21,13 +21,17 @@ public interface WeekScheduleCycleRepository extends JpaRepository<WeekScheduleC
    * вместо «проверить и вставить»: при двух одновременных запросах второй дожидается первого и ничего
    * не вставляет, а не падает на уникальности {@code semester_id}.
    *
+   * <p>Нативный INSERT минует JPA auditing, поэтому метки и автор (issue #112) проставляются здесь же.
+   *
+   * @param actorId id автора строкой или {@code null} — строкой, потому что {@code null} типа UUID в
+   *                нативном запросе PostgreSQL не всегда может привести к {@code uuid}
    * @return 1, если цикл создан; 0, если он уже был
    */
   @Modifying
   @Query(value = """
-      INSERT INTO week_schedule_cycles (id, semester_id, status)
-      VALUES (gen_random_uuid(), :semesterId, 'DRAFT')
+      INSERT INTO week_schedule_cycles (id, semester_id, status, created_at, updated_at, created_by, updated_by)
+      VALUES (gen_random_uuid(), :semesterId, 'DRAFT', NOW(), NOW(), CAST(:actorId AS uuid), CAST(:actorId AS uuid))
       ON CONFLICT (semester_id) DO NOTHING
       """, nativeQuery = true)
-  int insertDraftIfAbsent(@Param("semesterId") UUID semesterId);
+  int insertDraftIfAbsent(@Param("semesterId") UUID semesterId, @Param("actorId") String actorId);
 }

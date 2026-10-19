@@ -21,7 +21,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "semesters")
 @NoArgsConstructor
 @Data
-public class Semester {
+public class Semester extends AuditableEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)

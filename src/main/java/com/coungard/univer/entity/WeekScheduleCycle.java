@@ -25,7 +25,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "week_schedule_cycles")
 @NoArgsConstructor
 @Data
-public class WeekScheduleCycle {
+public class WeekScheduleCycle extends AuditableEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)

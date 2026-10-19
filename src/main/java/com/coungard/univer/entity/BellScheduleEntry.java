@@ -2,7 +2,6 @@ package com.coungard.univer.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -10,14 +9,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.time.Instant;
 import java.time.LocalTime;
 import java.util.UUID;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 /**
  * Звонковое расписание — справочник "номер пары -> время начала/окончания", per-university (см.
@@ -34,9 +29,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Entity
 @Table(name = "bell_schedule_entries")
 @NoArgsConstructor
-@EntityListeners(AuditingEntityListener.class)
 @Data
-public class BellScheduleEntry implements Auditable {
+public class BellScheduleEntry extends AuditableEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
@@ -54,12 +48,4 @@ public class BellScheduleEntry implements Auditable {
 
   @Column(name = "end_time", nullable = false)
   private LocalTime endTime;
-
-  @CreatedDate
-  @Column(name = "created_at")
-  private Instant createdAt;
-
-  @LastModifiedDate
-  @Column(name = "updated_at")
-  private Instant updatedAt;
 }
