@@ -136,10 +136,9 @@ public class StudentServiceImpl implements StudentService {
       if (keycloakUserId != null) {
         try {
           keycloakAdminService.deleteUser(keycloakUserId);
-          log.info("Пользователь в Keycloak удалён после сбоя в БД: " + keycloakUserId);
+          log.info("Пользователь в Keycloak удалён после сбоя в БД: {}", keycloakUserId);
         } catch (Exception cleanupEx) {
-          log.warn("Не удалось удалить пользователя в Keycloak: " + keycloakUserId);
-          log.error(cleanupEx.getMessage(), cleanupEx);
+          log.error("Не удалось удалить пользователя в Keycloak: {}", keycloakUserId, cleanupEx);
         }
       }
       throw new RuntimeException("Ошибка при регистрации студента: " + ex.getMessage());

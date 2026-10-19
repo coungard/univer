@@ -19,6 +19,6 @@ public class StartupListener {
     String port = environment.getProperty("local.server.port");
     String address = "localhost"; // Обычно localhost, но можно получить и реальный IP, если нужно
 
-    log.info("Application started at http://" + address + ":" + port);
+    log.info("Application started at http://{}:{}", address, port);
   }
 }
