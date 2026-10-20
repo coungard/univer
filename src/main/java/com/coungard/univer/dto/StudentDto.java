@@ -26,6 +26,8 @@ public record StudentDto(
         String fullname,
         Instant createdAt,
         Instant updatedAt,
+        UUID createdBy,
+        UUID updatedBy,
 
         @Email(message = "Некорректный email")
         @NotBlank(message = "Email обязателен")

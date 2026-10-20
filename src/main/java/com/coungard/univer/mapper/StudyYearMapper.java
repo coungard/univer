@@ -15,6 +15,10 @@ public class StudyYearMapper {
         .id(studyYear.getId())
         .facultyId(studyYear.getFacultyId())
         .yearNumber(studyYear.getYearNumber())
+        .createdAt(studyYear.getCreatedAt())
+        .updatedAt(studyYear.getUpdatedAt())
+        .createdBy(studyYear.getCreatedBy())
+        .updatedBy(studyYear.getUpdatedBy())
         .build();
   }
 

@@ -42,4 +42,18 @@ public abstract class AuditableEntity {
   @LastModifiedBy
   @Column(name = "updated_by")
   private UUID updatedBy;
+
+  /**
+   * Из двух записей одного объекта — изменённая последней. Например, у студента имя и email лежат в
+   * {@code Person}, и их правка не меняет {@code updated_at} самого студента (issue #119).
+   */
+  public static AuditableEntity lastModified(AuditableEntity first, AuditableEntity second) {
+    if (second == null || second.getUpdatedAt() == null) {
+      return first;
+    }
+    if (first.getUpdatedAt() == null || second.getUpdatedAt().isAfter(first.getUpdatedAt())) {
+      return second;
+    }
+    return first;
+  }
 }

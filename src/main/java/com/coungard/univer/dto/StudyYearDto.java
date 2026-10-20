@@ -2,6 +2,7 @@ package com.coungard.univer.dto;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import java.time.Instant;
 import java.util.UUID;
 import lombok.Builder;
 
@@ -14,6 +15,12 @@ public record StudyYearDto(
 
     @NotNull(message = "Номер курса обязателен")
     @Min(value = 1, message = "Номер курса не может быть меньше 1")
-    Integer yearNumber
+    Integer yearNumber,
+
+    // Только в ответе (AuditableEntity, issue #119): во входящих запросах игнорируются.
+    Instant createdAt,
+    Instant updatedAt,
+    UUID createdBy,
+    UUID updatedBy
 ) {
 }

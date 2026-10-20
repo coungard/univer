@@ -24,6 +24,8 @@ public class UniversityRequestMapper {
         .studentFullname(request.getStudent().getPerson().getFullname())
         .createdAt(request.getCreatedAt())
         .updatedAt(request.getUpdatedAt())
+        .createdBy(request.getCreatedBy())
+        .updatedBy(request.getUpdatedBy())
         .build();
   }
 }

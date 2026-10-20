@@ -76,7 +76,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
           enrollment.setCourse(course);
           enrollment.setEnrolledAt(LocalDateTime.now());
           enrollment.setStatus(EnrollmentStatus.ACTIVE);
-          return enrollmentMapper.toDto(enrollmentRepository.save(enrollment));
+          return enrollmentMapper.toDto(enrollmentRepository.saveAndFlush(enrollment));
         })
         .toList();
   }
@@ -113,7 +113,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
       existing.setStatus(enrollmentDto.status());
     }
 
-    Enrollment updated = enrollmentRepository.save(existing);
+    Enrollment updated = enrollmentRepository.saveAndFlush(existing);
     return enrollmentMapper.toDto(updated);
   }
 

@@ -110,7 +110,7 @@ public class CourseServiceImpl implements CourseService {
       validateTitleIsFree(existing.getFaculty().getId(), existing.getTitle(), id);
     }
 
-    Course updated = courseRepository.save(existing);
+    Course updated = courseRepository.saveAndFlush(existing);
     return courseMapper.toDto(updated);
   }
 

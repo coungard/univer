@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
@@ -39,6 +40,12 @@ public record LectureDto(
     UUID sourcePairId,
 
     @NotEmpty(message = "Лекция должна быть привязана хотя бы к одной группе")
-    Set<UUID> groupIds
+    Set<UUID> groupIds,
+
+    // Только в ответе (AuditableEntity, issue #119): во входящих запросах игнорируются.
+    Instant createdAt,
+    Instant updatedAt,
+    UUID createdBy,
+    UUID updatedBy
 ) {
 }

@@ -17,6 +17,10 @@ public class BellScheduleEntryMapper {
         .pairNumber(entry.getPairNumber())
         .startTime(entry.getStartTime())
         .endTime(entry.getEndTime())
+        .createdAt(entry.getCreatedAt())
+        .updatedAt(entry.getUpdatedAt())
+        .createdBy(entry.getCreatedBy())
+        .updatedBy(entry.getUpdatedBy())
         .build();
   }
 

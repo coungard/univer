@@ -74,7 +74,7 @@ public class FacultyServiceImpl implements FacultyService {
     validateNameIsFree(existing.getUniversity().getId(), newName, id);
     existing.setName(newName);
 
-    Faculty updated = facultyRepository.save(existing);
+    Faculty updated = facultyRepository.saveAndFlush(existing);
     return facultyMapper.toDto(updated);
   }
 
@@ -108,7 +108,7 @@ public class FacultyServiceImpl implements FacultyService {
     existing.setName(existing.getName().strip());
     validateNameIsFree(university.getId(), existing.getName(), id);
 
-    Faculty updated = facultyRepository.save(existing);
+    Faculty updated = facultyRepository.saveAndFlush(existing);
     return facultyMapper.toDto(updated);
   }
 

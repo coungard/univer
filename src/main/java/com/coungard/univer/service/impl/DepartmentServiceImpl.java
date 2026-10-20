@@ -82,7 +82,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     department.setName(departmentDto.name());
     department.setDescription(departmentDto.description());
 
-    Department updated = departmentRepository.save(department);
+    Department updated = departmentRepository.saveAndFlush(department);
     return toDto(updated);
   }
 
@@ -100,7 +100,11 @@ public class DepartmentServiceImpl implements DepartmentService {
         department.getId(),
         department.getName(),
         department.getDescription(),
-        department.getFaculty().getId()
+        department.getFaculty().getId(),
+        department.getCreatedAt(),
+        department.getUpdatedAt(),
+        department.getCreatedBy(),
+        department.getUpdatedBy()
     );
   }
 }

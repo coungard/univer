@@ -110,7 +110,7 @@ public class WeekScheduleCycleServiceImpl implements WeekScheduleCycleService {
     WeekScheduleCycleStatus previous = cycle.getStatus();
     cycle.setStatus(status);
 
-    WeekScheduleCycle updated = weekScheduleCycleRepository.save(cycle);
+    WeekScheduleCycle updated = weekScheduleCycleRepository.saveAndFlush(cycle);
     if (previous != status) {
       auditService.record(AuditAction.STATUS_CHANGE, AuditEntityType.WEEK_SCHEDULE_CYCLE, id,
           AuditService.details("from", previous, "to", status));

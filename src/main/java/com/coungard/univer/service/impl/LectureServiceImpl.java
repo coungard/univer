@@ -264,7 +264,7 @@ public class LectureServiceImpl implements LectureService {
     existing.setRoom(lectureDto.room());
     existing.setGroups(resolveGroups(lectureDto.groupIds()));
 
-    Lecture updated = lectureRepository.save(existing);
+    Lecture updated = lectureRepository.saveAndFlush(existing);
     return lectureMapper.toDto(updated);
   }
 

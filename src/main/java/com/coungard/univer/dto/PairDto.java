@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.DayOfWeek;
+import java.time.Instant;
 import java.time.LocalTime;
 import java.util.Set;
 import java.util.UUID;
@@ -46,6 +47,12 @@ public record PairDto(
     String room,
 
     @NotEmpty(message = "Пара должна быть привязана хотя бы к одной группе")
-    Set<UUID> groupIds
+    Set<UUID> groupIds,
+
+    // Только в ответе (AuditableEntity, issue #119): во входящих запросах игнорируются.
+    Instant createdAt,
+    Instant updatedAt,
+    UUID createdBy,
+    UUID updatedBy
 ) {
 }

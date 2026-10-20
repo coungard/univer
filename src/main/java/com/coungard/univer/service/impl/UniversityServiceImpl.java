@@ -118,7 +118,7 @@ public class UniversityServiceImpl implements UniversityService {
     existing.setAddress(address);
     existing.setRegion(findRegion(universityDto.regionId()));
 
-    University saved = universityRepository.save(existing);
+    University saved = universityRepository.saveAndFlush(existing);
     return toDto(saved);
   }
 

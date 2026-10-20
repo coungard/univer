@@ -17,6 +17,10 @@ public class GroupMapper {
         .name(group.getName())
         .fullName(group.getFullName())
         .createdByStudentId(group.getCreatedByStudentId())
+        .createdAt(group.getCreatedAt())
+        .updatedAt(group.getUpdatedAt())
+        .createdBy(group.getCreatedBy())
+        .updatedBy(group.getUpdatedBy())
         .build();
   }
 

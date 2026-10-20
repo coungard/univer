@@ -15,6 +15,10 @@ public class WeekScheduleCycleMapper {
         .id(cycle.getId())
         .semesterId(cycle.getSemester().getId())
         .status(cycle.getStatus())
+        .createdAt(cycle.getCreatedAt())
+        .updatedAt(cycle.getUpdatedAt())
+        .createdBy(cycle.getCreatedBy())
+        .updatedBy(cycle.getUpdatedBy())
         .build();
   }
 

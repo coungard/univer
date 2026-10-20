@@ -1,6 +1,7 @@
 package com.coungard.univer.mapper;
 
 import com.coungard.univer.dto.StudentDto;
+import com.coungard.univer.entity.AuditableEntity;
 import com.coungard.univer.entity.Student;
 import org.springframework.stereotype.Component;
 
@@ -11,6 +12,8 @@ public class StudentMapper {
     if (student == null) {
       return null;
     }
+    // Правка имени или email меняет только Person
+    AuditableEntity lastModified = AuditableEntity.lastModified(student, student.getPerson());
     return StudentDto.builder()
         .id(student.getId())
         .username(student.getPerson().getUsername())
@@ -25,7 +28,9 @@ public class StudentMapper {
         .yearNumber(student.getYearNumber())
         .groupId(student.getGroup() != null ? student.getGroup().getId() : null)
         .createdAt(student.getCreatedAt())
-        .updatedAt(student.getUpdatedAt())
+        .updatedAt(lastModified.getUpdatedAt())
+        .createdBy(student.getCreatedBy())
+        .updatedBy(lastModified.getUpdatedBy())
         .build();
   }
 }

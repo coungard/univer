@@ -20,7 +20,7 @@
 - **Content-Type:** `application/json` и для тела запроса, и для ответа.
 - **ID сущностей:** везде `UUID` (строка вида `a8f2e7b1-1c2d-4e3f-8a9b-1c2d3e4f5a6b`).
 - **Даты/время:** `LocalDate` → `"2026-09-01"`, `LocalDateTime` → `"2026-09-01T09:00:00"`, `LocalTime` →
-  `"09:00:00"`, `Instant` (аудит-поля `createdAt`/`updatedAt`) → ISO-8601 с зоной, например
+  `"09:00:00"`, `Instant` (поля аудита `createdAt`/`updatedAt`) → ISO-8601 с зоной, например
   `"2026-08-30T10:15:30.123456Z"`.
 
 ### Пагинация
@@ -75,13 +75,24 @@ id в этом же заголовке (до 64 символов: латиниц
 специфичные для запроса или для ответа, отмечены отдельно. `★` — поле обязательно (`@NotNull`/`@NotBlank`
 и т.п.) при создании/обновлении.
 
+**Поля аудита.** Ответы со схемами изменяемых сущностей — всех DTO ниже, кроме `RegionDto`,
+`AttendanceStatsDto`, `AuditEventDto` и request-only схем, — содержат четыре поля только для ответа
+(issue #119): `createdAt`, `updatedAt` (`Instant`, когда запись создана и последний раз изменена),
+`createdBy`, `updatedBy` (`UUID` — subject JWT автора и последнего редактора, то есть ID студента,
+преподавателя или администратора в Keycloak). Во вложенных объектах (`UniversityDto.address`,
+`faculties`, `faculties[].departments`) — свои поля аудита. Видны всем, кому доступен сам ответ. В теле
+запроса игнорируются. `createdBy`/`updatedBy` пусты (`null`), если запись создана или изменена без
+аутентификации: seed-данные из миграций, регистрация. У схем с `@JsonInclude(NON_NULL)`
+(`CourseDto`, `FacultyDto`, `DepartmentDto`) пустых полей в ответе нет вовсе. Ответ на изменение
+(`PUT`/`PATCH`/смена статуса) уже содержит новые `updatedAt`/`updatedBy`. Кто именно что сделал
+(с деталями) — в журнале `GET /audit-events`, см. `AuditEventDto`.
+
 ### AddressDto
 `id`, `address`★, `country`★, `region`★, `city`★, `street`★, `postalCode`, `phone`, `email`, `website`.
 `id` — если передан, используется существующий адрес; если нет — создаётся новый по остальным полям.
 
 ### UniversityDto
-`id`, `name`, `description`, `rector`, `foundingYear`, `studentCount`, `createdAt`, `updatedAt` (только
-в ответе), `address: AddressDto`, `regionId`★, `facultyCount` (только в ответе), `faculties: FacultyDto[]` (в ответе; при создании/обновлении
+`id`, `name`, `description`, `rector`, `foundingYear`, `studentCount`, поля аудита, `address: AddressDto`, `regionId`★, `facultyCount` (только в ответе), `faculties: FacultyDto[]` (в ответе; при создании/обновлении
 можно не передавать — по умолчанию `[]`). `rector`/`foundingYear`/`studentCount` необязательны (`foundingYear`,
 если передан, — не меньше 1000; `studentCount`, если передан, — не отрицательный). `regionId` — ID региона
 из `GET /regions`, обязателен: регион есть у каждого вуза (issue #80). Без `regionId` `POST`/`PUT`
@@ -176,7 +187,7 @@ id в этом же заголовке (до 64 символов: латиниц
 `pairId`★, `date`★.
 
 ### StudentDto
-`id`, `username`★, `firstname`★, `lastname`★, `fullname`, `createdAt`, `updatedAt` (только в ответе),
+`id`, `username`★, `firstname`★, `lastname`★, `fullname`, поля аудита,
 `email`★ (валидный email), `enrollmentDate` (не в будущем, необязательна — назначается администратором
 после регистрации, не собирается на самой регистрации), `birthday` (не в будущем), `universityId`
 (`null`, пока студент не выбрал университет), `facultyId`, `yearNumber` (номер курса, `≥ 1`) — оба
@@ -192,7 +203,7 @@ id в этом же заголовке (до 64 символов: латиниц
 `regionName` (оба `null`, если студент региона не указал), `status: UniversityRequestStatus`,
 `universityId` (университет, которым заявка закрыта; заполнен только у `COMPLETED`), `comment`
 (пояснение администратора при отклонении; бывает только у `REJECTED`, и то не всегда), `studentId`,
-`studentUsername`, `studentFullname` (автор заявки), `createdAt`, `updatedAt`.
+`studentUsername`, `studentFullname` (автор заявки), поля аудита.
 `UniversityRequestStatus` (enum): `PENDING` (необработанная) | `COMPLETED` (выполнена) | `REJECTED`
 (отклонена).
 
@@ -217,8 +228,8 @@ id в этом же заголовке (до 64 символов: латиниц
 регистрации в `CLAUDE.md`).
 
 ### TeacherDto
-`id`, `username`★, `firstname`★, `lastname`★, `fullname`, `email`★, `phone`, `birthday`, `createdAt`,
-`updatedAt` (только в ответе), `facultyId`★ (только для `PUT`/`POST /teachers` — на регистрации не
+`id`, `username`★, `firstname`★, `lastname`★, `fullname`, `email`★, `phone`, `birthday`, поля аудита,
+`facultyId`★ (только для `PUT`/`POST /teachers` — на регистрации не
 приходит, см. ниже, может быть `null` в ответе, пока кафедра не назначена), `position`★, `registered`
 (`Boolean`, только в ответе — зарегистрирован ли преподаватель в Keycloak).
 

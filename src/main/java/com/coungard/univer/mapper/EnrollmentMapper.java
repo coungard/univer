@@ -18,6 +18,10 @@ public class EnrollmentMapper {
         .courseId(enrollment.getCourse().getId())
         .enrolledAt(enrollment.getEnrolledAt())
         .status(enrollment.getStatus())
+        .createdAt(enrollment.getCreatedAt())
+        .updatedAt(enrollment.getUpdatedAt())
+        .createdBy(enrollment.getCreatedBy())
+        .updatedBy(enrollment.getUpdatedBy())
         .build();
   }
 

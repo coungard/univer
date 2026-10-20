@@ -97,7 +97,7 @@ public class GroupServiceImpl implements GroupService {
     existing.setName(newName);
     existing.setFullName(normalizeFullName(fullName));
 
-    Group updated = groupRepository.save(existing);
+    Group updated = groupRepository.saveAndFlush(existing);
     return groupMapper.toDto(updated);
   }
 
@@ -147,7 +147,7 @@ public class GroupServiceImpl implements GroupService {
     existing.setName(name);
     existing.setFullName(normalizeFullName(groupDto.fullName()));
 
-    Group updated = groupRepository.save(existing);
+    Group updated = groupRepository.saveAndFlush(existing);
     return groupMapper.toDto(updated);
   }
 

@@ -17,6 +17,10 @@ public class SemesterMapper {
         .type(semester.getType())
         .startDate(semester.getStartDate())
         .endDate(semester.getEndDate())
+        .createdAt(semester.getCreatedAt())
+        .updatedAt(semester.getUpdatedAt())
+        .createdBy(semester.getCreatedBy())
+        .updatedBy(semester.getUpdatedBy())
         .build();
   }
 
