@@ -51,5 +51,6 @@ public class Faculty extends AuditableEntity {
   private UUID createdByStudentId;
 
   @OneToMany(mappedBy = "faculty", cascade = CascadeType.ALL, orphanRemoval = true)
+  @Builder.Default
   private List<Department> departments = new ArrayList<>();
 }
