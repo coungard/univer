@@ -86,6 +86,29 @@ Keycloak из `docker-compose.yml`: логин `student1`, пароль `student
 `GET /groups?facultyId=&yearNumber=`, пока их семестр актуален (01.09.2026–29.12.2026 и далее, пока
 не заведён следующий).
 
+### События Keycloak
+
+Входы, выходы и ошибки аутентификации сервис сам не видит — их журналирует Keycloak (настройки в
+`init-keycloak/realm-config.json`, issue #113). Бизнес-действия внутри сервиса — отдельный журнал
+`audit_events` (`GET /api/v1/audit-events`, только `ADMIN`).
+
+- **События пользователей** (`LOGIN`, `LOGIN_ERROR`, `LOGOUT`, `REGISTER`, `UPDATE_PASSWORD`,
+  `CODE_TO_TOKEN_ERROR`, `REFRESH_TOKEN_ERROR` и др.) — консоль Keycloak
+  (`http://localhost:8082/admin`, `admin`/`admin`) → realm `univer-realm` → **Events** → вкладка
+  **User events**. Хранятся 90 дней (`eventsExpiration`).
+- **Админ-события** (создание/удаление пользователей и назначение ролей через `KeycloakAdminService`,
+  изменения realm) — там же, вкладка **Admin events**. Тела запросов не сохраняются
+  (`adminEventsDetailsEnabled: false`) — в них бывают пароли.
+- Те же события через Admin REST API: `GET /admin/realms/univer-realm/events` и
+  `GET /admin/realms/univer-realm/admin-events` (токен администратора `master`-realm).
+- Слушатель `jboss-logging` дополнительно пишет события в лог контейнера: ошибки — уровнем `WARN`
+  (`docker logs keycloak-univer | grep org.keycloak.events`), успешные — на `DEBUG`, поэтому при
+  `KC_LOG_LEVEL: INFO` в логе их нет.
+
+`--import-realm` не перезаписывает уже существующий realm, поэтому на стенде, поднятом до этих
+настроек, их нужно включить вручную: **Realm settings** → **Events** (или пересоздать контейнер
+Keycloak вместе с его БД).
+
 ---
 
 ## 🧪 Тестирование
