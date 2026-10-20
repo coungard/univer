@@ -19,6 +19,7 @@ import com.coungard.univer.entity.Faculty;
 import com.coungard.univer.entity.Group;
 import com.coungard.univer.entity.Lecture;
 import com.coungard.univer.entity.LectureAttendance;
+import com.coungard.univer.entity.LectureSelfAttendance;
 import com.coungard.univer.entity.Pair;
 import com.coungard.univer.entity.Person;
 import com.coungard.univer.entity.Semester;
@@ -34,6 +35,7 @@ import com.coungard.univer.repository.DepartmentRepository;
 import com.coungard.univer.repository.FacultyRepository;
 import com.coungard.univer.repository.GroupRepository;
 import com.coungard.univer.repository.LectureAttendanceRepository;
+import com.coungard.univer.repository.LectureSelfAttendanceRepository;
 import com.coungard.univer.repository.LectureRepository;
 import com.coungard.univer.repository.PairRepository;
 import com.coungard.univer.repository.SemesterRepository;
@@ -95,6 +97,9 @@ class LectureServiceTest {
   private LectureAttendanceRepository lectureAttendanceRepository;
 
   @Autowired
+  private LectureSelfAttendanceRepository lectureSelfAttendanceRepository;
+
+  @Autowired
   private PairService pairService;
 
   @Autowired
@@ -153,6 +158,7 @@ class LectureServiceTest {
   void setUp() {
     auditEventRepository.deleteAll();
     lectureAttendanceRepository.deleteAll();
+    lectureSelfAttendanceRepository.deleteAll();
     studentRepository.deleteAll();
     lectureRepository.deleteAll();
     pairRepository.deleteAll();
@@ -782,6 +788,33 @@ class LectureServiceTest {
     assertThat(lectureRepository.findAll()).extracting(Lecture::getId).containsExactly(attended.id());
     assertThat(lectureService.getLectureById(attended.id()).sourcePairId()).isNull();
     assertThat(lectureAttendanceRepository.count()).isEqualTo(1);
+  }
+
+  @Test
+  void shouldKeepLectureWithStudentOwnMarkWhenPairIsUpdated() {
+    // Given: по первой лекции пары студент сам отметил, что был (issue #117)
+    lectureService.generateSemesterLectures(cycleId, null);
+    LectureDto marked = findLecturesOfPair(pairId).stream()
+        .filter(lecture -> lecture.scheduledTime().toLocalDate().equals(FIRST_MONDAY_ODD_WEEK))
+        .findFirst()
+        .orElseThrow();
+    LectureSelfAttendance mark = new LectureSelfAttendance();
+    mark.setStudentId(createStudent(group1Id));
+    mark.setLectureId(marked.id());
+    mark.setAttended(true);
+    lectureSelfAttendanceRepository.save(mark);
+    PairDto pair = pairService.getPairById(pairId);
+
+    // When: пара перенесена на вторник
+    pairService.updatePair(pairId, pair.toBuilder().dayOfWeek(DayOfWeek.TUESDAY).build(), null);
+
+    // Then: лекция с личной отметкой осталась как была — вместе с отметкой
+    assertThat(findLecturesOfPair(pairId))
+        .extracting(LectureDto::scheduledTime)
+        .containsExactlyInAnyOrder(
+            marked.scheduledTime(),
+            LocalDateTime.of(2026, 9, 8, 8, 0));
+    assertThat(lectureSelfAttendanceRepository.count()).isEqualTo(1);
   }
 
   @Test

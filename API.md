@@ -249,6 +249,19 @@ id в этом же заголовке (до 64 символов: латиниц
 ### AttendanceStatsDto (только ответ)
 `totalMarked` (`long`), `attendedCount` (`long`), `attendanceRate` (`double`, `0..1`).
 
+### MarkMyAttendanceRequest (только запрос, `PUT /attendance/me/lecture/{lectureId}`)
+`attended`★ (`boolean`: `true` — был, `false` — не был).
+
+### MyAttendanceDto (только ответ)
+Итоговая отметка посещаемости лекции у вызывающего студента (issue #117). `lectureId`, `attended`
+(`boolean`), `source: AttendanceSource`.
+`AttendanceSource` (enum): `TEACHER` (лекцию отметил преподаватель или администратор — его отметка
+главнее личной) | `STUDENT` (только личная отметка студента).
+
+### AttendanceSummaryDto (только ответ)
+`pastLectures`, `attended`, `missed`, `unmarked` (все `long`): сколько лекций курса уже началось и
+сколько из них посещено, пропущено и не отмечено. `pastLectures = attended + missed + unmarked`.
+
 ### AuditEventDto (только ответ)
 `id`, `occurredAt` (`Instant`), `actorId` (subject JWT автора; `null` у анонимных действий — регистрации),
 `actorRole` (старшая роль автора: `ADMIN` | `TEACHER` | `STUDENT`), `action: AuditAction`,
@@ -484,7 +497,8 @@ id в этом же заголовке (до 64 символов: латиниц
   `POST /lectures/generate/semester/{id}`. У созданных заново занятий новые `id`. Если из пары
   занятия ещё не генерировались, `PUT` их не создаёт.
 - **`DELETE /{id}`** — занятия пары удаляются вместе с ней.
-- **Занятия с отмеченной посещаемостью** (есть хотя бы одна запись `LectureAttendance`) не
+- **Занятия с отмеченной посещаемостью** (есть хотя бы одна отметка преподавателя `LectureAttendance`
+  или личная отметка студента, `PUT /attendance/me/lecture/{id}`) не
   удаляются и не меняются: при `PUT` остаются на прежних дате и времени, а второе занятие той же
   пары на эту дату не создаётся; при `DELETE` остаются в расписании с пустым `sourcePairId`.
 - Прошедшие и будущие занятия не различаются: занятие без отметок посещаемости пересоздаётся или
@@ -778,6 +792,10 @@ id в этом же заголовке (до 64 символов: латиниц
 | GET | `/lecture/{lectureId}` | любая роль | — (`?page&size`) | `Page<LectureAttendanceDto>` |
 | GET | `/lecture/{lectureId}/stats` | любая роль | — | `AttendanceStatsDto` |
 | GET | `/student/{studentId}/course/{courseId}/stats` | любая роль | — | `AttendanceStatsDto` |
+| PUT | `/me/lecture/{lectureId}` | `STUDENT` | `MarkMyAttendanceRequest` | `200` + `MyAttendanceDto` |
+| DELETE | `/me/lecture/{lectureId}` | `STUDENT` | — | `204` |
+| GET | `/me` | `STUDENT` | — (`?page&size`) | `Page<MyAttendanceDto>` |
+| GET | `/me/course/{courseId}/summary` | `STUDENT` | — | `AttendanceSummaryDto` |
 
 - **`POST /`** — студент должен быть активно (`ACTIVE`) зачислен на курс этой лекции, иначе ошибка
   (`422`/`ValidationException`, см. «Формат ошибок» выше).
@@ -785,6 +803,24 @@ id в этом же заголовке (до 64 символов: латиниц
   ожидаемых/зачисленных (`totalMarked`, `attendedCount`, `attendanceRate`).
 - **`GET /student/{studentId}/course/{courseId}/stats`** — статистика по студенту в рамках курса: сколько
   лекций курса он посетил из уже отмеченных.
+- Отметки выше ставит преподаватель. Пути `/me…` — **личные отметки студента** (issue #117): студент сам
+  отмечает, был ли он на занятии. Хранятся отдельно, поэтому выборки и статистика `/student/…` и
+  `/lecture/…` их не видят. Если по лекции есть отметка преподавателя, итоговой считается она.
+- **`PUT /me/lecture/{lectureId}`** — поставить или изменить личную отметку. Лекция должна быть в
+  расписании группы студента (то есть в `GET /lectures/me`) и уже начаться (`scheduledTime` в прошлом).
+  Зачисление на курс не требуется. Чужая лекция, студент без группы или ещё не начавшаяся лекция —
+  `422`, несуществующая — `404`. В ответе итоговая отметка: если лекцию уже отметил преподаватель,
+  придёт его отметка с `source: TEACHER`, хотя личная тоже сохранится.
+- **`DELETE /me/lecture/{lectureId}`** — снять личную отметку. Отметку преподавателя не трогает. Если
+  личной отметки нет — тоже `204`.
+- **`GET /me`** — итоговая отметка по каждой лекции, где у студента есть отметка преподавателя или
+  личная, по времени начала лекции. Лекции без отметок сюда не попадают.
+- **`GET /me/course/{courseId}/summary`** — сводка по курсу: начавшиеся лекции курса у группы студента
+  в семестре этой группы, по итоговым отметкам. Начавшиеся лекции без отметки (`unmarked`) не
+  считаются ни посещёнными, ни пропусками. У студента без группы — все нули. Несуществующий курс —
+  `404`.
+- Лекция, у которой есть хоть одна отметка — преподавателя или личная, — не удаляется при изменении
+  или удалении её пары (см. `Pairs`).
 
 ## AuditEvents — `/api/v1/audit-events`
 
@@ -807,7 +843,7 @@ id в этом же заголовке (до 64 символов: латиниц
 | Изменение пары | `PAIR`, `UPDATE` | `before`, `after`, `lecturesDeleted`, `lecturesCreated` |
 | Удаление пары | `PAIR`, `DELETE` | `before`, `lecturesDeleted` |
 | Смена статуса цикла | `WEEK_SCHEDULE_CYCLE`, `STATUS_CHANGE` | `from`, `to` |
-| Отметка посещаемости | `LECTURE_ATTENDANCE`, `MARK` (`entityId` — лекция) | `studentId`, `attended`, `previous` |
+| Отметка посещаемости преподавателем (личные отметки студента не журналируются) | `LECTURE_ATTENDANCE`, `MARK` (`entityId` — лекция) | `studentId`, `attended`, `previous` |
 | Закрытие заявки на университет | `UNIVERSITY_REQUEST`, `COMPLETE` | `studentId`, `universityId`; `chosenByStudent: true`, если университет выбрал сам студент |
 | Отклонение заявки | `UNIVERSITY_REQUEST`, `REJECT` | `studentId`, `comment` |
 | Любое удаление через `DELETE` | тип сущности, `DELETE` | — |

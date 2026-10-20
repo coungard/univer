@@ -33,15 +33,40 @@ public interface LectureRepository extends JpaRepository<Lecture, UUID> {
   List<LocalDateTime> findScheduledTimesBySourcePairId(@Param("pairId") UUID pairId);
 
   /**
-   * Lecture, сгенерированные из пары, по которым посещаемость ещё не отмечалась, — их можно удалить
-   * и создать заново при изменении или удалении пары.
+   * Lecture, сгенерированные из пары, по которым посещаемость ещё не отмечалась ни преподавателем, ни
+   * самим студентом (issue #117), — их можно удалить и создать заново при изменении или удалении пары.
    */
   @Query("""
       SELECT l FROM Lecture l
       WHERE l.sourcePair.id = :pairId
         AND NOT EXISTS (SELECT 1 FROM LectureAttendance a WHERE a.lectureId = l.id)
+        AND NOT EXISTS (SELECT 1 FROM LectureSelfAttendance s WHERE s.lectureId = l.id)
       """)
   List<Lecture> findBySourcePairIdWithoutAttendance(@Param("pairId") UUID pairId);
+
+  /** Лекция есть в расписании группы — напрямую или как поток. */
+  boolean existsByIdAndGroupsId(UUID id, UUID groupId);
+
+  /** Лекции, по которым у студента есть отметка — преподавателя или личная. */
+  @Query("""
+      SELECT l FROM Lecture l
+      WHERE EXISTS (SELECT 1 FROM LectureAttendance a WHERE a.lectureId = l.id AND a.studentId = :studentId)
+         OR EXISTS (SELECT 1 FROM LectureSelfAttendance s WHERE s.lectureId = l.id AND s.studentId = :studentId)
+      """)
+  Page<Lecture> findMarkedByStudentId(@Param("studentId") UUID studentId, Pageable pageable);
+
+  /** ID лекций курса у группы, начавшихся в промежутке {@code [from, to]}. */
+  @Query("""
+      SELECT l.id FROM Lecture l JOIN l.groups g
+      WHERE g.id = :groupId
+        AND l.course.id = :courseId
+        AND l.scheduledTime BETWEEN :from AND :to
+      """)
+  List<UUID> findIdsByGroupAndCourseBetween(
+      @Param("groupId") UUID groupId,
+      @Param("courseId") UUID courseId,
+      @Param("from") LocalDateTime from,
+      @Param("to") LocalDateTime to);
 
   /**
    * Отвязать от пары все сгенерированные из неё Lecture — перед удалением пары, чтобы оставшиеся

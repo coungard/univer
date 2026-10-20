@@ -1,12 +1,17 @@
 package com.coungard.univer.service.impl;
 
+import com.coungard.univer.dto.AttendanceSource;
 import com.coungard.univer.dto.AttendanceStatsDto;
+import com.coungard.univer.dto.AttendanceSummaryDto;
 import com.coungard.univer.dto.AuditAction;
 import com.coungard.univer.dto.AuditEntityType;
 import com.coungard.univer.dto.EnrollmentStatus;
 import com.coungard.univer.dto.LectureAttendanceDto;
+import com.coungard.univer.dto.MyAttendanceDto;
 import com.coungard.univer.entity.Lecture;
 import com.coungard.univer.entity.LectureAttendance;
+import com.coungard.univer.entity.LectureSelfAttendance;
+import com.coungard.univer.entity.Semester;
 import com.coungard.univer.entity.Student;
 import com.coungard.univer.exception.ResourceNotFoundException;
 import com.coungard.univer.exception.ValidationException;
@@ -15,9 +20,16 @@ import com.coungard.univer.repository.CourseRepository;
 import com.coungard.univer.repository.EnrollmentRepository;
 import com.coungard.univer.repository.LectureAttendanceRepository;
 import com.coungard.univer.repository.LectureRepository;
+import com.coungard.univer.repository.LectureSelfAttendanceRepository;
 import com.coungard.univer.repository.StudentRepository;
 import com.coungard.univer.service.AuditService;
 import com.coungard.univer.service.LectureAttendanceService;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +43,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class LectureAttendanceServiceImpl implements LectureAttendanceService {
 
   private final LectureAttendanceRepository attendanceRepository;
+  private final LectureSelfAttendanceRepository selfAttendanceRepository;
   private final StudentRepository studentRepository;
   private final LectureRepository lectureRepository;
   private final CourseRepository courseRepository;
@@ -113,6 +126,104 @@ public class LectureAttendanceServiceImpl implements LectureAttendanceService {
     long totalMarked = attendanceRepository.countByStudentIdAndLecture_CourseId(studentId, courseId);
     long attendedCount = attendanceRepository.countByStudentIdAndLecture_CourseIdAndAttendedTrue(studentId, courseId);
     return buildStats(totalMarked, attendedCount);
+  }
+
+  @Override
+  @Transactional
+  public MyAttendanceDto markMyAttendance(UUID studentId, UUID lectureId, boolean attended) {
+    Student student = studentRepository.findById(studentId)
+        .orElseThrow(() -> new ResourceNotFoundException("Студент не найден с ID: " + studentId));
+    Lecture lecture = lectureRepository.findById(lectureId)
+        .orElseThrow(() -> new ResourceNotFoundException("Лекция не найдена с ID: " + lectureId));
+
+    if (student.getGroup() == null || !lectureRepository.existsByIdAndGroupsId(lectureId, student.getGroup().getId())) {
+      throw new ValidationException("Студент может отмечать только лекции своей группы");
+    }
+    if (lecture.getScheduledTime().isAfter(LocalDateTime.now())) {
+      throw new ValidationException("Отметить посещение можно только после начала лекции");
+    }
+
+    LectureSelfAttendance mark = selfAttendanceRepository.findByStudentIdAndLectureId(studentId, lectureId)
+        .orElseGet(() -> {
+          LectureSelfAttendance created = new LectureSelfAttendance();
+          created.setStudentId(studentId);
+          created.setLectureId(lectureId);
+          return created;
+        });
+    mark.setAttended(attended);
+    selfAttendanceRepository.save(mark);
+
+    return resolveMarks(studentId, List.of(lectureId)).get(lectureId);
+  }
+
+  @Override
+  @Transactional
+  public void unmarkMyAttendance(UUID studentId, UUID lectureId) {
+    selfAttendanceRepository.findByStudentIdAndLectureId(studentId, lectureId)
+        .ifPresent(selfAttendanceRepository::delete);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Page<MyAttendanceDto> getMyAttendance(UUID studentId, Pageable pageable) {
+    Page<Lecture> lectures = lectureRepository.findMarkedByStudentId(studentId, pageable);
+    Map<UUID, MyAttendanceDto> marks = resolveMarks(studentId,
+        lectures.stream().map(Lecture::getId).toList());
+    return lectures.map(lecture -> marks.get(lecture.getId()));
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public AttendanceSummaryDto getMyCourseSummary(UUID studentId, UUID courseId) {
+    Student student = studentRepository.findById(studentId)
+        .orElseThrow(() -> new ResourceNotFoundException("Студент не найден с ID: " + studentId));
+    if (!courseRepository.existsById(courseId)) {
+      throw new ResourceNotFoundException("Учебный курс не найден с ID: " + courseId);
+    }
+
+    List<UUID> pastLectureIds = List.of();
+    if (student.getGroup() != null) {
+      // Группа живёт в одном семестре — это и есть текущий семестр студента
+      Semester semester = student.getGroup().getSemester();
+      LocalDateTime now = LocalDateTime.now();
+      LocalDateTime semesterEnd = semester.getEndDate().atTime(LocalTime.MAX);
+      pastLectureIds = lectureRepository.findIdsByGroupAndCourseBetween(
+          student.getGroup().getId(), courseId,
+          semester.getStartDate().atStartOfDay(), now.isBefore(semesterEnd) ? now : semesterEnd);
+    }
+
+    Collection<MyAttendanceDto> marks = resolveMarks(studentId, pastLectureIds).values();
+    long attended = marks.stream().filter(MyAttendanceDto::attended).count();
+    long missed = marks.size() - attended;
+    return AttendanceSummaryDto.builder()
+        .pastLectures(pastLectureIds.size())
+        .attended(attended)
+        .missed(missed)
+        .unmarked(pastLectureIds.size() - marks.size())
+        .build();
+  }
+
+  /** Итоговые отметки студента по лекциям: отметка преподавателя перекрывает личную. */
+  private Map<UUID, MyAttendanceDto> resolveMarks(UUID studentId, Collection<UUID> lectureIds) {
+    Map<UUID, MyAttendanceDto> marks = new HashMap<>();
+    if (lectureIds.isEmpty()) {
+      return marks;
+    }
+    for (LectureSelfAttendance mark : selfAttendanceRepository.findByStudentIdAndLectureIdIn(studentId, lectureIds)) {
+      marks.put(mark.getLectureId(), myAttendance(mark.getLectureId(), mark.isAttended(), AttendanceSource.STUDENT));
+    }
+    for (LectureAttendance mark : attendanceRepository.findByStudentIdAndLectureIdIn(studentId, lectureIds)) {
+      marks.put(mark.getLectureId(), myAttendance(mark.getLectureId(), mark.isAttended(), AttendanceSource.TEACHER));
+    }
+    return marks;
+  }
+
+  private static MyAttendanceDto myAttendance(UUID lectureId, boolean attended, AttendanceSource source) {
+    return MyAttendanceDto.builder()
+        .lectureId(lectureId)
+        .attended(attended)
+        .source(source)
+        .build();
   }
 
   private AttendanceStatsDto buildStats(long totalMarked, long attendedCount) {
