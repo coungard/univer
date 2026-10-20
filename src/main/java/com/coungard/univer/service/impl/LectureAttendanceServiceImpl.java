@@ -67,7 +67,7 @@ public class LectureAttendanceServiceImpl implements LectureAttendanceService {
     });
     attendance.setAttended(attendanceDto.attended());
 
-    LectureAttendance saved = attendanceRepository.save(attendance);
+    LectureAttendance saved = attendanceRepository.saveAndFlush(attendance);
     auditService.record(AuditAction.MARK, AuditEntityType.LECTURE_ATTENDANCE, lecture.getId(),
         AuditService.details(
             "studentId", student.getId(),

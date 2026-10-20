@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 
 import java.util.List;
+import java.time.Instant;
 import java.util.UUID;
 
 @Builder
@@ -15,7 +16,13 @@ public record FacultyDto(
         String description,
         List<DepartmentDto> departments,
         UUID universityId,
-        UUID createdByStudentId
+        UUID createdByStudentId,
+
+        // Только в ответе (AuditableEntity, issue #119): во входящих запросах игнорируются.
+        Instant createdAt,
+        Instant updatedAt,
+        UUID createdBy,
+        UUID updatedBy
 ) {
     public FacultyDto {
         departments = departments == null ? List.of() : departments;

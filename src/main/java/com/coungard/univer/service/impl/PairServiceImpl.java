@@ -146,7 +146,7 @@ public class PairServiceImpl implements PairService {
     existing.setRoom(pairDto.room());
     existing.setGroups(groups);
 
-    Pair updated = pairRepository.save(existing);
+    Pair updated = pairRepository.saveAndFlush(existing);
     // Лекции, уже сгенерированные из пары, иначе остались бы на прежнем дне и времени (issue #99)
     PairLecturesChange lectures = lectureService.syncLecturesWithPair(updated.getId());
     auditService.record(AuditAction.UPDATE, AuditEntityType.PAIR, id, AuditService.details(

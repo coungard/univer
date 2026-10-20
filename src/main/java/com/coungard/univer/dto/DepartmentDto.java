@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Builder
@@ -14,6 +15,12 @@ public record DepartmentDto(
         @NotBlank(message = "Название кафедры обязательно")
         String name,
         String description,
-        UUID facultyId
+        UUID facultyId,
+
+        // Только в ответе (AuditableEntity, issue #119): во входящих запросах игнорируются.
+        Instant createdAt,
+        Instant updatedAt,
+        UUID createdBy,
+        UUID updatedBy
 ) {
 }

@@ -1,6 +1,7 @@
 package com.coungard.univer.dto;
 
 import jakarta.validation.constraints.NotNull;
+import java.time.Instant;
 import java.util.UUID;
 import lombok.Builder;
 
@@ -13,6 +14,12 @@ public record LectureAttendanceDto(
     @NotNull(message = "ID лекции обязателен")
     UUID lectureId,
 
-    boolean attended
+    boolean attended,
+
+    // Только в ответе (AuditableEntity, issue #119): во входящих запросах игнорируются.
+    Instant createdAt,
+    Instant updatedAt,
+    UUID createdBy,
+    UUID updatedBy
 ) {
 }

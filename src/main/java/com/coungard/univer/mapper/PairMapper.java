@@ -29,6 +29,10 @@ public class PairMapper {
             : pair.getTeacherName())
         .room(pair.getRoom())
         .groupIds(pair.getGroups().stream().map(Group::getId).collect(Collectors.toSet()))
+        .createdAt(pair.getCreatedAt())
+        .updatedAt(pair.getUpdatedAt())
+        .createdBy(pair.getCreatedBy())
+        .updatedBy(pair.getUpdatedBy())
         .build();
   }
 

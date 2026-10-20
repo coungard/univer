@@ -29,6 +29,8 @@ public record UniversityDto(
 
         Instant createdAt,
         Instant updatedAt,
+        UUID createdBy,
+        UUID updatedBy,
         AddressDto address,
 
         @NotNull(message = "Регион обязателен")

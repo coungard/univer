@@ -2,6 +2,7 @@ package com.coungard.univer.mapper;
 
 import com.coungard.univer.dto.TeacherDto;
 import com.coungard.univer.dto.registration.RegisterTeacherRequest;
+import com.coungard.univer.entity.AuditableEntity;
 import com.coungard.univer.entity.Person;
 import com.coungard.univer.entity.Teacher;
 import org.springframework.stereotype.Component;
@@ -14,6 +15,8 @@ public class TeacherMapper {
     if (teacher == null) {
       return null;
     }
+    // Правка имени, email или телефона меняет только Person
+    AuditableEntity lastModified = AuditableEntity.lastModified(teacher, teacher.getPerson());
     return TeacherDto.builder()
         .id(teacher.getId())
         .username(teacher.getPerson().getUsername())
@@ -27,7 +30,9 @@ public class TeacherMapper {
         .position(teacher.getPosition())
         .registered(teacher.isRegistered())
         .createdAt(teacher.getCreatedAt())
-        .updatedAt(teacher.getUpdatedAt())
+        .updatedAt(lastModified.getUpdatedAt())
+        .createdBy(teacher.getCreatedBy())
+        .updatedBy(lastModified.getUpdatedBy())
         .build();
   }
 

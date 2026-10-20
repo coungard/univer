@@ -122,7 +122,7 @@ public class UniversityRequestServiceImpl implements UniversityRequestService {
       studentRepository.save(student);
     }
 
-    UniversityRequest saved = universityRequestRepository.save(universityRequest);
+    UniversityRequest saved = universityRequestRepository.saveAndFlush(universityRequest);
     auditService.record(AuditAction.COMPLETE, AuditEntityType.UNIVERSITY_REQUEST, id, AuditService.details(
         "studentId", student.getId(),
         "universityId", universityId));
@@ -136,7 +136,7 @@ public class UniversityRequestServiceImpl implements UniversityRequestService {
     universityRequest.setStatus(UniversityRequestStatus.REJECTED);
     universityRequest.setComment(StringUtils.hasText(comment) ? comment.strip() : null);
 
-    UniversityRequest saved = universityRequestRepository.save(universityRequest);
+    UniversityRequest saved = universityRequestRepository.saveAndFlush(universityRequest);
     auditService.record(AuditAction.REJECT, AuditEntityType.UNIVERSITY_REQUEST, id, AuditService.details(
         "studentId", universityRequest.getStudent().getId(),
         "comment", saved.getComment()));

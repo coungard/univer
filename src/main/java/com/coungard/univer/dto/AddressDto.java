@@ -3,6 +3,7 @@ package com.coungard.univer.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Schema(description = "Ввод адреса: либо ID существующего, либо данные для создания")
@@ -30,7 +31,13 @@ public record AddressDto(
         @Schema(description = "Электронная почта", example = "dstu@dstu.ru")
         String email,
         @Schema(description = "Сайт", example = "http://www.dstu.ru")
-        String website
+        String website,
+
+        // Только в ответе (AuditableEntity, issue #119): во входящих запросах игнорируются.
+        Instant createdAt,
+        Instant updatedAt,
+        UUID createdBy,
+        UUID updatedBy
 ) {
 
     public static Builder builder() {
@@ -48,6 +55,10 @@ public record AddressDto(
         private String phone;
         private String email;
         private String website;
+        private Instant createdAt;
+        private Instant updatedAt;
+        private UUID createdBy;
+        private UUID updatedBy;
 
         public Builder id(UUID id) {
             this.id = id;
@@ -99,6 +110,26 @@ public record AddressDto(
             return this;
         }
 
+        public Builder createdAt(Instant createdAt) {
+            this.createdAt = createdAt;
+            return this;
+        }
+
+        public Builder updatedAt(Instant updatedAt) {
+            this.updatedAt = updatedAt;
+            return this;
+        }
+
+        public Builder createdBy(UUID createdBy) {
+            this.createdBy = createdBy;
+            return this;
+        }
+
+        public Builder updatedBy(UUID updatedBy) {
+            this.updatedBy = updatedBy;
+            return this;
+        }
+
         public AddressDto build() {
             return new AddressDto(
                     id,
@@ -110,7 +141,11 @@ public record AddressDto(
                     postalCode,
                     phone,
                     email,
-                    website
+                    website,
+                    createdAt,
+                    updatedAt,
+                    createdBy,
+                    updatedBy
             );
         }
     }

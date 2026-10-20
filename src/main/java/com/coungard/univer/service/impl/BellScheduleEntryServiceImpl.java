@@ -95,7 +95,7 @@ public class BellScheduleEntryServiceImpl implements BellScheduleEntryService {
     existing.setStartTime(entryDto.startTime());
     existing.setEndTime(entryDto.endTime());
 
-    BellScheduleEntry updated = bellScheduleEntryRepository.save(existing);
+    BellScheduleEntry updated = bellScheduleEntryRepository.saveAndFlush(existing);
     return bellScheduleEntryMapper.toDto(updated);
   }
 

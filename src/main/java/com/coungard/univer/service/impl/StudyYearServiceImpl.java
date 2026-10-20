@@ -77,7 +77,7 @@ public class StudyYearServiceImpl implements StudyYearService {
     existing.setFacultyId(studyYearDto.facultyId());
     existing.setYearNumber(studyYearDto.yearNumber());
 
-    StudyYear updated = studyYearRepository.save(existing);
+    StudyYear updated = studyYearRepository.saveAndFlush(existing);
     return studyYearMapper.toDto(updated);
   }
 

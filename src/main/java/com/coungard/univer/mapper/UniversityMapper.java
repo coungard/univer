@@ -34,6 +34,8 @@ public class UniversityMapper {
         .studentCount(university.getStudentCount())
         .createdAt(university.getCreatedAt())
         .updatedAt(university.getUpdatedAt())
+        .createdBy(university.getCreatedBy())
+        .updatedBy(university.getUpdatedBy())
         .address(this.toAddressDto(university.getAddress()))
         .regionId(university.getRegion() != null ? university.getRegion().getId() : null)
         .facultyCount(facultyCount)
@@ -71,6 +73,10 @@ public class UniversityMapper {
         .name(faculty.getName())
         .description(faculty.getDescription())
         .departments(toDepartmentDtos(faculty.getDepartments()))
+        .createdAt(faculty.getCreatedAt())
+        .updatedAt(faculty.getUpdatedAt())
+        .createdBy(faculty.getCreatedBy())
+        .updatedBy(faculty.getUpdatedBy())
         .build();
   }
 
@@ -83,6 +89,10 @@ public class UniversityMapper {
         .id(department.getId())
         .name(department.getName())
         .description(department.getDescription())
+        .createdAt(department.getCreatedAt())
+        .updatedAt(department.getUpdatedAt())
+        .createdBy(department.getCreatedBy())
+        .updatedBy(department.getUpdatedBy())
         .build();
   }
 
@@ -150,6 +160,10 @@ public class UniversityMapper {
         .website(address.getWebsite())
         .email(address.getEmail())
         .phone(address.getPhone())
+        .createdAt(address.getCreatedAt())
+        .updatedAt(address.getUpdatedAt())
+        .createdBy(address.getCreatedBy())
+        .updatedBy(address.getUpdatedBy())
         .build();
   }
 

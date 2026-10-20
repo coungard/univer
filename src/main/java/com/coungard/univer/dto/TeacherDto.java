@@ -32,6 +32,8 @@ public record TeacherDto(
 
     Instant createdAt,
     Instant updatedAt,
+    UUID createdBy,
+    UUID updatedBy,
 
     @NotNull(message = "ID факультета обязателен")
     UUID facultyId,

@@ -2,6 +2,7 @@ package com.coungard.univer.dto;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import java.time.Instant;
 import java.time.LocalTime;
 import java.util.UUID;
 import lombok.Builder;
@@ -21,6 +22,12 @@ public record BellScheduleEntryDto(
     LocalTime startTime,
 
     @NotNull(message = "Время окончания пары обязательно")
-    LocalTime endTime
+    LocalTime endTime,
+
+    // Только в ответе (AuditableEntity, issue #119): во входящих запросах игнорируются.
+    Instant createdAt,
+    Instant updatedAt,
+    UUID createdBy,
+    UUID updatedBy
 ) {
 }

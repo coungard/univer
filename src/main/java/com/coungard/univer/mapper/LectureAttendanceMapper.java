@@ -15,6 +15,10 @@ public class LectureAttendanceMapper {
         .studentId(attendance.getStudent().getId())
         .lectureId(attendance.getLecture().getId())
         .attended(attendance.isAttended())
+        .createdAt(attendance.getCreatedAt())
+        .updatedAt(attendance.getUpdatedAt())
+        .createdBy(attendance.getCreatedBy())
+        .updatedBy(attendance.getUpdatedBy())
         .build();
   }
 

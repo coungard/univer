@@ -35,6 +35,10 @@ public record UniversityRequestDto(
 
     Instant createdAt,
 
-    Instant updatedAt
+    Instant updatedAt,
+
+    UUID createdBy,
+
+    UUID updatedBy
 ) {
 }

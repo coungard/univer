@@ -27,6 +27,10 @@ public class LectureMapper {
         .room(lecture.getRoom())
         .sourcePairId(lecture.getSourcePair() != null ? lecture.getSourcePair().getId() : null)
         .groupIds(lecture.getGroups().stream().map(Group::getId).collect(Collectors.toSet()))
+        .createdAt(lecture.getCreatedAt())
+        .updatedAt(lecture.getUpdatedAt())
+        .createdBy(lecture.getCreatedBy())
+        .updatedBy(lecture.getUpdatedBy())
         .build();
   }
 

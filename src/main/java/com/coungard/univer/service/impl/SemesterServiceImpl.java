@@ -107,7 +107,7 @@ public class SemesterServiceImpl implements SemesterService {
     existing.setStartDate(semesterDto.startDate());
     existing.setEndDate(semesterDto.endDate());
 
-    Semester updated = semesterRepository.save(existing);
+    Semester updated = semesterRepository.saveAndFlush(existing);
     return semesterMapper.toDto(updated);
   }
 

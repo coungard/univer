@@ -155,7 +155,7 @@ public class TeacherServiceImpl implements TeacherService {
     teacher.getPerson().setBirthday(teacherDto.birthday());
     teacher.setFaculty(faculty);
 
-    Teacher updated = teacherRepository.save(teacher);
+    Teacher updated = teacherRepository.saveAndFlush(teacher);
     return teacherMapper.toDto(updated);
   }
 

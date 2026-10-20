@@ -2,6 +2,7 @@ package com.coungard.univer.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.NotBlank;
+import java.time.Instant;
 import java.util.UUID;
 import lombok.Builder;
 
@@ -23,6 +24,12 @@ public record CourseDto(
         UUID teacherId,
 
         // Только в ответе: студент, создавший предмет через POST /students/me/course.
-        UUID createdByStudentId
+        UUID createdByStudentId,
+
+        // Только в ответе (AuditableEntity, issue #119): во входящих запросах игнорируются.
+        Instant createdAt,
+        Instant updatedAt,
+        UUID createdBy,
+        UUID updatedBy
 ) {
 }

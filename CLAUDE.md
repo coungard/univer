@@ -61,7 +61,11 @@ mvn test -Dtest=StudentServiceTest#shouldUpdateStudent   # запуск одно
   заполняет Spring Data JPA auditing, автор — subject JWT (`CurrentActor`, `JpaAuditingConfig`). Любую новую
   изменяемую сущность наследуйте от `AuditableEntity` и добавляйте её таблице эти четыре столбца в
   миграции. Нативные `INSERT`/`UPDATE` и bulk-`@Modifying` минуют auditing — заполняйте поля в них сами
-  (issue #112).
+  (issue #112). Эти поля отдаются в DTO сущности (только ответ, во входящих запросах игнорируются,
+  issue #119): добавляйте их в DTO новой сущности и в её маппер. `updatedAt`/`updatedBy` проставляются в
+  `@PreUpdate`, то есть только на flush, поэтому метод, который изменяет существующую сущность и
+  возвращает её DTO, сохраняет её через `saveAndFlush`, а не `save` — иначе в ответе останется прежний
+  редактор.
 - `dto` — Java `record`'ы (в стиле builder, например `StudentDto.builder()...build()`), включая подпакет
   `dto.registration` для форм запросов/ответов регистрации и `dto.request` для прочих request-only DTO.
 - `mapper` — написанные вручную `@Component`-мапперы (entity ↔ DTO), *не* сгенерированные через MapStruct,

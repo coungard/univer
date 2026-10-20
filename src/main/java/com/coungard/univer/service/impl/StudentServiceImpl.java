@@ -181,7 +181,7 @@ public class StudentServiceImpl implements StudentService {
       existing.setGroup(group);
     }
 
-    Student updated = studentRepository.save(existing);
+    Student updated = studentRepository.saveAndFlush(existing);
     universityRequestService.completePendingRequestOnUniversityChosen(updated);
     return studentMapper.toDto(updated);
   }
@@ -207,7 +207,7 @@ public class StudentServiceImpl implements StudentService {
       changeGroup(student, request.getGroupId());
     }
 
-    Student updated = studentRepository.save(student);
+    Student updated = studentRepository.saveAndFlush(student);
     // Университет мог появиться и не напрямую — по выбранному факультету или группе
     universityRequestService.completePendingRequestOnUniversityChosen(updated);
     return studentMapper.toDto(updated);
@@ -237,7 +237,7 @@ public class StudentServiceImpl implements StudentService {
     student.setYearNumber(null);
     student.setGroup(null);
 
-    Student updated = studentRepository.save(student);
+    Student updated = studentRepository.saveAndFlush(student);
     return studentMapper.toDto(updated);
   }
 
@@ -284,7 +284,7 @@ public class StudentServiceImpl implements StudentService {
         "name", request.name().strip()));
     student.setGroup(groupRepository.getReferenceById(groupId));
 
-    Student updated = studentRepository.save(student);
+    Student updated = studentRepository.saveAndFlush(student);
     return studentMapper.toDto(updated);
   }
 
