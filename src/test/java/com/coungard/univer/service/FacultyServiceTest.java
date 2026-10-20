@@ -5,14 +5,20 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.coungard.univer.TestRegions;
 import com.coungard.univer.UniverApplication;
+import com.coungard.univer.dto.DepartmentDto;
 import com.coungard.univer.dto.FacultyDto;
+import com.coungard.univer.entity.Course;
+import com.coungard.univer.entity.Department;
 import com.coungard.univer.entity.Faculty;
 import com.coungard.univer.entity.University;
 import com.coungard.univer.exception.ConflictException;
 import com.coungard.univer.exception.ResourceNotFoundException;
+import com.coungard.univer.repository.CourseRepository;
+import com.coungard.univer.repository.DepartmentRepository;
 import com.coungard.univer.repository.FacultyRepository;
 import com.coungard.univer.repository.RegionRepository;
 import com.coungard.univer.repository.UniversityRepository;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -52,6 +58,12 @@ class FacultyServiceTest {
   private FacultyRepository facultyRepository;
 
   @Autowired
+  private DepartmentRepository departmentRepository;
+
+  @Autowired
+  private CourseRepository courseRepository;
+
+  @Autowired
   private UniversityRepository universityRepository;
 
   @Autowired
@@ -61,6 +73,8 @@ class FacultyServiceTest {
 
   @BeforeEach
   void setUp() {
+    courseRepository.deleteAll();
+    departmentRepository.deleteAll();
     facultyRepository.deleteAll();
     universityRepository.deleteAll();
 
@@ -145,6 +159,54 @@ class FacultyServiceTest {
   }
 
   @Test
+  void shouldKeepDepartmentsWhenFacultyIsRenamed() {
+    // Given: у факультета две кафедры, на одну ссылается предмет
+    FacultyDto faculty = createTestFaculty("ФКТиЭ");
+    UUID withCourse = createDepartment(faculty.id(), "Кафедра ПОВТиАС");
+    UUID withoutCourse = createDepartment(faculty.id(), "Кафедра физики");
+    Course course = new Course();
+    course.setTitle("Программирование");
+    course.setDepartment(departmentRepository.getReferenceById(withCourse));
+    courseRepository.save(course);
+
+    // When: факультет переименован, кафедр в теле запроса нет (по умолчанию departments = [])
+    FacultyDto updated = facultyService.updateFaculty(faculty.id(), FacultyDto.builder()
+        .name("ФКТиЭ ДГТУ")
+        .universityId(universityId)
+        .build());
+
+    // Then: кафедры на месте
+    assertThat(updated.name()).isEqualTo("ФКТиЭ ДГТУ");
+    assertThat(updated.departments()).extracting(DepartmentDto::id)
+        .containsExactlyInAnyOrder(withCourse, withoutCourse);
+    assertThat(departmentRepository.findAllById(List.of(withCourse, withoutCourse))).hasSize(2);
+  }
+
+  @Test
+  void shouldIgnoreDepartmentsInFacultyRequests() {
+    // Given
+    DepartmentDto newDepartment = DepartmentDto.builder().name("Кафедра из запроса").build();
+
+    // When: факультет создан и изменён с кафедрами в теле запроса
+    FacultyDto created = facultyService.createFaculty(FacultyDto.builder()
+        .name("ФКТиЭ")
+        .universityId(universityId)
+        .departments(List.of(newDepartment))
+        .build());
+    UUID existing = createDepartment(created.id(), "Кафедра физики");
+    FacultyDto updated = facultyService.updateFaculty(created.id(), FacultyDto.builder()
+        .name("ФКТиЭ")
+        .universityId(universityId)
+        .departments(List.of(newDepartment))
+        .build());
+
+    // Then: кафедры через факультет не создаются и не заменяются — только через /departments
+    assertThat(created.departments()).isEmpty();
+    assertThat(updated.departments()).extracting(DepartmentDto::id).containsExactly(existing);
+    assertThat(departmentRepository.count()).isEqualTo(1);
+  }
+
+  @Test
   void shouldRejectDuplicateNameInSameUniversity() {
     FacultyDto chemistry = createTestFaculty("Faculty of Chemistry");
     FacultyDto physics = createTestFaculty("Faculty of Physics");
@@ -207,6 +269,13 @@ class FacultyServiceTest {
   }
 
   // === Вспомогательные методы ===
+
+  private UUID createDepartment(UUID facultyId, String name) {
+    Department department = new Department();
+    department.setName(name);
+    department.setFaculty(facultyRepository.getReferenceById(facultyId));
+    return departmentRepository.save(department).getId();
+  }
 
   private FacultyDto createTestFaculty(String name) {
     return createTestFaculty(name, universityId);
