@@ -22,6 +22,9 @@
     <java.version>17</java.version>
     <keycloak.version>22.0.1</keycloak.version>
     <docker-compose.plugin.version>0.9.1</docker-compose.plugin.version>
+    <!-- 1.19 из BOM Spring Boot 3.2.0 ходит в Docker по API 1.32, новые Docker Engine (раннер ubuntu-26.04)
+         такой клиент отклоняют -->
+    <testcontainers.version>1.21.4</testcontainers.version>
   </properties>
 
   <dependencies>
