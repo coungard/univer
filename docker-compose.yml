@@ -63,6 +63,38 @@ services:
       - ./init-keycloak/certs:/opt/keycloak/certs:ro
     links:
       - postgres
+    # В образе нет curl/wget — проверяем /health/ready через bash /dev/tcp (KC_HEALTH_ENABLED выше)
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080 && printf 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && grep -q '200 OK' <&3"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+  # Сам бэкенд. В профиле app, чтобы обычный `docker compose up` поднимал только Postgres+Keycloak и не
+  # занимал 8023 при запуске приложения из IDE. Полный стек: `docker compose --profile app up --build`
+  app:
+    build: .
+    # Как в coungard/delivery-club: репозиторий — проект, тег — сервис
+    image: coungard/univer:backend
+    container_name: univer-app
+    profiles: [ "app" ]
+    environment:
+      # Внутри сети compose сервисы доступны по именам, localhost:5435/8082 — только с хоста
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/univerdb
+      # JwtDecoder берёт отсюда только JWKS, claim iss не проверяет (см. SecurityConfig.jwtDecoder) —
+      # поэтому токены, выданные клиенту через localhost:8082, приложение принимает
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/univer-realm
+      KEYCLOAK_AUTH_SERVER_URL: http://keycloak:8080
+      # tokenUrl Swagger UI открывается из браузера, поэтому адрес с хоста
+      KEYCLOAK_PUBLIC_URL: http://localhost:8082
+    ports:
+      - "8023:8023"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
 
 volumes:
   postgres_data:

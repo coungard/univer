@@ -47,6 +47,9 @@ keycloak:
   enabled: true
   realm: univer-realm
   auth-server-url: http://localhost:8082
+  # Адрес Keycloak, видимый браузеру (tokenUrl в Swagger UI). В Docker отличается от auth-server-url: приложение
+  # ходит в Keycloak по внутреннему адресу (http://keycloak:8080), а браузер — по http://localhost:8082
+  public-url: ${keycloak.auth-server-url}
   ssl-required: external
   resource: univer-client
   use-resource-role-mappings: true

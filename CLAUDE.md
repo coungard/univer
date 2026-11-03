@@ -26,7 +26,12 @@ University — REST API на Spring Boot 3 / Java 17 для управления
 docker-compose up --build
 ```
 
-Само приложение работает на порту `8023` (`server.port` в `application.yml`).
+Само приложение работает на порту `8023` (`server.port` в `application.yml`). Его можно поднять и в Docker
+вместе с остальными сервисами — `docker compose --profile app up --build` (multi-stage `Dockerfile`, сервис
+`app` в профиле `app`, чтобы обычный `docker-compose up` не занимал 8023). В контейнере адреса Postgres и
+Keycloak переопределены env-переменными на имена сервисов; `keycloak.auth-server-url` — back-channel адрес
+(Keycloak admin client), `keycloak.public-url` — адрес для браузера (tokenUrl Swagger UI), по умолчанию
+совпадают. Новые настройки, зависящие от сетевого окружения, держите переопределяемыми так же.
 
 ```bash
 mvn compile                 # компиляция
