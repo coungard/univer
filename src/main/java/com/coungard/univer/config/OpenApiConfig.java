@@ -23,8 +23,8 @@ public class OpenApiConfig {
   @Value("${springdoc.api-docs.version}")
   private String version;
 
-  @Value("${keycloak.auth-server-url}")
-  private String keycloakAuthServerUrl;
+  @Value("${keycloak.public-url}")
+  private String keycloakPublicUrl;
 
   // Список тегов в нужном порядке
   private static final List<String> TAG_ORDER = asList(
@@ -50,7 +50,7 @@ public class OpenApiConfig {
                 .description("OAuth2 with Keycloak")
                 .flows(new OAuthFlows()
                     .password(new OAuthFlow()
-                        .tokenUrl(keycloakAuthServerUrl + "/realms/univer-realm/protocol/openid-connect/token")
+                        .tokenUrl(keycloakPublicUrl + "/realms/univer-realm/protocol/openid-connect/token")
                         .scopes(new Scopes().addString("openid", "OpenID scope"))
                     )
                 )

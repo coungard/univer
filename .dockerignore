@@ -1,0 +1,13 @@
+target/
+.git/
+.github/
+.idea/
+.gigaide/
+.claude/
+temp/
+explore/
+scripts/
+init-db/
+init-keycloak/
+*.iml
+*.md

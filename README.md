@@ -125,7 +125,19 @@ Keycloak вместе с его БД).
     - Docker
     - Docker Compose
 
-2. Запустите всё окружение:
+2. Запустите всё окружение — Postgres, Keycloak и сам бэкенд (JDK и Maven не нужны, приложение собирается
+   внутри образа по `Dockerfile`, API — на http://localhost:8023):
 
 ```bash
-docker-compose up --build
+docker compose --profile app up --build
+```
+
+   Без `--profile app` поднимаются только Postgres и Keycloak — для запуска приложения из IDE
+   (`mvn spring-boot:run`). Внутри контейнера приложение ходит в сервисы по именам (`postgres:5432`,
+   `keycloak:8080`), адреса переопределены переменными окружения сервиса `app` в `docker-compose.yml`;
+   `KEYCLOAK_PUBLIC_URL` — адрес Keycloak для браузера (Swagger UI), он остаётся `http://localhost:8082`.
+
+   Только Postgres и Keycloak:
+
+```bash
+docker compose up --build
