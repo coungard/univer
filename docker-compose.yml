@@ -33,7 +33,10 @@ services:
       KEYCLOAK_ADMIN_PASSWORD: admin
       KC_HEALTH_ENABLED: true
       KC_LOG_LEVEL: INFO
-      KC_HOSTNAME: localhost
+      # Для запуска на реальном устройстве (issue #127) — адрес Mac в LAN, иначе форма логина отправляется
+      # на localhost телефона: `KC_HOSTNAME=192.168.1.42 docker compose up`. Этот же адрес должен быть в SAN
+      # сертификата (init-keycloak/certs/generate.sh). iss токенов бэкенд не проверяет (см. MOBILE.md).
+      KC_HOSTNAME: ${KC_HOSTNAME:-localhost}
       # KC_HOSTNAME_PORT намеренно не фиксируем: он раньше жёстко приклеивал 8082 ко всем сгенерированным
       # URL (включая форму логина), из-за чего при заходе через HTTPS (8443) форма логина всё равно
       # указывала на https://localhost:8082 — порт, где реально слушает только HTTP. Без фиксации
