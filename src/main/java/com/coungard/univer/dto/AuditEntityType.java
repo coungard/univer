@@ -8,6 +8,7 @@ public enum AuditEntityType {
   COURSE,
   DEPARTMENT,
   FACULTY,
+  FEEDBACK,
   GROUP,
   LECTURE,
   LECTURE_ATTENDANCE,
