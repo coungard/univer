@@ -1,0 +1,122 @@
+# Стенд на VPS (issue #2): Caddy (TLS Let's Encrypt) → бэкенд и Keycloak, Postgres только во внутренней сети.
+# Локальная разработка — по-прежнему docker-compose.yml. Запуск и обновление — DEPLOY.md:
+#
+#   docker compose -f docker-compose.prod.yml --env-file .env.prod up -d
+#
+# Наружу публикуется только Caddy (80/443). Остальные сервисы портов не публикуют: Docker обходит ufw, и
+# опубликованный порт контейнера был бы виден из интернета независимо от правил файрвола.
+
+name: univer
+
+services:
+  postgres:
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: univerdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?задайте в .env.prod}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-keycloak/init-keycloak-db.sql:/docker-entrypoint-initdb.d/init-keycloak-db.sql:ro
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    mem_limit: 512m
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:22.0.1
+    restart: unless-stopped
+    # start, а не start-dev: кэши, тема и проверки hostname в боевом режиме. Realm импортируется только если его
+    # ещё нет — повторные старты не затирают пользователей, зарегистрированных на стенде.
+    command: [ "start", "--import-realm" ]
+    environment:
+      KC_DB: postgres
+      KC_DB_URL_HOST: postgres
+      KC_DB_URL_DATABASE: keycloak
+      KC_DB_USERNAME: postgres
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD:?}
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN_USERNAME:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?задайте в .env.prod}
+      KC_HEALTH_ENABLED: true
+      # TLS терминирует Caddy, внутри docker-сети Keycloak работает по HTTP и доверяет X-Forwarded-* от Caddy
+      KC_PROXY: edge
+      KC_HTTP_ENABLED: true
+      # Hostname не фиксируем: адреса строятся из запроса. Через Caddy — https://<AUTH_DOMAIN> (X-Forwarded-*,
+      # входящие заголовки клиента Caddy не пропускает), через SSH-туннель к админке — http://localhost:8081.
+      # С фиксированным KC_HOSTNAME + KC_HOSTNAME_ADMIN_URL админка зацикливалась: токены выдавались на публичном
+      # адресе, а обновлялись через туннель — invalid_token. Снаружи Keycloak доступен только через Caddy, а
+      # /admin там закрыт (403), так что админка открывается только через туннель (DEPLOY.md)
+      KC_HOSTNAME_STRICT: false
+      # Подставляются в init-keycloak/realm-config.json при первом импорте realm (${VAR:значение для dev})
+      UNIVER_CLIENT_SECRET: ${UNIVER_CLIENT_SECRET:?задайте в .env.prod}
+      UNIVER_API_URL: https://${API_DOMAIN:?задайте в .env.prod}
+      UNIVER_SUPER_PASSWORD: ${UNIVER_SUPER_PASSWORD:?задайте в .env.prod}
+      UNIVER_STUDENT1_PASSWORD: ${UNIVER_STUDENT1_PASSWORD:?задайте в .env.prod}
+    volumes:
+      - ./init-keycloak/realm-config.json:/opt/keycloak/data/import/realm-config.json:ro
+    ports:
+      # Только для SSH-туннеля к админке: на 127.0.0.1 сервера, снаружи недоступен
+      - "127.0.0.1:8081:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # В образе нет curl/wget — проверяем /health/ready через bash /dev/tcp
+    healthcheck:
+      test: [ "CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080 && printf 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && grep -q '200 OK' <&3" ]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 120s
+    mem_limit: 1g
+
+  app:
+    image: ${BACKEND_IMAGE:-coungard/univer:backend}
+    restart: unless-stopped
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/univerdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:?}
+      SPRING_JPA_SHOWSQL: false
+      # JWKS берётся по внутреннему адресу; claim iss не проверяется (SecurityConfig.jwtDecoder)
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/univer-realm
+      KEYCLOAK_AUTH_SERVER_URL: http://keycloak:8080
+      KEYCLOAK_PUBLIC_URL: https://${AUTH_DOMAIN:?}
+      KEYCLOAK_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USERNAME:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?}
+      SPRINGDOC_SWAGGERUI_OAUTH_CLIENTSECRET: ${UNIVER_CLIENT_SECRET:?}
+      JAVA_OPTS: -Xmx512m
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    mem_limit: 1g
+
+  caddy:
+    image: caddy:2.10
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      API_DOMAIN: ${API_DOMAIN:?}
+      AUTH_DOMAIN: ${AUTH_DOMAIN:?}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      # Выданные сертификаты и ключ ACME-аккаунта: без volume Caddy перевыпускал бы их на каждом пересоздании
+      # контейнера и быстро упёрся бы в лимиты Let's Encrypt
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+      - keycloak
+    mem_limit: 128m
+
+volumes:
+  postgres_data:
+  caddy_data:
+  caddy_config:
