@@ -26,7 +26,9 @@
 - Наружу открыты только 80/443 (Caddy) и 22 (SSH); `ufw` на сервере пропускает ещё 1234 — агент панели 1Gb.ru.
   Postgres, Keycloak и бэкенд портов не публикуют: Docker обходит `ufw`, опубликованный порт был бы виден снаружи.
 - Сертификаты Caddy получает и продлевает сам, хранит в volume `caddy_data`.
-- Keycloak работает в режиме `start` за прокси (`KC_PROXY=edge`). Realm импортируется из
+- Keycloak работает в режиме `start` за прокси (`KC_PROXY=edge`), hostname не зафиксирован (`KC_HOSTNAME_STRICT=false`):
+  адреса строятся из запроса — `https://auth.<домен>` через Caddy, `http://localhost:8081` через туннель к админке.
+  Realm импортируется из
   `init-keycloak/realm-config.json` **только при первом запуске**; секрет `univer-client`, пароли `super` и
   `student1` и redirect URI для Swagger UI подставляются из `.env.prod` (`${VAR:значение для dev}` в файле realm).
   Дальше они живут в базе Keycloak — меняйте их в админке, правка `.env.prod` на них уже не влияет.

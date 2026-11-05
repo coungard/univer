@@ -44,9 +44,12 @@ services:
       # TLS терминирует Caddy, внутри docker-сети Keycloak работает по HTTP и доверяет X-Forwarded-* от Caddy
       KC_PROXY: edge
       KC_HTTP_ENABLED: true
-      KC_HOSTNAME: ${AUTH_DOMAIN:?задайте в .env.prod}
-      # Админка закрыта на Caddy (403) и открывается только через SSH-туннель на 127.0.0.1:8081 (DEPLOY.md)
-      KC_HOSTNAME_ADMIN_URL: http://localhost:8081
+      # Hostname не фиксируем: адреса строятся из запроса. Через Caddy — https://<AUTH_DOMAIN> (X-Forwarded-*,
+      # входящие заголовки клиента Caddy не пропускает), через SSH-туннель к админке — http://localhost:8081.
+      # С фиксированным KC_HOSTNAME + KC_HOSTNAME_ADMIN_URL админка зацикливалась: токены выдавались на публичном
+      # адресе, а обновлялись через туннель — invalid_token. Снаружи Keycloak доступен только через Caddy, а
+      # /admin там закрыт (403), так что админка открывается только через туннель (DEPLOY.md)
+      KC_HOSTNAME_STRICT: false
       # Подставляются в init-keycloak/realm-config.json при первом импорте realm (${VAR:значение для dev})
       UNIVER_CLIENT_SECRET: ${UNIVER_CLIENT_SECRET:?задайте в .env.prod}
       UNIVER_API_URL: https://${API_DOMAIN:?задайте в .env.prod}
