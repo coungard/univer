@@ -1,12 +1,18 @@
 package com.coungard.univer.exception;
 
 import com.coungard.univer.filter.RequestIdFilter;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -66,6 +72,63 @@ public class GlobalExceptionHandler {
     body.put("path", "/");
 
     return new ResponseEntity<>(body, HttpStatus.CONFLICT);
+  }
+
+  @ExceptionHandler(TooManyRequestsException.class)
+  public ResponseEntity<Object> handleTooManyRequests(TooManyRequestsException ex) {
+    // Retry-After в целых секундах с округлением вверх, не меньше секунды
+    long retryAfterSeconds = Math.max(1, (ex.getRetryAfter().toMillis() + 999) / 1000);
+
+    Map<String, Object> body = new LinkedHashMap<>();
+    body.put("timestamp", LocalDateTime.now());
+    body.put("status", HttpStatus.TOO_MANY_REQUESTS.value());
+    body.put("error", "Too Many Requests");
+    body.put("message", ex.getMessage());
+    body.put("retryAfterSeconds", retryAfterSeconds);
+    body.put("path", "/");
+
+    return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+        .header(HttpHeaders.RETRY_AFTER, String.valueOf(retryAfterSeconds))
+        .body(body);
+  }
+
+  /**
+   * Значение поля тела не того формата — неизвестное значение enum, не UUID, не число: такая же плоская карта
+   * поле → сообщение, как у ошибок {@code @Valid}, а не стандартное тело Spring. Прочие нечитаемые тела
+   * (битый JSON, нет тела) остаются стандартным ответом 400.
+   */
+  @ExceptionHandler(HttpMessageNotReadableException.class)
+  public ResponseEntity<Map<String, String>> handleNotReadable(HttpMessageNotReadableException ex) throws Exception {
+    if (!(ex.getCause() instanceof InvalidFormatException invalidFormat) || invalidFormat.getPath().isEmpty()) {
+      throw ex;
+    }
+
+    String field = invalidFormat.getPath().stream()
+        .map(reference -> reference.getFieldName() != null
+            ? reference.getFieldName()
+            : "[" + reference.getIndex() + "]")
+        .collect(Collectors.joining(".")).replace(".[", "[");
+
+    Class<?> targetType = invalidFormat.getTargetType();
+    String message = targetType != null && targetType.isEnum()
+        ? "Недопустимое значение. Допустимые: " + String.join(", ", enumJsonValues(targetType))
+        : "Недопустимое значение";
+    return new ResponseEntity<>(Map.of(field, message), HttpStatus.BAD_REQUEST);
+  }
+
+  /** Значения enum, как они выглядят в JSON: с учётом {@code @JsonProperty} на константах. */
+  private static List<String> enumJsonValues(Class<?> enumType) {
+    return Arrays.stream(enumType.getEnumConstants())
+        .map(constant -> {
+          String name = ((Enum<?>) constant).name();
+          try {
+            JsonProperty property = enumType.getField(name).getAnnotation(JsonProperty.class);
+            return property != null ? property.value() : name;
+          } catch (NoSuchFieldException e) {
+            return name;
+          }
+        })
+        .toList();
   }
 
   @ExceptionHandler(MethodArgumentNotValidException.class)

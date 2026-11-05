@@ -47,12 +47,13 @@
 
 | Статус | Когда | Тело |
 |---|---|---|
-| `400 Bad Request` | Невалидное тело запроса (`@Valid`, аннотации на полях DTO) | `{ "имяПоля": "текст ошибки", ... }` — плоская карта поле → сообщение |
+| `400 Bad Request` | Невалидное тело запроса (`@Valid`, аннотации на полях DTO) или значение поля не того формата (неизвестное значение enum, не UUID, не число) | `{ "имяПоля": "текст ошибки", ... }` — плоская карта поле → сообщение; у enum в сообщении перечислены допустимые значения. Синтаксически битый JSON — стандартный ответ Spring |
 | `401 Unauthorized` | Нет токена / токен невалиден или просрочен | стандартный ответ Spring Security (пустое тело или `WWW-Authenticate` заголовок) |
 | `403 Forbidden` | Токен валиден, но роли не хватает (`@PreAuthorize`) | стандартный ответ Spring Security |
 | `404 Not Found` | Сущность не найдена (`ResourceNotFoundException`) | `{ "timestamp", "status": 404, "error": "Not Found", "message", "path": "/" }` |
 | `409 Conflict` | Значение уже занято: email или логин при регистрации, название группы в семестре, название факультета в университете, название предмета на факультете (`ConflictException`) | `{ "timestamp", "status": 409, "error": "Conflict", "message", "field", "path": "/" }` — `field` называет поле запроса с занятым значением: `"email"`, `"username"`, `"name"` или `"title"` (у предмета); `null`, если определить не удалось. Для названия группы, факультета или предмета в теле есть ещё `id` — ID уже существующей записи с таким названием; для email и логина поля `id` нет |
 | `422 Unprocessable Entity` | Бизнес-валидация не прошла (`ValidationException`) | то же тело, что и 404 (`"status": 422`), поле `"error"` тоже всегда `"Not Found"` — известная неточность в `GlobalExceptionHandler`, не полагайтесь на текст `error`, только на `status`/`message` |
+| `429 Too Many Requests` | Превышен лимит частоты действия (`TooManyRequestsException`; пока только отзывы — 1 в час) | `{ "timestamp", "status": 429, "error": "Too Many Requests", "message", "retryAfterSeconds", "path": "/" }` и заголовок `Retry-After` в секундах |
 | `500 Internal Server Error` | Непредвиденная ошибка сервера | `{ "timestamp", "status": 500, "error": "Internal Server Error", "message": "Внутренняя ошибка сервера", "requestId", "path" }` — без деталей ошибки; `path` здесь — реальный путь запроса |
 
 Во всех случаях выше с телом (`400`/`404`/`409`/`422`) поле `path` в теле **не** содержит реальный путь запроса —
@@ -272,7 +273,28 @@ id в этом же заголовке (до 64 символов: латиниц
 `AuditAction` (enum): `REGISTER` | `CREATE` | `UPDATE` | `DELETE` | `STATUS_CHANGE` | `MARK` | `COMPLETE` |
 `REJECT`. `AuditEntityType` (enum): `BELL_SCHEDULE_ENTRY` | `COURSE` | `DEPARTMENT` | `FACULTY` | `GROUP` |
 `LECTURE` | `LECTURE_ATTENDANCE` | `PAIR` | `SEMESTER` | `STUDENT` | `STUDY_YEAR` | `TEACHER` | `UNIVERSITY` |
-`UNIVERSITY_REQUEST` | `WEEK_SCHEDULE_CYCLE`.
+`UNIVERSITY_REQUEST` | `WEEK_SCHEDULE_CYCLE` | `FEEDBACK`.
+
+### SubmitFeedbackRequest (только запрос, `POST /feedback`)
+`type`★ (`FeedbackType`), `message`★ (от 1 до 2000 символов), `appVersion`★ (до 32 символов), `platform`★
+(`FeedbackPlatform`), `osVersion`★ (до 32 символов). Крайние пробелы строк отбрасываются до проверки длины;
+сообщение из одних пробелов — пустое. Автора клиент не передаёт: он берётся из токена.
+`FeedbackType` (enum): `BUG` (ошибка) | `IMPROVEMENT` (доработка) | `IDEA` (идея).
+`FeedbackPlatform` (enum, **строчными**): `ios` | `android`.
+
+### FeedbackDto (только ответ, `POST /feedback`)
+`id`, `type: FeedbackType`, `message`, `status: FeedbackStatus`, `createdAt`.
+`FeedbackStatus` (enum): `NEW` (новый) | `IN_PROGRESS` (в работе) | `DONE` (сделано) | `REJECTED` (не будет
+сделано).
+
+### FeedbackAdminDto (только ответ, `GET`/`PATCH /feedback`)
+Поля `FeedbackDto` плюс автор и устройство: `userId` (subject JWT = id студента или преподавателя), `role`
+(старшая роль автора на момент отправки: `ADMIN` | `TEACHER` | `STUDENT`), `username` (логин на момент
+отправки), `appVersion`, `platform`, `osVersion`; поля аудита (`updatedAt`/`updatedBy` — последняя смена
+статуса).
+
+### UpdateFeedbackStatusRequest (только запрос, `PATCH /feedback/{id}`)
+`status`★ (`FeedbackStatus`).
 
 ---
 
@@ -851,10 +873,35 @@ id в этом же заголовке (до 64 символов: латиниц
 | Отметка посещаемости преподавателем (личные отметки студента не журналируются) | `LECTURE_ATTENDANCE`, `MARK` (`entityId` — лекция) | `studentId`, `attended`, `previous` |
 | Закрытие заявки на университет | `UNIVERSITY_REQUEST`, `COMPLETE` | `studentId`, `universityId`; `chosenByStudent: true`, если университет выбрал сам студент |
 | Отклонение заявки | `UNIVERSITY_REQUEST`, `REJECT` | `studentId`, `comment` |
+| Смена статуса отзыва (сам отзыв не журналируется) | `FEEDBACK`, `STATUS_CHANGE` | `from`, `to` |
 | Любое удаление через `DELETE` | тип сущности, `DELETE` | — |
 
 > ФИО, email и телефон в `details` не пишутся. Ссылок на сущности у события нет, поэтому запись
 > остаётся после удаления сущности и автора.
+
+## Feedback — `/api/v1/feedback`
+
+Отзывы из мобильного приложения: ошибка, предложение по доработке или идея (issue #130). Хранятся только
+на бэкенде, никуда не пересылаются. Пользователь оставляет отзыв, администратор их разбирает.
+
+| Метод | Путь | Auth | Тело запроса | Тело ответа |
+|---|---|---|---|---|
+| POST | `/` | `STUDENT`, `TEACHER`, `ADMIN` | `SubmitFeedbackRequest` | `FeedbackDto`, `201` |
+| GET | `/` | `ADMIN` | — (`?type&status&page&size`) | `Page<FeedbackAdminDto>` |
+| PATCH | `/{id}` | `ADMIN` | `UpdateFeedbackStatusRequest` | `FeedbackAdminDto` |
+
+- **`POST /`** — автор (`userId`, роль, логин) берётся из токена. Ошибки:
+  - `400` — карта полей, в том числе для неизвестного `type` или `platform`:
+    `{ "type": "Недопустимое значение. Допустимые: BUG, IMPROVEMENT, IDEA" }`;
+  - `429` — пользователь уже оставлял отзыв за последний час (лимит — 1 отзыв в час). Тело
+    `{ "timestamp", "status": 429, "error": "Too Many Requests", "message", "retryAfterSeconds", "path": "/" }`,
+    то же число секунд — в заголовке `Retry-After`: через столько можно отправить снова. Лимит у каждого
+    пользователя свой и считается без блокировок: два одновременных запроса на границе могут оба пройти.
+- **`GET /`** — сначала новые. `type` и `status` необязательны и объединяются через «и»; неизвестное
+  значение — `400`.
+- **`PATCH /{id}`** — смена статуса: `NEW` → `IN_PROGRESS` → `DONE` | `REJECTED`, из `NEW` можно сразу в
+  `DONE` или `REJECTED`. `DONE` и `REJECTED` окончательные: переход из них или назад — `422`. Тот же статус
+  ничего не меняет (`200`). Отзыва нет — `404`. Смена статуса пишется в журнал аудита.
 
 ---
 
