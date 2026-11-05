@@ -1,0 +1,17 @@
+# Reverse-proxy стенда (issue #2). Сертификаты Let's Encrypt (запасной вариант — ZeroSSL) Caddy получает и
+# продлевает сам, email для ACME не нужен. Домены — из .env.prod через docker-compose.prod.yml.
+
+{$API_DOMAIN} {
+	encode gzip
+	reverse_proxy app:8023
+}
+
+{$AUTH_DOMAIN} {
+	# Админка и admin REST API Keycloak снаружи закрыты. Бэкенд ходит в admin API напрямую (http://keycloak:8080),
+	# администратор — через SSH-туннель (DEPLOY.md)
+	@admin path /admin /admin/*
+	respond @admin 403
+
+	encode gzip
+	reverse_proxy keycloak:8080
+}

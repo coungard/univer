@@ -37,3 +37,6 @@ build/
 ### Python ###
 __pycache__/
 *.pyc
+
+### Deploy ###
+.env.prod

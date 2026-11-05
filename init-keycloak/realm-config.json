@@ -42,7 +42,7 @@
       "protocol": "openid-connect",
       "enabled": true,
       "publicClient": false,
-      "secret": "univer-client-secret",
+      "secret": "${UNIVER_CLIENT_SECRET:univer-client-secret}",
       "standardFlowEnabled": true,
       "directAccessGrantsEnabled": true,
       "serviceAccountsEnabled": false,
@@ -53,10 +53,12 @@
       "webOrigins": [
         "http://localhost:*",
         "https://localhost:*",
+        "${UNIVER_API_URL:http://localhost:8023}",
         "+"
       ],
       "redirectUris": [
-        "http://localhost:8023/*"
+        "http://localhost:8023/*",
+        "${UNIVER_API_URL:http://localhost:8023}/*"
       ],
       "attributes": {
         "post.logout.redirect.uris": "+",
@@ -130,7 +132,7 @@
       "credentials": [
         {
           "type": "password",
-          "value": "1234",
+          "value": "${UNIVER_SUPER_PASSWORD:1234}",
           "temporary": false
         }
       ],
@@ -147,7 +149,7 @@
       "credentials": [
         {
           "type": "password",
-          "value": "student123",
+          "value": "${UNIVER_STUDENT1_PASSWORD:student123}",
           "temporary": false
         }
       ],
