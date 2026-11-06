@@ -86,7 +86,10 @@ docker stats --no-stream
 1. A-записи `api.<домен>` и `auth.<домен>` → `81.177.48.254`. Дождаться, пока они резолвятся у публичных DNS
    (`dig +short api.<домен> @8.8.8.8`), иначе Caddy не пройдёт проверку Let's Encrypt.
 2. `API_DOMAIN` / `AUTH_DOMAIN` в `.env.prod`, затем `up -d` — Caddy выпустит новые сертификаты, бэкенд получит
-   новый `KEYCLOAK_PUBLIC_URL`. Keycloak перезапускать не нужно: адреса он берёт из запроса.
+   новый `KEYCLOAK_PUBLIC_URL`. Keycloak перезапускать не нужно: адреса он берёт из запроса. Первую минуту
+   после `up -d` HTTPS на новых адресах обрывается на рукопожатии (Caddy ещё получает сертификаты), а API
+   отвечает 502 (бэкенд стартует ~20 с) — это нормально, проверять после `certificate obtained successfully`
+   в `docker logs univer-caddy-1`.
 3. Redirect URI и web origin клиента `univer-client` (для Swagger UI). Realm уже импортирован, из `.env.prod` они
    не обновятся — меняем через `kcadm.sh` в контейнере:
    ```bash
