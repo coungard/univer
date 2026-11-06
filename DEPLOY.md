@@ -7,13 +7,14 @@
 | | |
 |---|---|
 | Сервер | `ssh root@81.177.48.254` (1Gb.ru, Ubuntu 26.04, 2 vCPU / 4 ГБ / 40 ГБ), вход только по ключу |
-| API | `https://api.81-177-48-254.sslip.io` (Swagger UI — `/swagger-ui/index.html`) |
-| Keycloak | `https://auth.81-177-48-254.sslip.io`, realm `univer-realm` |
+| API | `https://api.univerapp.ru` (Swagger UI — `/swagger-ui/index.html`) |
+| Keycloak | `https://auth.univerapp.ru`, realm `univer-realm` |
+| Домен | `univerapp.ru`, куплен и обслуживается в 1Gb.ru (DNS: `ns1.1gb.ru`, `ns2.1gb.ru`, `ns3.1gb-ru.com`) |
 | Файлы | `/opt/univer`: `docker-compose.prod.yml`, `deploy/Caddyfile`, `init-keycloak/`, `.env.prod` |
 | Секреты | `/opt/univer/.env.prod` на сервере (права 600, в git не попадает) |
 
-Домена пока нет, поэтому адреса на [sslip.io](https://sslip.io): `<имя>.81-177-48-254.sslip.io` резолвится в IP
-сервера, и Let's Encrypt выдаёт на такие имена обычные сертификаты.
+DNS-записи в панели 1Gb.ru: A `api` и A `auth` → `81.177.48.254`. Корень и `www` тоже указывают на сервер, но
+пока не обслуживаются. CAA панель не поддерживает.
 
 ## Как устроено
 
@@ -82,11 +83,27 @@ docker stats --no-stream
 
 ## Смена домена
 
-1. A-записи `api.<домен>` и `auth.<домен>` → `81.177.48.254`.
-2. `API_DOMAIN` / `AUTH_DOMAIN` в `.env.prod`, затем `up -d` — Caddy выпустит новые сертификаты.
-3. В админке Keycloak у клиента `univer-client` заменить redirect URI и web origin на `https://api.<домен>`
-   (realm уже импортирован, из `.env.prod` они не обновятся).
-4. В мобильном приложении — новые адреса.
+1. A-записи `api.<домен>` и `auth.<домен>` → `81.177.48.254`. Дождаться, пока они резолвятся у публичных DNS
+   (`dig +short api.<домен> @8.8.8.8`), иначе Caddy не пройдёт проверку Let's Encrypt.
+2. `API_DOMAIN` / `AUTH_DOMAIN` в `.env.prod`, затем `up -d` — Caddy выпустит новые сертификаты, бэкенд получит
+   новый `KEYCLOAK_PUBLIC_URL`. Keycloak перезапускать не нужно: адреса он берёт из запроса. Первую минуту
+   после `up -d` HTTPS на новых адресах обрывается на рукопожатии (Caddy ещё получает сертификаты), а API
+   отвечает 502 (бэкенд стартует ~20 с) — это нормально, проверять после `certificate obtained successfully`
+   в `docker logs univer-caddy-1`.
+3. Redirect URI и web origin клиента `univer-client` (для Swagger UI). Realm уже импортирован, из `.env.prod` они
+   не обновятся — меняем через `kcadm.sh` в контейнере:
+   ```bash
+   cd /opt/univer
+   docker compose -f docker-compose.prod.yml --env-file .env.prod exec keycloak bash -c '
+     K=/opt/keycloak/bin/kcadm.sh
+     $K config credentials --server http://localhost:8080 --realm master --user "$KEYCLOAK_ADMIN" --password "$KEYCLOAK_ADMIN_PASSWORD"
+     ID=$($K get clients -r univer-realm -q clientId=univer-client --fields id --format csv --noquotes)
+     $K update clients/$ID -r univer-realm \
+       -s "redirectUris=[\"http://localhost:8023/*\",\"https://api.<домен>/*\"]" \
+       -s "webOrigins=[\"http://localhost:*\",\"https://localhost:*\",\"https://api.<домен>\",\"+\"]"'
+   ```
+4. В мобильном приложении — новые адреса. Токены, выданные на старом адресе, имеют другой `iss`, и Keycloak
+   не обновит их на новом — пользователям нужно один раз войти заново.
 
 ## Ещё не сделано (issue #2)
 

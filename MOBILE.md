@@ -114,6 +114,12 @@ issuer-валидатора — проверяются только подпис
 примет), а для реального iPhone в SAN и `KC_HOSTNAME` нужен LAN-адрес Mac — см. `init-keycloak/certs/README.md`
 (issue #127).
 
+**Стенд вместо локального бэкенда (issue #2):** `https://api.univerapp.ru` (API) и `https://auth.univerapp.ru`
+(Keycloak, тот же realm `univer-realm` и клиент `univer-mobile`). Сертификаты Let's Encrypt, поэтому ничего
+добавлять в доверенные не нужно, а HTTPS-порт один — и для страницы логина, и для обмена `code` на токены, и для
+`password` grant. Работает с реального устройства из любой сети. Учётные записи стенда отдельные от локальных,
+пароль тестового `student1` — в `/opt/univer/.env.prod` на сервере (см. `DEPLOY.md`).
+
 ---
 
 ## Флоу авторизации (Authorization Code + PKCE)
