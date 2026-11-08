@@ -40,3 +40,6 @@ __pycache__/
 
 ### Deploy ###
 .env.prod
+
+### Media (issue #136) ###
+/data/

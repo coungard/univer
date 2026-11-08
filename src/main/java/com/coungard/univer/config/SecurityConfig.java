@@ -53,6 +53,9 @@ public class SecurityConfig {
                 "/api/v1/faculties/**",
                 "/api/v1/departments/**"
             ).permitAll()
+            // Медиа-файлы (аватары) публичны: ключ содержит случайный UUID, листинга нет. Нужно только при
+            // media.serve-from-app (локальная разработка) — на стенде /media/** отдаёт Caddy (issue #136)
+            .requestMatchers(HttpMethod.GET, MediaWebConfig.MEDIA_PATH).permitAll()
             // Отключено намеренно: удобно для локальной отладки — требуем JWT
             // даже на списковых эндпоинтах, чтобы не путать публичное и приватное поведение.
 //            .requestMatchers("/api/v1/teachers*").permitAll()
