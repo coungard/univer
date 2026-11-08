@@ -3,6 +3,7 @@ package com.coungard.univer.security;
 import com.coungard.univer.config.KeycloakConfig;
 import com.coungard.univer.dto.registration.RegisterData;
 import com.coungard.univer.exception.ConflictException;
+import jakarta.ws.rs.NotFoundException;
 import java.util.List;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
@@ -62,6 +63,21 @@ public class KeycloakAdminService {
           .users()
           .get(userId)
           .remove();
+    }
+  }
+
+  /**
+   * Удалить пользователя, если он ещё есть. Повторное удаление уже удалённого пользователя — не ошибка: так
+   * можно безопасно повторить удаление аккаунта, оборвавшееся после Keycloak (issue #133).
+   *
+   * @return {@code true}, если пользователь был и удалён; {@code false}, если его уже не было
+   */
+  public boolean deleteUserIfExists(String userId) {
+    try {
+      deleteUser(userId);
+      return true;
+    } catch (NotFoundException e) {
+      return false;
     }
   }
 

@@ -31,8 +31,9 @@ public class Feedback extends AuditableEntity {
 
   /**
    * Subject JWT автора. Ссылки на студента или преподавателя нет: отзыв может оставить и администратор.
+   * {@code null} — автор удалил аккаунт, отзыв обезличен (issue #133).
    */
-  @Column(name = "user_id", nullable = false)
+  @Column(name = "user_id")
   private UUID userId;
 
   /**

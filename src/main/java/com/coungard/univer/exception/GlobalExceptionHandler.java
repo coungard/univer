@@ -93,6 +93,25 @@ public class GlobalExceptionHandler {
   }
 
   /**
+   * Удаление аккаунта сорвалось на Keycloak — 500 с понятным сообщением и {@code requestId}, как у
+   * необработанных ошибок, причина со стеком в лог.
+   */
+  @ExceptionHandler(AccountDeletionException.class)
+  public ResponseEntity<Object> handleAccountDeletion(AccountDeletionException ex, HttpServletRequest request) {
+    log.error("Не удалось удалить аккаунт: {} {}", request.getMethod(), request.getRequestURI(), ex);
+
+    Map<String, Object> body = new LinkedHashMap<>();
+    body.put("timestamp", LocalDateTime.now());
+    body.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+    body.put("error", "Internal Server Error");
+    body.put("message", ex.getMessage());
+    body.put("requestId", MDC.get(RequestIdFilter.MDC_KEY));
+    body.put("path", request.getRequestURI());
+
+    return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+
+  /**
    * Значение поля тела не того формата — неизвестное значение enum, не UUID, не число: такая же плоская карта
    * поле → сообщение, как у ошибок {@code @Valid}, а не стандартное тело Spring. Прочие нечитаемые тела
    * (битый JSON, нет тела) остаются стандартным ответом 400.
