@@ -1,6 +1,7 @@
 package com.coungard.univer.repository;
 
 import com.coungard.univer.entity.Lecture;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -75,4 +76,15 @@ public interface LectureRepository extends JpaRepository<Lecture, UUID> {
   @Modifying
   @Query("UPDATE Lecture l SET l.sourcePair = null WHERE l.sourcePair.id = :pairId")
   int detachFromSourcePair(@Param("pairId") UUID pairId);
+
+  /**
+   * Отвязать преподавателя от всех его лекций — при удалении его аккаунта (issue #133). Bulk-update минует
+   * JPA auditing, поэтому {@code updatedAt}/{@code updatedBy} проставляются явно.
+   */
+  @Modifying
+  @Query("""
+      UPDATE Lecture l SET l.teacher = null, l.updatedAt = :now, l.updatedBy = :actorId
+      WHERE l.teacher.id = :teacherId""")
+  int detachTeacher(@Param("teacherId") UUID teacherId, @Param("now") Instant now,
+      @Param("actorId") UUID actorId);
 }

@@ -8,6 +8,9 @@ import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -22,4 +25,11 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Enrollme
   boolean existsByStudentIdAndCourseId(UUID studentId, UUID courseId);
 
   boolean existsByStudentIdAndCourseIdAndStatus(UUID studentId, UUID courseId, EnrollmentStatus status);
+
+  /**
+   * Удалить все записи студента на курсы — при удалении его аккаунта (issue #133).
+   */
+  @Modifying
+  @Query("DELETE FROM Enrollment e WHERE e.studentId = :studentId")
+  int deleteAllOfStudent(@Param("studentId") UUID studentId);
 }

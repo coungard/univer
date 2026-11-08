@@ -9,6 +9,9 @@ import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -29,4 +32,11 @@ public interface LectureAttendanceRepository extends JpaRepository<LectureAttend
   long countByStudentIdAndLecture_CourseId(UUID studentId, UUID courseId);
 
   long countByStudentIdAndLecture_CourseIdAndAttendedTrue(UUID studentId, UUID courseId);
+
+  /**
+   * Удалить все отметки преподавателя о посещении студентом — при удалении его аккаунта (issue #133).
+   */
+  @Modifying
+  @Query("DELETE FROM LectureAttendance a WHERE a.studentId = :studentId")
+  int deleteAllOfStudent(@Param("studentId") UUID studentId);
 }

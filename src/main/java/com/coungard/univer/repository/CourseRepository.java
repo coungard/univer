@@ -1,15 +1,16 @@
 package com.coungard.univer.repository;
 
 import com.coungard.univer.entity.Course;
+import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
-import java.util.UUID;
 
 @Repository
 public interface CourseRepository extends JpaRepository<Course, UUID> {
@@ -43,4 +44,15 @@ public interface CourseRepository extends JpaRepository<Course, UUID> {
         """)
     List<Course> findByFacultyIdAndTitleIgnoreCase(
         @Param("facultyId") UUID facultyId, @Param("title") String title);
+
+    /**
+     * Отвязать преподавателя от всех его предметов — при удалении его аккаунта (issue #133). Bulk-update
+     * минует JPA auditing, поэтому {@code updatedAt}/{@code updatedBy} проставляются явно.
+     */
+    @Modifying
+    @Query("""
+        UPDATE Course c SET c.teacher = null, c.updatedAt = :now, c.updatedBy = :actorId
+        WHERE c.teacher.id = :teacherId""")
+    int detachTeacher(@Param("teacherId") UUID teacherId, @Param("now") Instant now,
+        @Param("actorId") UUID actorId);
 }
