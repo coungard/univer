@@ -25,6 +25,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.MultipartException;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
@@ -72,6 +74,38 @@ public class GlobalExceptionHandler {
     body.put("path", "/");
 
     return new ResponseEntity<>(body, HttpStatus.CONFLICT);
+  }
+
+  /** Загруженный файл не принят (issue #137): 413 или 415 из самого исключения. */
+  @ExceptionHandler(MediaRejectedException.class)
+  public ResponseEntity<Object> handleMediaRejected(MediaRejectedException ex, HttpServletRequest request) {
+    return mediaError(ex.getStatus(), ex.getMessage(), request);
+  }
+
+  /**
+   * Файл больше {@code spring.servlet.multipart.max-file-size} — тело отвергнуто ещё до контроллера. Без этого
+   * обработчика ответ был бы 500 из {@link #handleUnexpected}.
+   */
+  @ExceptionHandler(MaxUploadSizeExceededException.class)
+  public ResponseEntity<Object> handleMaxUploadSize(MaxUploadSizeExceededException ex, HttpServletRequest request) {
+    return mediaError(HttpStatus.PAYLOAD_TOO_LARGE, "Файл больше 5 МБ", request);
+  }
+
+  /** Битое multipart-тело (обрыв загрузки, нет границы) — ошибка клиента, а не 500. */
+  @ExceptionHandler(MultipartException.class)
+  public ResponseEntity<Object> handleMultipart(MultipartException ex, HttpServletRequest request) {
+    log.info("Некорректный multipart-запрос {} {}: {}", request.getMethod(), request.getRequestURI(), ex.toString());
+    return mediaError(HttpStatus.BAD_REQUEST, "Некорректный multipart-запрос", request);
+  }
+
+  private static ResponseEntity<Object> mediaError(HttpStatus status, String message, HttpServletRequest request) {
+    Map<String, Object> body = new LinkedHashMap<>();
+    body.put("timestamp", LocalDateTime.now());
+    body.put("status", status.value());
+    body.put("error", status.getReasonPhrase());
+    body.put("message", message);
+    body.put("path", request.getRequestURI());
+    return new ResponseEntity<>(body, status);
   }
 
   @ExceptionHandler(TooManyRequestsException.class)

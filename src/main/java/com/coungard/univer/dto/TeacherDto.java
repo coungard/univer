@@ -41,7 +41,13 @@ public record TeacherDto(
     @NotBlank(message = "Должность должна быть заполнена")
     String position,
 
-    Boolean registered
+    Boolean registered,
+
+    /** Фото профиля 512×512 — постоянная публичная ссылка; {@code null}, если фото нет (issue #137). Только ответ. */
+    String avatarUrl,
+
+    /** Превью 128×128 для списков (issue #137). Только ответ. */
+    String avatarThumbnailUrl
 ) {
 
 }

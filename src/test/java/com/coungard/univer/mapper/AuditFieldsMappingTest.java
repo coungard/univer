@@ -1,6 +1,7 @@
 package com.coungard.univer.mapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 import com.coungard.univer.entity.Address;
 import com.coungard.univer.entity.AuditableEntity;
@@ -21,6 +22,7 @@ import com.coungard.univer.entity.Teacher;
 import com.coungard.univer.entity.University;
 import com.coungard.univer.entity.UniversityRequest;
 import com.coungard.univer.entity.WeekScheduleCycle;
+import com.coungard.univer.service.AvatarUrls;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -30,6 +32,8 @@ import org.junit.jupiter.api.Test;
  * Поля {@link AuditableEntity} доходят до DTO во всех ручных мапперах (issue #119).
  */
 class AuditFieldsMappingTest {
+
+  private final AvatarUrls avatarUrls = mock(AvatarUrls.class);
 
   private static final Instant CREATED_AT = Instant.parse("2026-09-01T09:00:00Z");
   private static final Instant UPDATED_AT = Instant.parse("2026-10-01T12:30:00Z");
@@ -82,8 +86,8 @@ class AuditFieldsMappingTest {
     UniversityRequest request = audited(new UniversityRequest());
     request.setStudent(student);
 
-    assertAudit(new StudentMapper().toDto(student));
-    assertAudit(new TeacherMapper().toDto(teacher));
+    assertAudit(new StudentMapper(avatarUrls).toDto(student));
+    assertAudit(new TeacherMapper(avatarUrls).toDto(teacher));
     assertAudit(new EnrollmentMapper().toDto(enrollment));
     assertAudit(new LectureAttendanceMapper().toDto(attendance));
     assertAudit(new UniversityRequestMapper().toDto(request));
@@ -100,7 +104,7 @@ class AuditFieldsMappingTest {
     student.setPerson(person);
 
     // When
-    var dto = new StudentMapper().toDto(student);
+    var dto = new StudentMapper(avatarUrls).toDto(student);
 
     // Then: последнее изменение — у Person, автор и время создания — самого студента
     assertThat(dto.updatedAt()).isEqualTo(UPDATED_AT.plusSeconds(60));

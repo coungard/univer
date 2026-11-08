@@ -2,6 +2,7 @@ package com.coungard.univer.service.impl;
 
 import com.coungard.univer.dto.AuditAction;
 import com.coungard.univer.dto.AuditEntityType;
+import com.coungard.univer.entity.MediaFile;
 import com.coungard.univer.entity.Student;
 import com.coungard.univer.entity.Teacher;
 import com.coungard.univer.exception.AccountDeletionException;
@@ -18,6 +19,7 @@ import com.coungard.univer.repository.UniversityRequestRepository;
 import com.coungard.univer.security.KeycloakAdminService;
 import com.coungard.univer.service.AccountService;
 import com.coungard.univer.service.AuditService;
+import com.coungard.univer.service.AvatarService;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +46,7 @@ public class AccountServiceImpl implements AccountService {
   private final FeedbackRepository feedbackRepository;
   private final KeycloakAdminService keycloakAdminService;
   private final AuditService auditService;
+  private final AvatarService avatarService;
 
   @Override
   @Transactional
@@ -69,8 +72,10 @@ public class AccountServiceImpl implements AccountService {
     int attendance = lectureAttendanceRepository.deleteAllOfStudent(id);
     int selfAttendance = lectureSelfAttendanceRepository.deleteAllOfStudent(id);
     int universityRequests = universityRequestRepository.deleteAllOfStudent(id);
-    // Person удаляется каскадом (CascadeType.ALL)
+    MediaFile avatar = student.getPerson().getAvatarFile();
+    // Person удаляется каскадом (CascadeType.ALL); аватар — после него: persons ссылается на файл
     studentRepository.delete(student);
+    boolean avatarDeleted = avatarService.deleteOfRemovedPerson(avatar);
 
     auditService.record(AuditAction.DELETE, AuditEntityType.STUDENT, id, AuditService.details(
         "selfDeleted", true,
@@ -78,6 +83,7 @@ public class AccountServiceImpl implements AccountService {
         "attendanceDeleted", attendance,
         "selfAttendanceDeleted", selfAttendance,
         "universityRequestsDeleted", universityRequests,
+        "avatarDeleted", avatarDeleted,
         "feedbackAnonymized", feedbackAnonymized));
   }
 
@@ -87,14 +93,17 @@ public class AccountServiceImpl implements AccountService {
     int pairs = pairRepository.detachTeacher(id, now, id);
     int lectures = lectureRepository.detachTeacher(id, now, id);
     int courses = courseRepository.detachTeacher(id, now, id);
-    // Person удаляется каскадом (CascadeType.ALL)
+    MediaFile avatar = teacher.getPerson().getAvatarFile();
+    // Person удаляется каскадом (CascadeType.ALL); аватар — после него: persons ссылается на файл
     teacherRepository.delete(teacher);
+    boolean avatarDeleted = avatarService.deleteOfRemovedPerson(avatar);
 
     auditService.record(AuditAction.DELETE, AuditEntityType.TEACHER, id, AuditService.details(
         "selfDeleted", true,
         "pairsDetached", pairs,
         "lecturesDetached", lectures,
         "coursesDetached", courses,
+        "avatarDeleted", avatarDeleted,
         "feedbackAnonymized", feedbackAnonymized));
   }
 }

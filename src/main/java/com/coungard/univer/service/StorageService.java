@@ -2,6 +2,8 @@ package com.coungard.univer.service;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.time.Instant;
+import java.util.List;
 
 /**
  * Хранилище медиа-файлов (issue #136). В БД хранится ключ объекта, а не URL и не путь на диске: так переезд с
@@ -40,6 +42,17 @@ public interface StorageService {
 
   boolean exists(String key);
 
+  /**
+   * Все объекты с ключами, начинающимися с {@code prefix} (например, {@code avatars/}), — для уборки сирот.
+   *
+   * @param prefix пустая строка или ключ-каталог с {@code /} на конце
+   */
+  List<StoredObject> list(String prefix);
+
   /** Постоянный публичный адрес объекта для клиента. Существование объекта не проверяется. */
   String publicUrl(String key);
+
+  /** Объект хранилища и время его последней записи. */
+  record StoredObject(String key, Instant lastModified) {
+  }
 }

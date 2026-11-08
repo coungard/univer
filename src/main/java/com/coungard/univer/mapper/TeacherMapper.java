@@ -5,11 +5,16 @@ import com.coungard.univer.dto.registration.RegisterTeacherRequest;
 import com.coungard.univer.entity.AuditableEntity;
 import com.coungard.univer.entity.Person;
 import com.coungard.univer.entity.Teacher;
+import com.coungard.univer.service.AvatarUrls;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 @Component
+@RequiredArgsConstructor
 public class TeacherMapper {
+
+  private final AvatarUrls avatarUrls;
 
   public TeacherDto toDto(Teacher teacher) {
     if (teacher == null) {
@@ -33,6 +38,8 @@ public class TeacherMapper {
         .updatedAt(lastModified.getUpdatedAt())
         .createdBy(teacher.getCreatedBy())
         .updatedBy(lastModified.getUpdatedBy())
+        .avatarUrl(avatarUrls.full(teacher.getPerson().getAvatarFile()))
+        .avatarThumbnailUrl(avatarUrls.thumbnail(teacher.getPerson().getAvatarFile()))
         .build();
   }
 

@@ -3,10 +3,15 @@ package com.coungard.univer.mapper;
 import com.coungard.univer.dto.StudentDto;
 import com.coungard.univer.entity.AuditableEntity;
 import com.coungard.univer.entity.Student;
+import com.coungard.univer.service.AvatarUrls;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class StudentMapper {
+
+  private final AvatarUrls avatarUrls;
 
   public StudentDto toDto(Student student) {
     if (student == null) {
@@ -31,6 +36,8 @@ public class StudentMapper {
         .updatedAt(lastModified.getUpdatedAt())
         .createdBy(student.getCreatedBy())
         .updatedBy(lastModified.getUpdatedBy())
+        .avatarUrl(avatarUrls.full(student.getPerson().getAvatarFile()))
+        .avatarThumbnailUrl(avatarUrls.thumbnail(student.getPerson().getAvatarFile()))
         .build();
   }
 }
