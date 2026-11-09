@@ -11,7 +11,10 @@ import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -82,6 +85,33 @@ public class FileSystemStorageService implements StorageService {
   @Override
   public boolean exists(String key) {
     return Files.isRegularFile(resolve(key));
+  }
+
+  @Override
+  public List<StoredObject> list(String prefix) {
+    Path dir = root;
+    if (!prefix.isEmpty()) {
+      if (!prefix.endsWith("/")) {
+        throw new IllegalArgumentException("Префикс должен заканчиваться на /: " + prefix);
+      }
+      dir = resolve(prefix.substring(0, prefix.length() - 1));
+    }
+    if (!Files.isDirectory(dir)) {
+      return List.of();
+    }
+    List<StoredObject> objects = new ArrayList<>();
+    try (Stream<Path> files = Files.walk(dir)) {
+      for (Path file : (Iterable<Path>) files.filter(Files::isRegularFile)::iterator) {
+        String key = root.relativize(file).toString().replace(file.getFileSystem().getSeparator(), "/");
+        // Временные файлы недописанных объектов и чужие файлы не по шаблону ключа — не объекты хранилища
+        if (KEY_PATTERN.matcher(key).matches()) {
+          objects.add(new StoredObject(key, Files.getLastModifiedTime(file).toInstant()));
+        }
+      }
+    } catch (IOException | UncheckedIOException e) {
+      throw new StorageException("Не удалось прочитать список медиа-файлов " + prefix, e);
+    }
+    return objects;
   }
 
   @Override

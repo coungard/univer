@@ -45,6 +45,12 @@ public record StudentDto(
 
         Integer yearNumber,
 
-        UUID groupId
+        UUID groupId,
+
+        /** Фото профиля 512×512 — постоянная публичная ссылка; {@code null}, если фото нет (issue #137). Только ответ. */
+        String avatarUrl,
+
+        /** Превью 128×128 для списков (issue #137). Только ответ. */
+        String avatarThumbnailUrl
 ) {
 }

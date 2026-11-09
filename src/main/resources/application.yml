@@ -24,6 +24,12 @@ spring:
         jwt:
           issuer-uri: http://localhost:8082/realms/univer-realm
 
+  servlet:
+    multipart:
+      # Аватар — до 5 МБ (issue #137); больше — 413 до контроллера. На стенде тот же предел в Caddy (#138)
+      max-file-size: 5MB
+      max-request-size: 6MB
+
   flyway:
     enabled: true
     baseline-on-migrate: true  # Полезно, если БД уже существует
@@ -49,6 +55,8 @@ media:
   storage-dir: ./data/media
   public-base-url: http://localhost:${server.port}/media
   serve-from-app: true
+  # Уборка файлов-сирот и незавершённых загрузок (MediaSweeper, issue #137) — раз в сутки ночью
+  sweeper-cron: "0 30 4 * * *"
 
 # Keycloak Config
 keycloak:

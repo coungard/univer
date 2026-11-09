@@ -76,6 +76,24 @@ class FileSystemStorageServiceTest {
   }
 
   @Test
+  void shouldListObjectsUnderPrefixSkippingTempAndForeignFiles() throws IOException {
+    String thumbnail = KEY.replace("512.jpg", "128.jpg");
+    storage.put(KEY, bytes("big"), "image/jpeg");
+    storage.put(thumbnail, bytes("small"), "image/jpeg");
+    storage.put("other/file.txt", bytes("x"), "text/plain");
+    Files.writeString(root.resolve(KEY).resolveSibling(".upload-123.tmp"), "half");
+    Files.writeString(root.resolve("avatars").resolve("чужой файл.txt"), "x");
+
+    assertThat(storage.list("avatars/")).extracting(StorageService.StoredObject::key)
+        .containsExactlyInAnyOrder(KEY, thumbnail);
+    assertThat(storage.list("avatars/")).allSatisfy(object -> assertThat(object.lastModified()).isNotNull());
+    assertThat(storage.list("")).hasSize(3);
+    assertThat(storage.list("missing/")).isEmpty();
+    assertThatThrownBy(() -> storage.list("avatars")).isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> storage.list("../")).isInstanceOf(IllegalArgumentException.class);
+  }
+
+  @Test
   void shouldBuildPublicUrlWithoutDoubleSlash() {
     assertThat(storage.publicUrl(KEY)).isEqualTo("https://api.example.ru/media/" + KEY);
   }

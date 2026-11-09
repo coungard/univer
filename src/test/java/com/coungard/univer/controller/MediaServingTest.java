@@ -1,5 +1,6 @@
 package com.coungard.univer.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -89,7 +90,7 @@ class MediaServingTest {
 
   @Test
   void shouldBuildPublicUrlFromConfig() {
-    org.assertj.core.api.Assertions.assertThat(storageService.publicUrl(KEY))
+    assertThat(storageService.publicUrl(KEY))
         .isEqualTo("http://localhost:8023/media/" + KEY);
   }
 }
