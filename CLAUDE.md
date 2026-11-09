@@ -87,6 +87,11 @@ mvn test -Dtest=StudentServiceTest#shouldUpdateStudent   # запуск одно
 - `config` — `SecurityConfig` (JWT resource server + авторизация маршрутов), `KeycloakConfig`, `OpenApiConfig`
   (Swagger UI с OAuth2/PKCE, привязанный к realm Keycloak).
 - `listener` — `StartupListener` для хуков на старте приложения.
+- Медиа-файлы (аватары и т.п.) — через `StorageService` (`FileSystemStorageService`: каталог `media.storage-dir`
+  на локальном диске, issue #136), не напрямую через `java.nio.file`. В БД храните **ключ** объекта
+  (`avatars/{fileId}/512.jpg`), а не URL или путь — ссылку для клиента строит `StorageService.publicUrl(...)`
+  из `media.public-base-url`; так переезд в облачное S3 (критерии — issue #135) не потребует миграции данных.
+  Локально `/media/**` отдаёт само приложение (`media.serve-from-app`), на стенде — Caddy из volume.
 
 ### Флоу регистрации (студент/преподаватель)
 

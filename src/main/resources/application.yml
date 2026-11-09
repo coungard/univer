@@ -42,6 +42,14 @@ springdoc:
       scope-separator: " "
       scopes: openid
 
+# Медиа-файлы на локальном диске (issue #136). В БД хранятся ключи, ссылка для клиента —
+# <public-base-url>/<ключ>. На стенде: каталог внутри volume, public-base-url — https://<API_DOMAIN>/media,
+# serve-from-app: false (файлы отдаёт Caddy)
+media:
+  storage-dir: ./data/media
+  public-base-url: http://localhost:${server.port}/media
+  serve-from-app: true
+
 # Keycloak Config
 keycloak:
   enabled: true
