@@ -2,6 +2,7 @@ package com.coungard.univer.controller;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -11,8 +12,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.coungard.univer.UniverApplication;
+import com.coungard.univer.exception.AccountDeletionException;
+import com.coungard.univer.exception.ConflictException;
+import com.coungard.univer.exception.ResourceNotFoundException;
+import com.coungard.univer.exception.TooManyRequestsException;
+import com.coungard.univer.exception.ValidationException;
 import com.coungard.univer.filter.RequestIdFilter;
 import com.coungard.univer.service.RegionService;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -120,6 +127,47 @@ class RequestIdAndErrorHandlingTest {
             .header(HttpHeaders.AUTHORIZATION, "Bearer " + STUDENT_TOKEN))
         .andExpect(status().isForbidden())
         .andExpect(header().exists(RequestIdFilter.HEADER));
+  }
+
+  /**
+   * Тело доменных ошибок (issue #144): {@code error} — стандартная причина для статуса (у 422 раньше был
+   * «Not Found»), {@code path} — реальный путь (раньше «/»), {@code requestId} — как в заголовке.
+   */
+  @Test
+  void shouldReturnUniformBodyForDomainErrors() throws Exception {
+    record Case(RuntimeException exception, int status, String error) {
+    }
+    List<Case> cases = List.of(
+        new Case(new ResourceNotFoundException("нет такого"), 404, "Not Found"),
+        new Case(new ValidationException("не согласовано"), 422, "Unprocessable Entity"),
+        new Case(new ConflictException("name", "занято", UUID.fromString("00000000-0000-0000-0000-000000000001")),
+            409, "Conflict"),
+        new Case(new TooManyRequestsException("часто", Duration.ofSeconds(90)), 429, "Too Many Requests"),
+        new Case(new AccountDeletionException("Keycloak недоступен", new RuntimeException()), 500,
+            "Internal Server Error"));
+
+    for (Case c : cases) {
+      doThrow(c.exception()).when(regionService).getRegions();
+
+      mockMvc.perform(get("/api/v1/regions").header(RequestIdFilter.HEADER, "req-" + c.status()))
+          .andExpect(status().is(c.status()))
+          .andExpect(jsonPath("$.status").value(c.status()))
+          .andExpect(jsonPath("$.error").value(c.error()))
+          .andExpect(jsonPath("$.message").value(c.exception().getMessage()))
+          .andExpect(jsonPath("$.requestId").value("req-" + c.status()))
+          .andExpect(jsonPath("$.path").value("/api/v1/regions"))
+          .andExpect(jsonPath("$.timestamp").exists());
+    }
+
+    // Свои поля 409 и 429 остаются на месте
+    doThrow(cases.get(2).exception()).when(regionService).getRegions();
+    mockMvc.perform(get("/api/v1/regions"))
+        .andExpect(jsonPath("$.field").value("name"))
+        .andExpect(jsonPath("$.id").value("00000000-0000-0000-0000-000000000001"));
+    doThrow(cases.get(3).exception()).when(regionService).getRegions();
+    mockMvc.perform(get("/api/v1/regions"))
+        .andExpect(jsonPath("$.retryAfterSeconds").value(90))
+        .andExpect(header().string(HttpHeaders.RETRY_AFTER, "90"));
   }
 
   private static Jwt jwt(UUID subject, String role) {

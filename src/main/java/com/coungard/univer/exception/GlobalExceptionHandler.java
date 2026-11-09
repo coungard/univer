@@ -4,9 +4,12 @@ import com.coungard.univer.filter.RequestIdFilter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import jakarta.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -28,58 +31,34 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartException;
 
-import java.time.LocalDateTime;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
   @ExceptionHandler(ResourceNotFoundException.class)
-  public ResponseEntity<Object> handleResourceNotFound(ResourceNotFoundException ex) {
-    Map<String, Object> body = new LinkedHashMap<>();
-    body.put("timestamp", LocalDateTime.now());
-    body.put("status", HttpStatus.NOT_FOUND.value());
-    body.put("error", "Not Found");
-    body.put("message", ex.getMessage());
-    body.put("path", "/");
-
-    return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+  public ResponseEntity<Object> handleResourceNotFound(ResourceNotFoundException ex, HttpServletRequest request) {
+    return error(HttpStatus.NOT_FOUND, ex.getMessage(), request);
   }
 
   @ExceptionHandler(ValidationException.class)
-  public ResponseEntity<Object> handleValidation(ValidationException ex) {
-    Map<String, Object> body = new LinkedHashMap<>();
-    body.put("timestamp", LocalDateTime.now());
-    body.put("status", HttpStatus.UNPROCESSABLE_ENTITY.value());
-    body.put("error", "Not Found");
-    body.put("message", ex.getMessage());
-    body.put("path", "/");
-
-    return new ResponseEntity<>(body, HttpStatus.UNPROCESSABLE_ENTITY);
+  public ResponseEntity<Object> handleValidation(ValidationException ex, HttpServletRequest request) {
+    return error(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage(), request);
   }
 
   @ExceptionHandler(ConflictException.class)
-  public ResponseEntity<Object> handleConflict(ConflictException ex) {
-    Map<String, Object> body = new LinkedHashMap<>();
-    body.put("timestamp", LocalDateTime.now());
-    body.put("status", HttpStatus.CONFLICT.value());
-    body.put("error", "Conflict");
-    body.put("message", ex.getMessage());
+  public ResponseEntity<Object> handleConflict(ConflictException ex, HttpServletRequest request) {
+    Map<String, Object> body = body(HttpStatus.CONFLICT, ex.getMessage(), request);
     body.put("field", ex.getField());
     if (ex.getExistingId() != null) {
       body.put("id", ex.getExistingId());
     }
-    body.put("path", "/");
-
     return new ResponseEntity<>(body, HttpStatus.CONFLICT);
   }
 
   /** Загруженный файл не принят (issue #137): 413 или 415 из самого исключения. */
   @ExceptionHandler(MediaRejectedException.class)
   public ResponseEntity<Object> handleMediaRejected(MediaRejectedException ex, HttpServletRequest request) {
-    return mediaError(ex.getStatus(), ex.getMessage(), request);
+    return error(ex.getStatus(), ex.getMessage(), request);
   }
 
   /**
@@ -88,38 +67,23 @@ public class GlobalExceptionHandler {
    */
   @ExceptionHandler(MaxUploadSizeExceededException.class)
   public ResponseEntity<Object> handleMaxUploadSize(MaxUploadSizeExceededException ex, HttpServletRequest request) {
-    return mediaError(HttpStatus.PAYLOAD_TOO_LARGE, "Файл больше 5 МБ", request);
+    return error(HttpStatus.PAYLOAD_TOO_LARGE, "Файл больше 5 МБ", request);
   }
 
   /** Битое multipart-тело (обрыв загрузки, нет границы) — ошибка клиента, а не 500. */
   @ExceptionHandler(MultipartException.class)
   public ResponseEntity<Object> handleMultipart(MultipartException ex, HttpServletRequest request) {
     log.info("Некорректный multipart-запрос {} {}: {}", request.getMethod(), request.getRequestURI(), ex.toString());
-    return mediaError(HttpStatus.BAD_REQUEST, "Некорректный multipart-запрос", request);
-  }
-
-  private static ResponseEntity<Object> mediaError(HttpStatus status, String message, HttpServletRequest request) {
-    Map<String, Object> body = new LinkedHashMap<>();
-    body.put("timestamp", LocalDateTime.now());
-    body.put("status", status.value());
-    body.put("error", status.getReasonPhrase());
-    body.put("message", message);
-    body.put("path", request.getRequestURI());
-    return new ResponseEntity<>(body, status);
+    return error(HttpStatus.BAD_REQUEST, "Некорректный multipart-запрос", request);
   }
 
   @ExceptionHandler(TooManyRequestsException.class)
-  public ResponseEntity<Object> handleTooManyRequests(TooManyRequestsException ex) {
+  public ResponseEntity<Object> handleTooManyRequests(TooManyRequestsException ex, HttpServletRequest request) {
     // Retry-After в целых секундах с округлением вверх, не меньше секунды
     long retryAfterSeconds = Math.max(1, (ex.getRetryAfter().toMillis() + 999) / 1000);
 
-    Map<String, Object> body = new LinkedHashMap<>();
-    body.put("timestamp", LocalDateTime.now());
-    body.put("status", HttpStatus.TOO_MANY_REQUESTS.value());
-    body.put("error", "Too Many Requests");
-    body.put("message", ex.getMessage());
+    Map<String, Object> body = body(HttpStatus.TOO_MANY_REQUESTS, ex.getMessage(), request);
     body.put("retryAfterSeconds", retryAfterSeconds);
-    body.put("path", "/");
 
     return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
         .header(HttpHeaders.RETRY_AFTER, String.valueOf(retryAfterSeconds))
@@ -127,22 +91,32 @@ public class GlobalExceptionHandler {
   }
 
   /**
-   * Удаление аккаунта сорвалось на Keycloak — 500 с понятным сообщением и {@code requestId}, как у
-   * необработанных ошибок, причина со стеком в лог.
+   * Удаление аккаунта сорвалось на Keycloak — 500 с понятным сообщением, причина со стеком в лог.
    */
   @ExceptionHandler(AccountDeletionException.class)
   public ResponseEntity<Object> handleAccountDeletion(AccountDeletionException ex, HttpServletRequest request) {
     log.error("Не удалось удалить аккаунт: {} {}", request.getMethod(), request.getRequestURI(), ex);
+    return error(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(), request);
+  }
 
+  /**
+   * Единое тело ошибки (issue #144): {@code timestamp}, {@code status}, {@code error} — стандартная причина для
+   * этого статуса, {@code message}, {@code requestId} (тот же, что в заголовке {@code X-Request-Id}, issue #110)
+   * и {@code path} — реальный путь запроса. Обработчики со своими полями (409, 429) дописывают их в эту карту.
+   */
+  private static Map<String, Object> body(HttpStatus status, String message, HttpServletRequest request) {
     Map<String, Object> body = new LinkedHashMap<>();
     body.put("timestamp", LocalDateTime.now());
-    body.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
-    body.put("error", "Internal Server Error");
-    body.put("message", ex.getMessage());
+    body.put("status", status.value());
+    body.put("error", status.getReasonPhrase());
+    body.put("message", message);
     body.put("requestId", MDC.get(RequestIdFilter.MDC_KEY));
     body.put("path", request.getRequestURI());
+    return body;
+  }
 
-    return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
+  private static ResponseEntity<Object> error(HttpStatus status, String message, HttpServletRequest request) {
+    return new ResponseEntity<>(body(status, message, request), status);
   }
 
   /**
@@ -212,16 +186,7 @@ public class GlobalExceptionHandler {
     }
 
     log.error("Необработанная ошибка: {} {}", request.getMethod(), request.getRequestURI(), ex);
-
-    Map<String, Object> body = new LinkedHashMap<>();
-    body.put("timestamp", LocalDateTime.now());
-    body.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
-    body.put("error", "Internal Server Error");
-    body.put("message", "Внутренняя ошибка сервера");
-    body.put("requestId", MDC.get(RequestIdFilter.MDC_KEY));
-    body.put("path", request.getRequestURI());
-
-    return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
+    return error(HttpStatus.INTERNAL_SERVER_ERROR, "Внутренняя ошибка сервера", request);
   }
 
   /** Те же типы, что разрешают {@code DefaultHandlerExceptionResolver} и Spring Security. */
