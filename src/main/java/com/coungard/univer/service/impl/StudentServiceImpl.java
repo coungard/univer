@@ -124,6 +124,7 @@ public class StudentServiceImpl implements StudentService {
           : registerStudentRequest.lastname() + " " + registerStudentRequest.firstname());
       person.setEmail(registerStudentRequest.email());
       person.setBirthday(registerStudentRequest.birthday());
+      person.setGender(registerStudentRequest.gender());
 
       student.setPerson(person);
 
@@ -205,6 +206,9 @@ public class StudentServiceImpl implements StudentService {
     }
     if (request.isGroupIdSet()) {
       changeGroup(student, request.getGroupId());
+    }
+    if (request.isGenderSet()) {
+      student.getPerson().setGender(request.getGender());
     }
 
     Student updated = studentRepository.saveAndFlush(student);

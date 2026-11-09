@@ -39,6 +39,9 @@ public record StudentDto(
         @PastOrPresent(message = "Дата рождения не может быть в будущем")
         LocalDate birthday,
 
+        /** Пол (issue #139), {@code null} — не указан. Только ответ: меняется через {@code PATCH /students/me}. */
+        Gender gender,
+
         UUID universityId,
 
         UUID facultyId,

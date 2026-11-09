@@ -1,5 +1,6 @@
 package com.coungard.univer.dto.registration;
 
+import com.coungard.univer.dto.Gender;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -35,6 +36,9 @@ public record RegisterStudentRequest(
         @PastOrPresent(message = "Дата рождения не может быть в будущем")
         LocalDate birthday,
 
-        UUID universityId
+        UUID universityId,
+
+        /** Необязателен, чтобы не ломать регистрацию из старых сборок приложения (issue #139). */
+        Gender gender
 ) {
 }

@@ -27,6 +27,7 @@ public class StudentMapper {
         .lastname(student.getPerson().getLastname())
         .fullname(student.getPerson().getFullname())
         .birthday(student.getPerson().getBirthday())
+        .gender(student.getPerson().getGender())
         .enrollmentDate(student.getEnrollmentDate())
         .universityId(student.getUniversity() != null ? student.getUniversity().getId() : null)
         .facultyId(student.getFaculty() != null ? student.getFaculty().getId() : null)

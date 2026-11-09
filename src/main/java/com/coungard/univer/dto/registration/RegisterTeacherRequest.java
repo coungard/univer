@@ -1,5 +1,6 @@
 package com.coungard.univer.dto.registration;
 
+import com.coungard.univer.dto.Gender;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -39,4 +40,7 @@ public class RegisterTeacherRequest {
 
   @NotBlank(message = "Должность должна быть указана")
   String position;
+
+  /** Необязателен, чтобы не ломать регистрацию из старых сборок приложения (issue #139). */
+  Gender gender;
 }

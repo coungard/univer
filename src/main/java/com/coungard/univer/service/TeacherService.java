@@ -1,5 +1,6 @@
 package com.coungard.univer.service;
 
+import com.coungard.univer.dto.request.UpdateTeacherProfileRequest;
 import com.coungard.univer.dto.registration.RegisterTeacherRequest;
 import com.coungard.univer.dto.TeacherDto;
 import java.util.UUID;
@@ -21,6 +22,14 @@ public interface TeacherService {
   TeacherDto createTeacher(TeacherDto teacherDto);
 
   TeacherDto updateTeacher(UUID id, TeacherDto teacherDto);
+
+  /**
+   * Частичное обновление своего профиля преподавателем (issue #139): непереданное поле не меняется, явный
+   * {@code null} очищает.
+   *
+   * @param id subject JWT = id преподавателя
+   */
+  TeacherDto updateMyProfile(UUID id, UpdateTeacherProfileRequest request);
 
   void deleteTeacherById(UUID id);
 }

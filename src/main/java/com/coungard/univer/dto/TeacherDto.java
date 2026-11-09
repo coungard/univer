@@ -30,6 +30,9 @@ public record TeacherDto(
 
     LocalDate birthday,
 
+    /** Пол (issue #139), {@code null} — не указан. Только ответ: меняется через {@code PATCH /teachers/me}. */
+    Gender gender,
+
     Instant createdAt,
     Instant updatedAt,
     UUID createdBy,

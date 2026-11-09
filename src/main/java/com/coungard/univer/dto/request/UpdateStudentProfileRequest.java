@@ -1,5 +1,6 @@
 package com.coungard.univer.dto.request;
 
+import com.coungard.univer.dto.Gender;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -26,6 +27,9 @@ public class UpdateStudentProfileRequest {
 
   private UUID groupId;
 
+  /** Пол (issue #139); явный {@code null} очищает. */
+  private Gender gender;
+
   @JsonIgnore
   private boolean universityIdSet;
 
@@ -37,6 +41,9 @@ public class UpdateStudentProfileRequest {
 
   @JsonIgnore
   private boolean groupIdSet;
+
+  @JsonIgnore
+  private boolean genderSet;
 
   public void setUniversityId(UUID universityId) {
     this.universityId = universityId;
@@ -56,5 +63,10 @@ public class UpdateStudentProfileRequest {
   public void setGroupId(UUID groupId) {
     this.groupId = groupId;
     this.groupIdSet = true;
+  }
+
+  public void setGender(Gender gender) {
+    this.gender = gender;
+    this.genderSet = true;
   }
 }

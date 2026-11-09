@@ -2,6 +2,7 @@ package com.coungard.univer.controller;
 
 import com.coungard.univer.dto.TeacherDto;
 import com.coungard.univer.dto.registration.RegisterTeacherRequest;
+import com.coungard.univer.dto.request.UpdateTeacherProfileRequest;
 import com.coungard.univer.service.TeacherService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -17,9 +18,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -107,6 +111,28 @@ public class TeacherController {
       @Valid @RequestBody TeacherDto teacherDto) {
 
     TeacherDto updated = teacherService.updateTeacher(id, teacherDto);
+    return ResponseEntity.ok(updated);
+  }
+
+  @Operation(
+      summary = "Заполнить свой профиль преподавателя: пол",
+      description = "Частичное обновление своего профиля (id — из токена, чужой профиль так не изменить): "
+          + "переданное поле меняется, непереданное — нет, явный null очищает. Пока только gender: "
+          + "MALE | FEMALE."
+  )
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "Профиль обновлён"),
+      @ApiResponse(responseCode = "400", description = "Неизвестное значение поля (например, gender)"),
+      @ApiResponse(responseCode = "403", description = "Роль не TEACHER"),
+      @ApiResponse(responseCode = "404", description = "Профиля преподавателя нет")
+  })
+  @PatchMapping("/me")
+  @PreAuthorize("hasRole('TEACHER')")
+  public ResponseEntity<TeacherDto> updateMyProfile(
+      @AuthenticationPrincipal Jwt jwt,
+      @RequestBody UpdateTeacherProfileRequest request) {
+
+    TeacherDto updated = teacherService.updateMyProfile(UUID.fromString(jwt.getSubject()), request);
     return ResponseEntity.ok(updated);
   }
 
