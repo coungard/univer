@@ -91,6 +91,10 @@ services:
       KEYCLOAK_AUTH_SERVER_URL: http://keycloak:8080
       # tokenUrl Swagger UI открывается из браузера, поэтому адрес с хоста
       KEYCLOAK_PUBLIC_URL: http://localhost:8082
+      # Медиа-файлы (issue #136) — в volume, чтобы переживали пересоздание контейнера; отдаёт их само приложение
+      MEDIA_STORAGE_DIR: /data/media
+    volumes:
+      - media_data:/data/media
     ports:
       - "8023:8023"
     depends_on:
@@ -101,3 +105,4 @@ services:
 
 volumes:
   postgres_data:
+  media_data:

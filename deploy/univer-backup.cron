@@ -1,0 +1,5 @@
+# Бэкап стенда (deploy/backup.sh, issue #138) — ежедневно в 03:30 по времени сервера, до уборки медиа
+# (MediaSweeper, 04:30). Установка: cp deploy/univer-backup.cron /etc/cron.d/univer-backup (DEPLOY.md)
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+30 3 * * * root /opt/univer/deploy/backup.sh >> /var/log/univer-backup.log 2>&1
