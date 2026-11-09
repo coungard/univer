@@ -43,3 +43,6 @@ __pycache__/
 
 ### Media (issue #136) ###
 /data/
+
+### Бэкапы стенда, scripts/pull-backups.sh (issue #138) ###
+/backups/

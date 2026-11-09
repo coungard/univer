@@ -87,7 +87,13 @@ services:
       KEYCLOAK_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USERNAME:-admin}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?}
       SPRINGDOC_SWAGGERUI_OAUTH_CLIENTSECRET: ${UNIVER_CLIENT_SECRET:?}
+      # Медиа-файлы (issue #138): приложение пишет в volume, отдаёт их Caddy — /media/** до бэкенда не доходит
+      MEDIA_STORAGE_DIR: /data/media
+      MEDIA_PUBLIC_BASE_URL: https://${API_DOMAIN:?}/media
+      MEDIA_SERVE_FROM_APP: "false"
       JAVA_OPTS: -Xmx512m
+    volumes:
+      - media_data:/data/media
     depends_on:
       postgres:
         condition: service_healthy
@@ -111,6 +117,8 @@ services:
       # контейнера и быстро упёрся бы в лимиты Let's Encrypt
       - caddy_data:/data
       - caddy_config:/config
+      # Медиа-файлы для /media/* — только чтение: писать в них может лишь бэкенд
+      - media_data:/srv/media:ro
     depends_on:
       - app
       - keycloak
@@ -120,3 +128,5 @@ volumes:
   postgres_data:
   caddy_data:
   caddy_config:
+  # Аватары и прочие медиа-файлы (issue #138). Бэкап — deploy/backup.sh вместе с Postgres
+  media_data:

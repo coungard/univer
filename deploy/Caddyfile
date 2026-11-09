@@ -2,8 +2,32 @@
 # продлевает сам, email для ACME не нужен. Домены — из .env.prod через docker-compose.prod.yml.
 
 {$API_DOMAIN} {
-	encode gzip
-	reverse_proxy app:8023
+	# Больше — 413 до бэкенда. Самый большой запрос — загрузка аватара: файл до 5 МБ + multipart-обёртка
+	# (тот же предел, что spring.servlet.multipart.max-request-size, issue #138)
+	request_body {
+		max_size 6MB
+	}
+
+	# Медиа-файлы (аватары, issue #138) — прямо из volume, read-only, без бэкенда и без токена. Ссылку не
+	# угадать (в ключе случайный UUID), листинга нет (file_server без browse). Отдаются только картинки:
+	# временные файлы недописанных загрузок (.upload-*.tmp) и всё прочее — 404.
+	handle_path /media/* {
+		root * /srv/media
+		@notImage not path *.jpg *.jpeg *.png *.webp
+		respond @notImage 404
+
+		# Новая загрузка — новый ключ, содержимое по ссылке не меняется: кэш бессрочный. Заголовок уходит и с
+		# 404, но это безвредно: ссылку клиент получает только после того, как файл записан, а удалённый файл
+		# под тем же ключом не появится
+		header Cache-Control "public, max-age=31536000, immutable"
+		header X-Content-Type-Options nosniff
+		file_server
+	}
+
+	handle {
+		encode gzip
+		reverse_proxy app:8023
+	}
 }
 
 {$AUTH_DOMAIN} {
