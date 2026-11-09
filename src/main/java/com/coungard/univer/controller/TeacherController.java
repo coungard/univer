@@ -117,14 +117,15 @@ public class TeacherController {
   @Operation(
       summary = "Заполнить свой профиль преподавателя: пол",
       description = "Частичное обновление своего профиля (id — из токена, чужой профиль так не изменить): "
-          + "переданное поле меняется, непереданное — нет, явный null очищает. Пока только gender: "
-          + "MALE | FEMALE."
+          + "переданное поле меняется, непереданное — нет. Пока только gender: MALE | FEMALE; он "
+          + "обязателен — null не очищает его, а даёт 422."
   )
   @ApiResponses({
       @ApiResponse(responseCode = "200", description = "Профиль обновлён"),
       @ApiResponse(responseCode = "400", description = "Неизвестное значение поля (например, gender)"),
       @ApiResponse(responseCode = "403", description = "Роль не TEACHER"),
-      @ApiResponse(responseCode = "404", description = "Профиля преподавателя нет")
+      @ApiResponse(responseCode = "404", description = "Профиля преподавателя нет"),
+      @ApiResponse(responseCode = "422", description = "gender: null — пол обязателен, очистить нельзя")
   })
   @PatchMapping("/me")
   @PreAuthorize("hasRole('TEACHER')")

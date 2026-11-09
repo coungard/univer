@@ -38,7 +38,8 @@ public record RegisterStudentRequest(
 
         UUID universityId,
 
-        /** Необязателен, чтобы не ломать регистрацию из старых сборок приложения (issue #139). */
+        /** Обязателен (issue #139). В БД колонка nullable: у зарегистрированных раньше пола нет. */
+        @NotNull(message = "Пол обязателен")
         Gender gender
 ) {
 }

@@ -166,6 +166,9 @@ public class TeacherServiceImpl implements TeacherService {
         .orElseThrow(() -> new ResourceNotFoundException("Преподаватель не найден с ID: " + id));
 
     if (request.isGenderSet()) {
+      if (request.getGender() == null) {
+        throw new ValidationException("Пол обязателен — его можно изменить, но не очистить");
+      }
       teacher.getPerson().setGender(request.getGender());
     }
 

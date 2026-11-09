@@ -24,8 +24,8 @@ public interface TeacherService {
   TeacherDto updateTeacher(UUID id, TeacherDto teacherDto);
 
   /**
-   * Частичное обновление своего профиля преподавателем (issue #139): непереданное поле не меняется, явный
-   * {@code null} очищает.
+   * Частичное обновление своего профиля преподавателем (issue #139): непереданное поле не меняется. Пол
+   * обязателен — явный {@code null} даёт {@link com.coungard.univer.exception.ValidationException}.
    *
    * @param id subject JWT = id преподавателя
    */

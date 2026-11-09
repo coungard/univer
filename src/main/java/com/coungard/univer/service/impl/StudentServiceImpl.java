@@ -208,6 +208,9 @@ public class StudentServiceImpl implements StudentService {
       changeGroup(student, request.getGroupId());
     }
     if (request.isGenderSet()) {
+      if (request.getGender() == null) {
+        throw new ValidationException("Пол обязателен — его можно изменить, но не очистить");
+      }
       student.getPerson().setGender(request.getGender());
     }
 

@@ -110,26 +110,30 @@ class GenderControllerTest {
   }
 
   @Test
-  void shouldRegisterStudentWithAndWithoutGender() throws Exception {
+  void shouldRegisterStudentOnlyWithGender() throws Exception {
     registerStudent("anna", "\"gender\": \"FEMALE\"")
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.gender").value("FEMALE"));
     registerStudent("old", null)
-        .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.gender").doesNotExist());
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.gender").value("Пол обязателен"));
+    registerStudent("nulled", "\"gender\": null")
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.gender").value("Пол обязателен"));
 
+    // Студент из setUp зарегистрирован «до» поля — у него пола нет
     assertThat(studentRepository.findAll()).extracting(s -> s.getPerson().getGender())
-        .containsExactlyInAnyOrder(null, Gender.FEMALE, null);
+        .containsExactlyInAnyOrder(null, Gender.FEMALE);
   }
 
   @Test
-  void shouldRegisterTeacherWithAndWithoutGender() throws Exception {
+  void shouldRegisterTeacherOnlyWithGender() throws Exception {
     registerTeacher("petrov", "\"gender\": \"MALE\"")
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.gender").value("MALE"));
     registerTeacher("sidorov", null)
-        .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.gender").doesNotExist());
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.gender").value("Пол обязателен"));
   }
 
   @Test
@@ -157,10 +161,11 @@ class GenderControllerTest {
     patchMe("/api/v1/students/me", STUDENT_TOKEN, "{\"gender\": \"UNKNOWN\"}")
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.gender").exists());
-    // Явный null — очищает
+    // Пол обязателен: явный null не очищает его
     patchMe("/api/v1/students/me", STUDENT_TOKEN, "{\"gender\": null}")
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.gender").doesNotExist());
+        .andExpect(status().isUnprocessableEntity());
+    patchMe("/api/v1/students/me", STUDENT_TOKEN, "{\"gender\": \"MALE\"}")
+        .andExpect(jsonPath("$.gender").value("MALE"));
   }
 
   @Test
@@ -179,7 +184,9 @@ class GenderControllerTest {
     patchMe("/api/v1/teachers/me", TEACHER_TOKEN, "{}")
         .andExpect(jsonPath("$.gender").value("MALE"));
     patchMe("/api/v1/teachers/me", TEACHER_TOKEN, "{\"gender\": null}")
-        .andExpect(jsonPath("$.gender").doesNotExist());
+        .andExpect(status().isUnprocessableEntity());
+    patchMe("/api/v1/teachers/me", TEACHER_TOKEN, "{}")
+        .andExpect(jsonPath("$.gender").value("MALE"));
     patchMe("/api/v1/teachers/me", TEACHER_TOKEN, "{\"gender\": \"X\"}")
         .andExpect(status().isBadRequest());
   }

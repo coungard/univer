@@ -41,6 +41,7 @@ public class RegisterTeacherRequest {
   @NotBlank(message = "Должность должна быть указана")
   String position;
 
-  /** Необязателен, чтобы не ломать регистрацию из старых сборок приложения (issue #139). */
+  /** Обязателен (issue #139). В БД колонка nullable: у зарегистрированных раньше пола нет. */
+  @NotNull(message = "Пол обязателен")
   Gender gender;
 }

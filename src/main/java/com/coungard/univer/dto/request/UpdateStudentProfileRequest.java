@@ -27,7 +27,7 @@ public class UpdateStudentProfileRequest {
 
   private UUID groupId;
 
-  /** Пол (issue #139); явный {@code null} очищает. */
+  /** Пол (issue #139). Обязателен, поэтому явный {@code null} не очищает его, а даёт 422. */
   private Gender gender;
 
   @JsonIgnore
