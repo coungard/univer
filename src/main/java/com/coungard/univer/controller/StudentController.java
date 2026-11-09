@@ -76,15 +76,17 @@ public class StudentController {
   }
 
   @Operation(
-      summary = "Заполнить свой профиль: университет, факультет, курс, группа",
+      summary = "Заполнить свой профиль: университет, факультет, курс, группа, пол",
       description = "Частичное обновление: переданное поле меняется, непереданное — нет, явный null "
           + "очищает поле. Смена поля сбрасывает всё, что ниже по цепочке университет → факультет → "
-          + "курс → группа; незаполненные поля выше по цепочке проставляются по выбранному значению."
+          + "курс → группа; незаполненные поля выше по цепочке проставляются по выбранному значению. "
+          + "Пол (gender: MALE | FEMALE) от цепочки не зависит и обязателен: null не очищает его, а даёт 422."
   )
   @ApiResponses({
       @ApiResponse(responseCode = "200", description = "Профиль обновлён"),
+      @ApiResponse(responseCode = "400", description = "Неизвестное значение поля (например, gender)"),
       @ApiResponse(responseCode = "404", description = "Университет, факультет или группа не найдены"),
-      @ApiResponse(responseCode = "422", description = "Поля не согласованы между собой")
+      @ApiResponse(responseCode = "422", description = "Поля не согласованы между собой или gender: null")
   })
   @PatchMapping("/me")
   @PreAuthorize("hasRole('STUDENT')")

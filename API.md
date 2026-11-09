@@ -192,15 +192,26 @@ id в этом же заголовке (до 64 символов: латиниц
 ### StudentDto
 `id`, `username`★, `firstname`★, `lastname`★, `fullname`, поля аудита,
 `email`★ (валидный email), `enrollmentDate` (не в будущем, необязательна — назначается администратором
-после регистрации, не собирается на самой регистрации), `birthday` (не в будущем), `universityId`
+после регистрации, не собирается на самой регистрации), `birthday` (не в будущем), `gender: Gender` (только
+в ответе, `null` — не указан; задаётся на регистрации или через `PATCH /students/me`), `universityId`
 (`null`, пока студент не выбрал университет), `facultyId`, `yearNumber` (номер курса, `≥ 1`) — оба
 только в ответе, `null`, пока не выбраны; меняются через `PATCH /students/me`, а `PUT /students/{id}`
 их игнорирует, — `groupId`, `avatarUrl`, `avatarThumbnailUrl` (только в ответе: фото профиля 512×512 и превью
 128×128, `null`, если фото нет; меняются через `PUT`/`DELETE /users/me/avatar`).
 
 ### UpdateStudentProfileRequest (только запрос, `PATCH /students/me`)
-`universityId`, `facultyId`, `yearNumber` (от 1 до 6), `groupId` — все необязательны. Поле, которого нет
-в теле, не меняется; поле с явным `null` очищается.
+`universityId`, `facultyId`, `yearNumber` (от 1 до 6), `groupId`, `gender: Gender` — все необязательны. Поле,
+которого нет в теле, не меняется; поле с явным `null` очищается — кроме `gender`: он обязателен, `null` — `422`.
+
+### Gender (enum)
+`MALE` | `FEMALE` (issue #139). **Обязателен при регистрации** (без него — `400` `{"gender": "Пол обязателен"}`).
+У пользователей, зарегистрированных до его появления, в профиле `null` — указать его можно через `PATCH .../me`,
+а очистить уже указанный пол нельзя (`gender: null` — `422`). Пол — персональные данные (политика конфиденциальности, `coungard/univer_mobile#85`);
+при удалении аккаунта удаляется вместе с профилем. Неизвестное значение (в том числе в другом регистре) — `400`
+с картой полей: `{"gender": "Недопустимое значение. Допустимые: MALE, FEMALE"}`.
+
+### UpdateTeacherProfileRequest (только запрос, `PATCH /teachers/me`)
+`gender: Gender`. Поле, которого нет в теле, не меняется; явный `null` — `422` (пол обязателен, очистить нельзя).
 
 ### UniversityRequestDto (только ответ)
 Заявка студента на добавление университета. `id`, `name` (название, как его ввёл студент), `regionId`,
@@ -227,12 +238,13 @@ id в этом же заголовке (до 64 символов: латиниц
 будущем, необязательна — форма регистрации её больше не запрашивает, см.
 `coungard/univer_mobile#46`), `birthday`★ (не в будущем), `universityId` (необязателен — аккаунт
 можно создать до выбора университета или вовсе без него; если передан, должен существовать, иначе
-`404`). Пароль и остальные данные
+`404`), `gender`★ (`Gender`). Пароль и остальные данные
 регистрации уходят в Keycloak — `id` итогового `StudentDto` в ответе равен Keycloak user ID (см. флоу
 регистрации в `CLAUDE.md`).
 
 ### TeacherDto
-`id`, `username`★, `firstname`★, `lastname`★, `fullname`, `email`★, `phone`, `birthday`, поля аудита,
+`id`, `username`★, `firstname`★, `lastname`★, `fullname`, `email`★, `phone`, `birthday`, `gender: Gender`
+(только в ответе, `null` — не указан; задаётся на регистрации или через `PATCH /teachers/me`), поля аудита,
 `facultyId`★ (только для `PUT`/`POST /teachers` — на регистрации не
 приходит, см. ниже, может быть `null` в ответе, пока кафедра не назначена), `position`★, `registered`
 (`Boolean`, только в ответе — зарегистрирован ли преподаватель в Keycloak), `avatarUrl`, `avatarThumbnailUrl`
@@ -241,7 +253,8 @@ id в этом же заголовке (до 64 символов: латиниц
 ### RegisterTeacherRequest (только запрос, `POST /teachers/register`)
 `username`★, `firstname`★, `lastname`★, `fullname`, `password`★, `email`★, `departmentId` (необязателен
 — форма регистрации больше не выбирает кафедру, см. `coungard/univer_mobile#47`; кафедра
-назначается позже через `PUT /teachers/{id}`), `birthday`★ (не в будущем), `position`★.
+назначается позже через `PUT /teachers/{id}`), `birthday`★ (не в будущем), `position`★, `gender`★
+(`Gender`).
 
 ### EnrollmentDto
 `studentId`★, `courseId`★, `enrolledAt` (заполняется сервером при `POST`), `status: EnrollmentStatus`.
@@ -684,6 +697,8 @@ id в этом же заголовке (до 64 символов: латиниц
   - После выбора группы `GET /lectures/me` сразу отдаёт её расписание.
   - Если в профиле появился университет, необработанная заявка студента на добавление университета
     закрывается автоматически (см. `PUT /me/university-request`).
+  - `gender` в цепочку не входит и ничего не сбрасывает; неизвестное значение — `400`, `null` — `422` (см.
+    `Gender`).
 - **`PUT /me/university-request`** — студент не нашёл свой университет в `GET /universities` и
   оставляет заявку на его добавление. Сам он университеты не создаёт: заявку разбирает
   администратор (см. «UniversityRequests»). В ответе `200` и `UniversityRequestDto` в статусе
@@ -788,10 +803,14 @@ id в этом же заголовке (до 64 символов: латиниц
 | POST | `/register` | **Public** (без токена) | `RegisterTeacherRequest` | `201` + `TeacherDto` |
 | POST | `/` | любая роль | `TeacherDto` | `201` + `TeacherDto` |
 | PUT | `/{id}` | `ADMIN` | `TeacherDto` | `TeacherDto` |
+| PATCH | `/me` | `TEACHER` | `UpdateTeacherProfileRequest` | `TeacherDto` |
 | DELETE | `/{id}` | `ADMIN` | — | `204` |
 
 - **`POST /register`** — аналог регистрации студента, но для преподавателя: создаёт пользователя в
   Keycloak с ролью `TEACHER`, `id` сущности = Keycloak user ID. Ответы: `201`/`400`/`409`, как у студента.
+- **`PATCH /me`** — преподаватель сам заполняет свой профиль (issue #139), пока только `gender`. Профиль
+  берётся из токена, чужой так не изменить. `400` — неизвестное значение, `403` — роль не `TEACHER`, `404` —
+  профиля преподавателя нет, `422` — `gender: null`. `PUT /{id}` и `POST /` поле `gender` из `TeacherDto` игнорируют.
 - **`POST /`** — создание `Teacher` без прохождения через Keycloak (нет `@PreAuthorize`, доступно любой
   аутентифицированной роли) — использовать для регистрации, скорее всего, не стоит: `id` в этом случае
   генерируется локально и не будет совпадать ни с каким Keycloak user ID.

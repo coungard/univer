@@ -26,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import com.coungard.univer.dto.request.UpdateTeacherProfileRequest;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
@@ -155,6 +156,23 @@ public class TeacherServiceImpl implements TeacherService {
     teacher.getPerson().setBirthday(teacherDto.birthday());
     teacher.setFaculty(faculty);
 
+    Teacher updated = teacherRepository.saveAndFlush(teacher);
+    return teacherMapper.toDto(updated);
+  }
+
+  @Override
+  public TeacherDto updateMyProfile(UUID id, UpdateTeacherProfileRequest request) {
+    Teacher teacher = teacherRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("Преподаватель не найден с ID: " + id));
+
+    if (request.isGenderSet()) {
+      if (request.getGender() == null) {
+        throw new ValidationException("Пол обязателен — его можно изменить, но не очистить");
+      }
+      teacher.getPerson().setGender(request.getGender());
+    }
+
+    // saveAndFlush: правка Person должна попасть в updatedAt/updatedBy ответа
     Teacher updated = teacherRepository.saveAndFlush(teacher);
     return teacherMapper.toDto(updated);
   }

@@ -13,6 +13,7 @@ import com.coungard.univer.dto.AuditAction;
 import com.coungard.univer.dto.AuditEntityType;
 import com.coungard.univer.dto.CourseDto;
 import com.coungard.univer.dto.FacultyDto;
+import com.coungard.univer.dto.Gender;
 import com.coungard.univer.dto.GroupDto;
 import com.coungard.univer.dto.SemesterType;
 import com.coungard.univer.dto.StudentDto;
@@ -161,7 +162,8 @@ class StudentServiceTest {
         "password123",
         LocalDate.now().minusYears(1),
         LocalDate.now().minusYears(20),
-        universityId
+        universityId,
+        Gender.MALE
     );
 
     // When: Мокаем ответ Keycloak
@@ -173,6 +175,7 @@ class StudentServiceTest {
     assertThat(registered.firstname()).isEqualTo("Иван");
     assertThat(registered.email()).isEqualTo("ivan@example.com");
     assertThat(registered.universityId()).isEqualTo(universityId);
+    assertThat(registered.gender()).isEqualTo(Gender.MALE);
 
     assertThat(studentRepository.findById(UUID.fromString(mockKeycloakId))).isPresent();
 
@@ -201,7 +204,8 @@ class StudentServiceTest {
         "password123",
         null,
         LocalDate.now().minusYears(20),
-        universityId
+        universityId,
+        null
     );
     when(keycloakAdminService.createUser(any(RegisterData.class))).thenReturn(mockKeycloakId);
 
@@ -222,6 +226,7 @@ class StudentServiceTest {
         "password123",
         null,
         LocalDate.now().minusYears(20),
+        null,
         null
     );
     when(keycloakAdminService.createUser(any(RegisterData.class))).thenReturn(mockKeycloakId);
@@ -246,7 +251,8 @@ class StudentServiceTest {
         "password123",
         null,
         LocalDate.now().minusYears(20),
-        universityId
+        universityId,
+        null
     );
     when(keycloakAdminService.createUser(any(RegisterData.class))).thenReturn(mockKeycloakId);
 
@@ -287,7 +293,8 @@ class StudentServiceTest {
         "password123",
         null,
         LocalDate.now().minusYears(20),
-        universityId
+        universityId,
+        null
     );
   }
 

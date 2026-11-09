@@ -34,6 +34,7 @@ public class TeacherMapper {
         .facultyId(teacher.getFaculty() != null ? teacher.getFaculty().getId() : null)
         .position(teacher.getPosition())
         .registered(teacher.isRegistered())
+        .gender(teacher.getPerson().getGender())
         .createdAt(teacher.getCreatedAt())
         .updatedAt(lastModified.getUpdatedAt())
         .createdBy(teacher.getCreatedBy())
@@ -55,6 +56,7 @@ public class TeacherMapper {
         : request.getLastname() + " " + request.getFirstname());
     person.setEmail(request.getEmail());
     person.setBirthday(request.getBirthday());
+    person.setGender(request.getGender());
 
     Teacher teacher = new Teacher();
     teacher.setPosition(request.getPosition());

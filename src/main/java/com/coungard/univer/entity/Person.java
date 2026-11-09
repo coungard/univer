@@ -1,7 +1,10 @@
 package com.coungard.univer.entity;
 
+import com.coungard.univer.dto.Gender;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -49,6 +52,11 @@ public class Person extends AuditableEntity {
 
   @Column(name = "birthday")
   private LocalDate birthday;
+
+  /** Пол (issue #139); {@code null} — не указан. */
+  @Enumerated(EnumType.STRING)
+  @Column(name = "gender", length = 16)
+  private Gender gender;
 
   /**
    * Фото профиля (issue #137). Для ссылок достаточно id файла — у ленивого прокси он есть без запроса к БД.
