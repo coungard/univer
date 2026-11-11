@@ -166,6 +166,9 @@ class EnrollmentServiceTest {
     assertThat(enrolled.courseId()).isEqualTo(courseId);
     assertThat(enrolled.status()).isEqualTo(EnrollmentStatus.ACTIVE);
     assertThat(enrolled.enrolledAt()).isNotNull();
+    assertThat(enrolled.studentFullname()).isEqualTo("Petr Petrov");
+    assertThat(enrolled.studentAvatarUrl()).isNull();
+    assertThat(enrolled.studentAvatarThumbnailUrl()).isNull();
   }
 
   @Test
@@ -220,6 +223,7 @@ class EnrollmentServiceTest {
 
     // Then
     assertThat(result.getContent()).hasSize(1);
+    assertThat(result.getContent().get(0).studentFullname()).isEqualTo("Petr Petrov");
   }
 
   @Test
@@ -234,6 +238,9 @@ class EnrollmentServiceTest {
 
     // Then
     assertThat(result.getContent()).hasSize(2);
+    assertThat(result.getContent())
+        .extracting(EnrollmentDto::studentFullname)
+        .containsExactlyInAnyOrder("Ivan Ivanov", "Petr Petrov");
   }
 
   @Test
@@ -324,6 +331,7 @@ class EnrollmentServiceTest {
     person.setUsername(username);
     person.setFirstname(firstName);
     person.setLastname(lastName);
+    person.setFullname(firstName + " " + lastName);
     person.setEmail((firstName + "." + lastName + "@test.com").toLowerCase());
 
     student.setPerson(person);

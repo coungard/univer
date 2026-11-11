@@ -88,7 +88,7 @@ class AuditFieldsMappingTest {
 
     assertAudit(new StudentMapper(avatarUrls).toDto(student));
     assertAudit(new TeacherMapper(avatarUrls).toDto(teacher));
-    assertAudit(new EnrollmentMapper().toDto(enrollment));
+    assertAudit(new EnrollmentMapper(avatarUrls).toDto(enrollment));
     assertAudit(new LectureAttendanceMapper().toDto(attendance));
     assertAudit(new UniversityRequestMapper().toDto(request));
   }

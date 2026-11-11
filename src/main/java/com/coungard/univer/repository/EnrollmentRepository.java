@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -18,6 +19,11 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Enrollme
 
   Page<Enrollment> findByStudentId(UUID studentId, Pageable pageable);
 
+  /**
+   * Зачисления курса вместе со студентом и его {@code Person}: ростер преподавателя отдаёт ФИО и
+   * аватар, поэтому без join fetch получается N+1 на страницу (issue #148).
+   */
+  @EntityGraph(attributePaths = {"student", "student.person"})
   Page<Enrollment> findByCourseId(UUID courseId, Pageable pageable);
 
   Optional<Enrollment> findByStudentIdAndCourseId(UUID studentId, UUID courseId);
