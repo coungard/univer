@@ -19,6 +19,12 @@ public record EnrollmentDto(
 
     EnrollmentStatus status,
 
+    // Только в ответе (issue #148): ФИО и аватар студента для ростера преподавателя,
+    // которому GET /students/{id} закрыт. Во входящих запросах игнорируются.
+    String studentFullname,
+    String studentAvatarUrl,
+    String studentAvatarThumbnailUrl,
+
     // Только в ответе (AuditableEntity, issue #119): во входящих запросах игнорируются.
     Instant createdAt,
     Instant updatedAt,

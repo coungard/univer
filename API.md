@@ -260,7 +260,10 @@ id в этом же заголовке (до 64 символов: латиниц
 (`Gender`).
 
 ### EnrollmentDto
-`studentId`★, `courseId`★, `enrolledAt` (заполняется сервером при `POST`), `status: EnrollmentStatus`.
+`studentId`★, `courseId`★, `enrolledAt` (заполняется сервером при `POST`), `status: EnrollmentStatus`,
+`studentFullname`, `studentAvatarUrl`, `studentAvatarThumbnailUrl` (только в ответе, issue #148 —
+ФИО и аватар студента для ростера преподавателя, см. `coungard/univer_mobile#94`; во входящих
+запросах игнорируются, как поля аудита ниже).
 `EnrollmentStatus` (enum): `ACTIVE` | `COMPLETED` | `DROPPED`. У `Enrollment` нет собственного `id` —
 идентифицируется парой (`studentId`, `courseId`).
 
@@ -832,6 +835,9 @@ id в этом же заголовке (до 64 символов: латиниц
 | PUT | `/{studentId}/{courseId}` | `ADMIN`/`TEACHER` | `EnrollmentDto` | `EnrollmentDto` |
 | DELETE | `/{studentId}/{courseId}` | `ADMIN`/`TEACHER` | — | `204` |
 
+- **`GET /course/{courseId}`** — ростер курса для преподавателя (issue #148): в каждом `EnrollmentDto`
+  заполнены `studentFullname` и ссылки на аватар студента, поэтому ФИО и фото видны без доступа к
+  `GET /students/{id}` (он по-прежнему закрыт для `TEACHER`). Оба URL — `null`, если у студента нет фото.
 - **`POST /group/{groupId}/course/{courseId}`** — массово зачисляет на курс всех студентов группы, ещё не
   зачисленных на него; уже зачисленные молча пропускаются (не ошибка).
 - **`PUT /{studentId}/{courseId}`** — смена статуса зачисления (`ACTIVE`/`COMPLETED`/`DROPPED`) через то же
